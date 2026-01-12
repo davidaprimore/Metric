@@ -1,134 +1,239 @@
-import React from 'react';
-import { MetricCard } from '@/components/shared/MetricCard';
+import React, { useState } from 'react';
+import {
+  Bell,
+  Calendar as CalendarIcon,
+  Clock,
+  ChevronRight,
+  Plus,
+  AlertCircle,
+  TrendingDown,
+  TrendingUp,
+  ExternalLink,
+  ShieldCheck
+} from 'lucide-react';
 import {
   AreaChart,
   Area,
   XAxis,
+  YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer
 } from 'recharts';
-import { Bell, BadgeCheck, Scale, Droplets } from 'lucide-react';
-import { BottomNav } from '@/components/layout/BottomNav';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/Button';
+import { cn } from '@/lib/utils';
 
 const chartData = [
-  { name: 'Jan', weight: 82, bodyFat: 24 },
-  { name: 'Fev', weight: 81, bodyFat: 23 },
-  { name: 'Mar', weight: 79.5, bodyFat: 21 },
-  { name: 'Abr', weight: 78, bodyFat: 19.5 },
-  { name: 'Mai', weight: 77.2, bodyFat: 18.5 },
-  { name: 'Jun', weight: 76, bodyFat: 17 },
+  { name: 'JUN', weight: 81 },
+  { name: 'JUL', weight: 80.5 },
+  { name: 'AGO', weight: 79.8 },
+  { name: 'SET', weight: 82.5 },
+  { name: 'OUT', weight: 81.2 },
 ];
 
 export const DashboardScreen: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<'peso' | 'gordura'>('peso');
+
+  // Mock profile completeness check
+  const isProfileComplete = user?.user_metadata?.height && user?.user_metadata?.weight;
+  const firstName = user?.user_metadata?.first_name || 'Usuário';
+
   return (
-    <div className="min-h-screen bg-light pb-24 font-sans">
+    <div className="min-h-screen bg-[#F1F3F5] pb-32 font-sans px-5">
       {/* Header */}
-      <header className="bg-surface/80 backdrop-blur-md sticky top-0 z-20 px-6 py-4 flex justify-between items-center border-b border-gray-200">
+      <header className="pt-8 flex justify-between items-center mb-8">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full border-2 border-primary p-0.5">
-            <img src="https://picsum.photos/100/100?random=10" alt="User" className="w-full h-full rounded-full object-cover" />
+          <div className="w-12 h-12 rounded-full border-2 border-secondary p-0.5 bg-white shadow-sm overflow-hidden">
+            <img src="https://i.pravatar.cc/150?u=alex" alt="Profile" className="w-full h-full rounded-full object-cover" />
           </div>
-          <div>
-            <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Bem-vindo</p>
-            <h2 className="text-lg font-bold font-display text-dark">Dr. Ricardo</h2>
+          <div className="flex flex-col">
+            <h1 className="text-xl font-bold text-dark leading-tight">Olá, {firstName}</h1>
+            <span className="text-[10px] font-extrabold text-secondary uppercase tracking-[0.1em]">Plano Pro</span>
           </div>
         </div>
-        <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-dark hover:bg-gray-50 transition-colors">
-          <Bell className="w-5 h-5" />
+        <button className="w-11 h-11 bg-gray-200/50 rounded-full flex items-center justify-center text-dark relative">
+          <Bell size={20} fill="currentColor" className="text-dark" />
+          <div className="absolute top-3 right-3 w-2 h-2 bg-red-500 rounded-full border-2 border-[#F1F3F5]"></div>
         </button>
       </header>
 
-      <div className="p-6 space-y-8">
-        {/* Main Status Card */}
-        <div className="bg-dark rounded-[2rem] p-6 text-white relative overflow-hidden shadow-xl">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/30 rounded-full blur-3xl -mr-10 -mt-10"></div>
-
-          <div className="flex justify-between items-start mb-6">
-            <span className="bg-white/10 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">Avaliação Clínica</span>
-            <BadgeCheck className="text-primary w-6 h-6" />
+      {/* Profile Incomplete Alert */}
+      {!isProfileComplete && (
+        <div className="mb-6 bg-secondary/5 border border-secondary/10 p-4 rounded-3xl flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="w-10 h-10 rounded-2xl bg-secondary/10 flex items-center justify-center shrink-0">
+            <AlertCircle className="text-secondary" size={20} />
           </div>
-
-          <div className="text-center relative z-10">
-            <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Paciente em Foco</p>
-            <h2 className="text-3xl font-display font-bold mb-1">Alex Rivera</h2>
-            <div className="flex items-center justify-center gap-2 text-primary">
-              <span className="text-5xl font-bold font-display">12.4%</span>
-              <span className="text-sm font-medium mt-4">Gordura</span>
-            </div>
+          <div className="flex-1">
+            <p className="text-xs font-bold text-dark">Perfil Incompleto</p>
+            <p className="text-[10px] text-gray-500">Complete seus dados para habilitar agendamentos.</p>
           </div>
+          <button
+            onClick={() => navigate('/onboarding')}
+            className="text-[10px] font-bold text-secondary uppercase tracking-tight hover:underline"
+          >
+            Completar
+          </button>
+        </div>
+      )}
 
-          <div className="mt-6 flex gap-4">
-            <div className="flex-1 bg-white/10 rounded-xl p-3 backdrop-blur-sm">
-              <p className="text-[10px] text-gray-400 uppercase">Massa Magra</p>
-              <p className="text-xl font-bold">42.5kg</p>
+      {/* Main Appointment Card */}
+      <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100 mb-6 group hover:shadow-md transition-all duration-300">
+        <div className="flex justify-between items-start mb-4">
+          <span className="bg-secondary/10 text-secondary text-[10px] font-extrabold px-3 py-1 rounded-lg uppercase tracking-wider">Compromisso</span>
+          <div className="w-12 h-12 bg-secondary/10 rounded-2xl flex items-center justify-center">
+            <CalendarIcon className="text-secondary" size={24} />
+          </div>
+        </div>
+
+        <h3 className="text-xl font-bold text-dark mb-4">Próxima Avaliação</h3>
+
+        <div className="flex items-center gap-6 mb-8">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center">
+              <Clock className="text-secondary" size={16} />
             </div>
-            <div className="flex-1 bg-white/10 rounded-xl p-3 backdrop-blur-sm">
-              <p className="text-[10px] text-gray-400 uppercase">Status</p>
-              <p className="text-xl font-bold text-primary">Atleta</p>
+            <div>
+              <p className="text-sm font-bold text-dark leading-none">24 Out, 2023</p>
+              <p className="text-[10px] text-gray-400 font-medium">às 10:00 AM</p>
             </div>
           </div>
         </div>
 
-        {/* Metrics Grid */}
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-bold font-display text-dark">Métricas Detalhadas</h3>
-            <span className="text-secondary text-xs font-bold cursor-pointer hover:text-secondary/80">Ver todas</span>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <MetricCard
-              title="Peso Total"
-              value="78.4"
-              unit="kg"
-              trend="-0.5kg"
-              isPositive={true}
-              icon={<Scale className="w-6 h-6" />}
-            />
-            <MetricCard
-              title="Hidratação"
-              value="3.2"
-              unit="L"
-              trend="Ideal"
-              isPositive={true}
-              icon={<Droplets className="w-6 h-6" />}
-            />
-          </div>
-        </div>
-
-        {/* Chart Section */}
-        <div className="bg-surface p-6 rounded-[2rem] shadow-soft border border-white/60">
-          <h3 className="text-lg font-bold font-display text-dark mb-4">Evolução Recente</h3>
-          <div className="h-48 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="colorBf" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8A7AD0" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#8A7AD0" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9CA3AF' }} />
-                <Tooltip
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
-                  itemStyle={{ color: '#8A7AD0', fontWeight: 'bold' }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="bodyFat"
-                  stroke="#8A7AD0"
-                  strokeWidth={3}
-                  fillOpacity={1}
-                  fill="url(#colorBf)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+        <div className="flex gap-2">
+          <Button
+            className="flex-1 h-14 rounded-2xl bg-dark text-white font-bold text-sm hover:bg-dark/90 transition-all shadow-none"
+            onClick={() => isProfileComplete ? navigate('/appointments') : alert('Complete seu perfil para agendar!')}
+          >
+            Ver Detalhes
+          </Button>
+          <button className="w-14 h-14 bg-secondary/60 text-white rounded-2xl flex items-center justify-center hover:bg-secondary transition-all">
+            <ExternalLink size={20} />
+          </button>
         </div>
       </div>
 
-      <BottomNav />
+      {/* Metrics Grid */}
+      <div className="grid grid-cols-2 gap-4 mb-8">
+        {[
+          { label: 'Gordura Corporal', value: user?.user_metadata?.body_fat || '18.5', unit: '%', trend: '-1.2%', up: false },
+          { label: 'Peso Atual', value: user?.user_metadata?.weight || '78.4', unit: 'kg', trend: '-0.5kg', up: false },
+          { label: 'Massa Magra', value: user?.user_metadata?.lean_mass || '63.9', unit: 'kg' },
+          { label: 'Massa Gorda', value: user?.user_metadata?.fat_mass || '14.5', unit: 'kg' }
+        ].map((item, idx) => (
+          <div key={idx} className="bg-gray-200/40 rounded-[2rem] p-5 shadow-sm border border-white/50">
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tight mb-2">{item.label}</p>
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-black text-dark tracking-tighter">{item.value}</span>
+              <span className="text-xs font-bold text-gray-400">{item.unit}</span>
+            </div>
+            {item.trend && (
+              <div className={cn(
+                "flex items-center gap-1 mt-2 text-[10px] font-bold",
+                item.up ? "text-red-500" : "text-green-500"
+              )}>
+                {item.up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                {item.trend}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Evolution Chart */}
+      <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100 mb-8">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-lg font-bold text-dark">Minha Evolução</h3>
+        </div>
+
+        <div className="flex gap-1 bg-gray-100 p-1 rounded-2xl mb-6">
+          {['PESO', 'GORDURA %'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab.startsWith('P') ? 'peso' : 'gordura')}
+              className={cn(
+                "flex-1 py-3 text-[10px] font-extrabold rounded-xl transition-all uppercase tracking-[0.1em]",
+                activeTab === (tab.startsWith('P') ? 'peso' : 'gordura')
+                  ? "bg-white text-secondary shadow-sm"
+                  : "text-gray-400 hover:text-gray-600"
+              )}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        <div className="h-48 w-full mt-4">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#8A7AD0" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="#8A7AD0" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F3F5" />
+              <XAxis
+                dataKey="name"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 10, fontWeight: 700, fill: '#9CA3AF' }}
+                dy={10}
+              />
+              <Tooltip
+                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}
+                itemStyle={{ color: '#8A7AD0', fontWeight: 'bold' }}
+              />
+              <Area
+                type="smooth"
+                dataKey="weight"
+                stroke="#9F91E3"
+                strokeWidth={3}
+                fillOpacity={1}
+                fill="url(#colorVal)"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+
+        <button className="w-full mt-8 py-3 rounded-2xl border border-gray-100 text-secondary text-[11px] font-bold hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
+          Ver Histórico Completo <ExternalLink size={14} />
+        </button>
+      </div>
+
+      {/* Floating CTA */}
+      <Button
+        variant="primary"
+        className="w-full h-16 rounded-[2rem] bg-primary text-dark font-black text-lg gap-3 shadow-lg shadow-primary/20 hover:shadow-xl transition-all sticky bottom-8 z-30"
+        onClick={() => isProfileComplete ? navigate('/assessment') : alert('Complete seu perfil primeiro!')}
+      >
+        <Plus size={24} strokeWidth={3} />
+        Nova Avaliação
+      </Button>
+
+      {/* Footer Branded Content */}
+      <footer className="mt-12 mb-12 flex flex-col items-center gap-6">
+        <div className="flex items-center gap-3 opacity-60">
+          <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
+            <span className="text-primary font-black">M</span>
+          </div>
+          <div>
+            <p className="text-[11px] font-black text-dark tracking-[0.2em] leading-none mb-1">METRIK</p>
+            <p className="text-[8px] font-bold text-secondary tracking-[0.3em] uppercase opacity-60">Precision Lab</p>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-[10px] text-gray-400 font-bold tracking-tight">@METRIK.oficial</p>
+          <div className="flex items-center gap-1.5 bg-secondary/5 px-3 py-1.5 rounded-lg border border-secondary/10">
+            <ShieldCheck size={12} className="text-secondary" />
+            <span className="text-[9px] font-extrabold text-secondary uppercase tracking-widest">Avaliação Certificada</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

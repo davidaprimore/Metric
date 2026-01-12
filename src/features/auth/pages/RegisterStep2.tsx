@@ -52,8 +52,8 @@ export const RegisterStep2: React.FC = () => {
         if (error) {
             alert(error.message);
         } else {
-            // Success - Supabase handles redirection if session is active or user gets confirmation email
-            navigate('/');
+            // Success - Show splash screen
+            navigate('/register-success');
         }
     };
 
