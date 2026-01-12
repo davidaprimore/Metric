@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
+import { BottomNav } from '@/components/layout/BottomNav';
 
 const chartData = [
   { name: 'JUN', weight: 81 },
@@ -214,26 +215,29 @@ export const DashboardScreen: React.FC = () => {
         Nova Avaliação
       </Button>
 
-      {/* Footer Branded Content */}
-      <footer className="mt-12 mb-12 flex flex-col items-center gap-6">
-        <div className="flex items-center gap-3 opacity-60">
-          <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
-            <span className="text-primary font-black">M</span>
+      {/* Footer Branded Content - Side by Side */}
+      <footer className="mt-8 mb-16 flex justify-between items-center py-6 border-t border-gray-200/50">
+        <div className="flex items-center gap-2.5 opacity-80">
+          <div className="w-9 h-9 bg-black rounded-lg flex items-center justify-center">
+            <span className="text-secondary font-black text-sm">M</span>
           </div>
           <div>
-            <p className="text-[11px] font-black text-dark tracking-[0.2em] leading-none mb-1">METRIK</p>
-            <p className="text-[8px] font-bold text-secondary tracking-[0.3em] uppercase opacity-60">Precision Lab</p>
+            <p className="text-[10px] font-black text-dark tracking-[0.15em] leading-none mb-0.5">METRIK</p>
+            <p className="text-[7px] font-bold text-secondary tracking-[0.2em] uppercase opacity-60">Precision Lab</p>
           </div>
         </div>
 
-        <div className="flex flex-col items-center gap-2">
-          <p className="text-[10px] text-gray-400 font-bold tracking-tight">@METRIK.oficial</p>
-          <div className="flex items-center gap-1.5 bg-secondary/5 px-3 py-1.5 rounded-lg border border-secondary/10">
-            <ShieldCheck size={12} className="text-secondary" />
-            <span className="text-[9px] font-extrabold text-secondary uppercase tracking-widest">Avaliação Certificada</span>
+        <div className="flex flex-col items-end gap-1.5">
+          <p className="text-[9px] text-gray-400 font-bold tracking-tight opacity-60">@METRIK.oficial</p>
+          <div className="flex items-center gap-1.5 bg-secondary/5 px-2.5 py-1 rounded-lg border border-secondary/10">
+            <ShieldCheck size={11} className="text-secondary" />
+            <span className="text-[8px] font-extrabold text-secondary uppercase tracking-wider">Avaliação Certificada</span>
           </div>
         </div>
       </footer>
+
+      {/* Modern Bottom Navigation */}
+      <BottomNav />
     </div>
   );
 };
