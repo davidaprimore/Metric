@@ -6,6 +6,7 @@ import { WelcomeScreen } from '@/features/auth/pages/WelcomeScreen';
 import { LoginScreen } from '@/features/auth/pages/LoginScreen';
 import { RegisterScreen } from '@/features/auth/pages/RegisterScreen';
 import { RegisterStep2 } from '@/features/auth/pages/RegisterStep2';
+import { ForgotPasswordScreen } from '@/features/auth/pages/ForgotPasswordScreen';
 import { DashboardScreen } from '@/features/dashboard/pages/DashboardScreen';
 import { AssessmentScreen } from '@/features/assessment/pages/AssessmentScreen';
 import { ResultsScreen } from '@/features/assessment/pages/ResultsScreen';
@@ -36,6 +37,7 @@ function App() {
             <Route path="/login" element={<LoginScreen />} />
             <Route path="/register" element={<RegisterScreen />} />
             <Route path="/register-step-2" element={<RegisterStep2 />} />
+            <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
 
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
 

@@ -43,14 +43,14 @@ export const WelcomeScreen: React.FC = () => {
                 <Button
                     variant="ghost"
                     className="w-full h-16 rounded-2xl text-white border border-secondary/30 hover:bg-secondary/10 hover:border-secondary/50 font-bold tracking-widest uppercase transition-all"
-                    onClick={() => navigate('/register')}
+                    onClick={() => navigate('/login')}
                 >
-                    CRIAR CONTA
+                    ENTRAR
                 </Button>
 
                 <div className="text-center pt-2">
-                    <button onClick={() => navigate('/login')} className="text-white/50 text-sm font-medium hover:text-white transition-colors">
-                        Já tem uma conta? <span className="text-secondary font-bold" style={{ color: '#8A7AD0' }}>Entrar</span>
+                    <button onClick={() => navigate('/forgot-password')} className="text-white/40 text-xs font-bold uppercase tracking-widest hover:text-secondary transition-colors">
+                        Esqueci a conta
                     </button>
                 </div>
 
