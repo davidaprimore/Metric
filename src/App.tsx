@@ -20,29 +20,29 @@ function App() {
       <Router>
         <div className="font-sans text-foreground bg-background min-h-screen">
           <Routes>
-            <Route path="/login" element={<LoginScreen onNavigate={() => { }} />} />
+            <Route path="/login" element={<LoginScreen />} />
 
             <Route path="/" element={
               <PrivateRoute>
-                <DashboardScreen onNavigate={() => { }} />
+                <DashboardScreen />
               </PrivateRoute>
             } />
 
             <Route path="/assessment" element={
               <PrivateRoute>
-                <AssessmentScreen onNavigate={() => { }} />
+                <AssessmentScreen />
               </PrivateRoute>
             } />
 
             <Route path="/results" element={
               <PrivateRoute>
-                <ResultsScreen onNavigate={() => { }} />
+                <ResultsScreen />
               </PrivateRoute>
             } />
 
             <Route path="/schedule" element={
               <PrivateRoute>
-                <ScheduleScreen onNavigate={() => { }} />
+                <ScheduleScreen />
               </PrivateRoute>
             } />
 
