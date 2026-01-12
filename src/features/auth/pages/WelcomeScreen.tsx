@@ -3,35 +3,84 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { ArrowRight } from 'lucide-react';
 
-const Waveform = () => {
-    const [bars, setBars] = useState<number[]>([]);
+const DynamicGraph = () => {
+    const [points, setPoints] = useState<number[]>([]);
+    const [colorIndex, setColorIndex] = useState(0);
 
     useEffect(() => {
-        // Generate 40 initial bars
-        setBars(Array.from({ length: 40 }, () => Math.random() * 60 + 20));
+        setPoints(Array.from({ length: 20 }, () => Math.random() * 60 + 20));
 
         const interval = setInterval(() => {
-            setBars(prev => prev.map(h => {
-                const change = (Math.random() - 0.5) * 40;
-                return Math.min(Math.max(h + change, 10), 100);
-            }));
-        }, 150);
+            setPoints(prev => {
+                const next = [...prev.slice(1), Math.random() * 60 + 20];
+                return next;
+            });
+            // Toggle color index periodically
+            setColorIndex(prev => (prev + 1) % 200);
+        }, 200);
 
         return () => clearInterval(interval);
     }, []);
 
+    // Calculate interpolation between Green (#C6FF00) and Purple (#8A7AD0)
+    const isGreenToPurple = colorIndex < 100;
+    const ratio = (colorIndex % 100) / 100;
+
     return (
-        <div className="flex items-center justify-center gap-[2px] h-32 w-full opacity-40">
-            {bars.map((h, i) => (
-                <div
-                    key={i}
-                    className="w-1 bg-white rounded-full transition-all duration-300 ease-in-out"
-                    style={{ height: `${h}%` }}
+        <div className="relative w-full h-40 flex items-center justify-center">
+            <svg viewBox="0 0 200 100" className="w-full h-full preserve-3d">
+                <path
+                    d={`M ${points.map((p, i) => `${i * 10.5},${100 - p}`).join(' L ')}`}
+                    fill="none"
+                    stroke={isGreenToPurple ? '#C6FF00' : '#8A7AD0'}
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="transition-all duration-500 ease-in-out"
+                    style={{
+                        filter: 'drop-shadow(0 0 8px currentColor)',
+                        opacity: 0.8
+                    }}
                 />
-            ))}
+                {/* Animated gradients for "life" */}
+                {points.map((p, i) => (
+                    <circle
+                        key={i}
+                        cx={i * 10.5}
+                        cy={100 - p}
+                        r="2"
+                        fill="white"
+                        className="opacity-50 animate-pulse"
+                    />
+                ))}
+            </svg>
         </div>
     );
 };
+
+const MeasuringTape = ({ children }: { children: React.ReactNode }) => (
+    <div className="relative p-1">
+        {/* Inner Label Container */}
+        <div className="border border-white/5 rounded-[4rem] px-12 py-6 backdrop-blur-sm shadow-[0_0_30px_rgba(255,255,255,0.02)] relative z-10">
+            {children}
+        </div>
+
+        {/* Measuring Tape Border */}
+        <div className="absolute inset-0 rounded-[4.2rem] border-[3px] border-dashed border-primary/40 animate-[spin_20s_linear_infinite]" />
+        <div className="absolute inset-[-4px] rounded-[4.5rem] border border-secondary/20" />
+
+        {/* Tick Marks Effect */}
+        <div className="absolute inset-0 rounded-[4.2rem] flex items-center justify-center opacity-30 pointer-events-none">
+            {Array.from({ length: 36 }).map((_, i) => (
+                <div
+                    key={i}
+                    className="absolute w-1 h-2 bg-primary/60"
+                    style={{ transform: `rotate(${i * 10}deg) translateY(-54px)` }}
+                />
+            ))}
+        </div>
+    </div>
+);
 
 export const WelcomeScreen: React.FC = () => {
     const navigate = useNavigate();
@@ -43,16 +92,13 @@ export const WelcomeScreen: React.FC = () => {
 
             {/* Header / Logo Section */}
             <div className="w-full flex flex-col items-center z-10 pt-12 animate-in fade-in slide-in-from-top-4 duration-1000">
-                <div className="relative mb-6">
-                    <div className="border border-white/10 rounded-[4rem] px-12 py-6 backdrop-blur-sm animate-pulse shadow-[0_0_30px_rgba(255,255,255,0.02)]">
-                        <h1 className="text-white text-5xl font-display font-bold tracking-[0.15em] opacity-80">
-                            METRIK
-                        </h1>
-                    </div>
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-primary rounded-full shadow-neon" />
-                </div>
+                <MeasuringTape>
+                    <h1 className="text-white text-5xl font-display font-bold tracking-[0.15em] opacity-80">
+                        METRIK
+                    </h1>
+                </MeasuringTape>
 
-                <p className="text-gray-200 text-lg font-medium text-center max-w-[280px] leading-relaxed">
+                <p className="text-gray-200 text-lg font-medium text-center max-w-[280px] mt-8 leading-relaxed">
                     Precisão clínica para sua <br />
                     <span className="text-white font-bold italic">evolução física</span>
                 </p>
@@ -60,8 +106,8 @@ export const WelcomeScreen: React.FC = () => {
 
             {/* Central Visual Section */}
             <div className="w-full flex items-center justify-center z-10 py-12">
-                <div className="relative w-full max-w-sm aspect-square flex items-center justify-center bg-white/[0.02] rounded-3xl border border-white/[0.05] shadow-inner overflow-hidden">
-                    <Waveform />
+                <div className="relative w-full max-w-sm aspect-video flex items-center justify-center bg-white/[0.02] rounded-3xl border border-white/[0.05] shadow-inner overflow-hidden px-4">
+                    <DynamicGraph />
                     {/* Scan Line Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent h-20 w-full animate-scan-line" />
                 </div>
@@ -94,14 +140,14 @@ export const WelcomeScreen: React.FC = () => {
                 </div>
             </div>
 
-            {/* Global CSS for custom animations if needed (or added to index.css) */}
+            {/* Global CSS for custom animations */}
             <style>{`
         @keyframes scan-line {
-          0% { transform: translateY(-100%); }
-          100% { transform: translateY(400%); }
+          0% { transform: translateY(-300%); }
+          100% { transform: translateY(300%); }
         }
         .animate-scan-line {
-          animation: scan-line 4s linear infinite;
+          animation: scan-line 6s linear infinite;
         }
       `}</style>
         </div>
