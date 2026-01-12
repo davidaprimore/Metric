@@ -1,6 +1,6 @@
 
 # Push Updates Script
-# Automatically commits and pushes changes with a sequential commit message.
+# Automatically commits and pushes changes with a sequential commit message (01, 02, etc).
 
 $ErrorActionPreference = "Stop"
 
@@ -9,19 +9,21 @@ if (-not (Test-Path .git)) {
     Write-Host "Initializing Git repository..."
     git init
     git branch -M main
-    git remote add origin https://github.com/davidaprimore/Metric.git
+    git remote add origin https://davidaprimore@github.com/davidaprimore/Metric.git
 }
 
 # 2. Get the last commit message to determine the next sequence number
 $lastCommit = try { git log -1 --pretty=%B } catch { "" }
 
 $nextNum = 1
-if ($lastCommit -match "Implementação (\d+)") {
-    $nextNum = [int]$matches[1] + 1
+# Use Regex directly to avoid $matches common pitfalls
+$match = [regex]::Match($lastCommit, "\d+")
+if ($match.Success) {
+    $nextNum = [int]$match.Value + 1
 }
 
 $seqString = "{0:D2}" -f $nextNum
-$commitMessage = "Implementação $seqString - Atualização do sistema $(Get-Date -Format 'dd/MM/yyyy HH:mm')"
+$commitMessage = "$seqString"
 
 Write-Host "Preparing commit: $commitMessage"
 
@@ -31,13 +33,18 @@ git add .
 # 4. Commit
 try {
     git commit -m "$commitMessage"
-    Write-Host "Committed successfully."
-} catch {
-    Write-Host "Nothing to commit?"
+    Write-Host "Committed successfully: $commitMessage"
+}
+catch {
+    Write-Host "Nothing to commit or commit failed."
 }
 
 # 5. Push
 Write-Host "Pushing to remote..."
-git push -u origin main
-
-Write-Host "Done! Update $seqString pushed."
+try {
+    git push -u origin main
+    Write-Host "Done! Update $seqString pushed."
+}
+catch {
+    Write-Host "Push failed. Check credentials or network."
+}
