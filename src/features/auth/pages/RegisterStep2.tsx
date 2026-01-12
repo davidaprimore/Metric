@@ -17,6 +17,18 @@ export const RegisterStep2: React.FC = () => {
         weight: ''
     });
 
+    const formatDate = (value: string) => {
+        const raw = value.replace(/\D/g, '');
+        return raw
+            .replace(/(\d{2})(\d)/, '$1/$2')
+            .replace(/(\d{2})(\d)/, '$1/$2')
+            .replace(/(\d{4})\d+?$/, '$1');
+    };
+
+    const handleBirthDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({ ...formData, birthDate: formatDate(e.target.value) });
+    };
+
     const step1Data = location.state?.step1;
 
     const handleFinish = async () => {
@@ -69,7 +81,8 @@ export const RegisterStep2: React.FC = () => {
                                 placeholder="DD/MM/AAAA"
                                 className="w-full h-16 px-5 bg-white rounded-3xl border-none shadow-sm focus:ring-2 focus:ring-secondary/20 transition-all outline-none text-dark"
                                 value={formData.birthDate}
-                                onChange={e => setFormData({ ...formData, birthDate: e.target.value })}
+                                onChange={handleBirthDateChange}
+                                maxLength={10}
                             />
                             <Calendar className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-300" size={20} />
                         </div>
@@ -84,8 +97,8 @@ export const RegisterStep2: React.FC = () => {
                                     key={g}
                                     onClick={() => setGender(g.toLowerCase())}
                                     className={`flex-1 h-12 rounded-2xl text-sm font-bold transition-all ${gender === g.toLowerCase()
-                                            ? 'bg-white shadow-md text-dark'
-                                            : 'text-gray-400 hover:text-gray-600'
+                                        ? 'bg-white shadow-md text-dark'
+                                        : 'text-gray-400 hover:text-gray-600'
                                         }`}
                                 >
                                     {g}

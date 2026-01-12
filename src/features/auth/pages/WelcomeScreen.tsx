@@ -50,7 +50,7 @@ export const WelcomeScreen: React.FC = () => {
 
                 <div className="text-center pt-2">
                     <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
-                        ESQUECI A SENHA. <button onClick={() => navigate('/forgot-password')} className="text-secondary hover:underline transition-all">Clique aqui para redefinir</button>
+                        ESQUECI A SENHA. <button onClick={() => navigate('/forgot-password')} className="text-secondary hover:underline cursor-pointer transition-all">Clique aqui</button>
                     </p>
                 </div>
 
