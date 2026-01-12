@@ -1,8 +1,9 @@
+```
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { ArrowRight } from 'lucide-react';
-import { MetrikLogo, ColorWaveform } from '@/components/shared/WelcomeBranding';
+import { Logo1, ColorWaveform } from '@/components/shared/WelcomeBranding';
 
 export const WelcomeScreen: React.FC = () => {
     const navigate = useNavigate();
@@ -14,7 +15,7 @@ export const WelcomeScreen: React.FC = () => {
 
             {/* Header / Logo Section */}
             <div className="w-full flex flex-col items-center z-10 pt-16 animate-in fade-in slide-in-from-top-4 duration-1000">
-                <MetrikLogo />
+                <Logo1 />
 
                 <p className="text-gray-200 text-lg font-medium text-center max-w-[280px] mt-10 leading-relaxed">
                     Precisão clínica para sua <br />
@@ -43,10 +44,16 @@ export const WelcomeScreen: React.FC = () => {
                 <Button
                     variant="ghost"
                     className="w-full h-16 rounded-2xl text-white border border-secondary/30 hover:bg-secondary/10 hover:border-secondary/50 font-bold tracking-widest uppercase transition-all"
-                    onClick={() => navigate('/login')}
+                    onClick={() => navigate('/register')}
                 >
-                    Entrar
+                    CRIAR CONTA
                 </Button>
+
+                <div className="text-center pt-2">
+                    <button onClick={() => navigate('/login')} className="text-white/50 text-sm font-medium hover:text-white transition-colors">
+                        Já tem uma conta? <span className="text-secondary font-bold">Entrar</span>
+                    </button>
+                </div>
 
                 <div className="pt-8 flex flex-col items-center gap-1 opacity-40">
                     <p className="text-[10px] font-bold text-gray-400 tracking-[0.2em] uppercase">
