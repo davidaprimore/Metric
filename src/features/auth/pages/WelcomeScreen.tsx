@@ -1,4 +1,3 @@
-```
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
@@ -51,7 +50,7 @@ export const WelcomeScreen: React.FC = () => {
 
                 <div className="text-center pt-2">
                     <button onClick={() => navigate('/login')} className="text-white/50 text-sm font-medium hover:text-white transition-colors">
-                        Já tem uma conta? <span className="text-secondary font-bold">Entrar</span>
+                        Já tem uma conta? <span className="text-secondary font-bold" style={{ color: '#8A7AD0' }}>Entrar</span>
                     </button>
                 </div>
 
