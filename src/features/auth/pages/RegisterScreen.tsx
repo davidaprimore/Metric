@@ -19,12 +19,32 @@ export const RegisterScreen: React.FC = () => {
         confirmPassword: ''
     });
 
+    const formatCPF = (value: string) => {
+        const raw = value.replace(/\D/g, '');
+        return raw
+            .replace(/(\d{3})(\d)/, '$1.$2')
+            .replace(/(\d{3})(\d)/, '$1.$2')
+            .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+            .replace(/(-\d{2})\d+?$/, '$1');
+    };
+
+    const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({ ...formData, cpf: formatCPF(e.target.value) });
+    };
+
     const requirements = [
         { label: 'Mínimo de 8 caracteres', met: formData.password.length >= 8 },
         { label: 'Uma letra maiúscula e uma minúscula', met: /[A-Z]/.test(formData.password) && /[a-z]/.test(formData.password) },
         { label: 'Um caractere especial', met: /[^A-Za-z0-9]/.test(formData.password) },
         { label: 'Pelo menos um número', met: /[0-9]/.test(formData.password) },
     ];
+
+    const passwordsMatch = formData.password.length > 0 && formData.password === formData.confirmPassword;
+    const isFormValid = formData.name.length > 2 &&
+        formData.cpf.length === 14 &&
+        formData.email.includes('@') &&
+        requirements.every(r => r.met) &&
+        passwordsMatch;
 
     return (
         <div className="min-h-screen bg-white flex flex-col font-sans">
@@ -54,6 +74,7 @@ export const RegisterScreen: React.FC = () => {
                             type="text"
                             placeholder="Ex: João"
                             className="w-full h-14 px-4 bg-gray-100 rounded-2xl border-none focus:ring-2 focus:ring-secondary/20 transition-all outline-none text-dark"
+                            value={formData.name}
                             onChange={e => setFormData({ ...formData, name: e.target.value })}
                         />
                     </div>
@@ -64,6 +85,7 @@ export const RegisterScreen: React.FC = () => {
                             type="text"
                             placeholder="Ex: Silva"
                             className="w-full h-14 px-4 bg-gray-100 rounded-2xl border-none focus:ring-2 focus:ring-secondary/20 transition-all outline-none text-dark"
+                            value={formData.surname}
                             onChange={e => setFormData({ ...formData, surname: e.target.value })}
                         />
                     </div>
@@ -73,8 +95,10 @@ export const RegisterScreen: React.FC = () => {
                         <input
                             type="text"
                             placeholder="000.000.000-00"
-                            className="w-full h-14 px-4 bg-gray-100 rounded-2xl border-none focus:ring-2 focus:ring-secondary/20 transition-all outline-none text-dark"
-                            onChange={e => setFormData({ ...formData, cpf: e.target.value })}
+                            className="w-full h-14 px-4 bg-gray-100 rounded-2xl border-none focus:ring-2 focus:ring-secondary/20 transition-all outline-none text-dark font-mono"
+                            value={formData.cpf}
+                            onChange={handleCPFChange}
+                            maxLength={14}
                         />
                     </div>
 
@@ -84,6 +108,7 @@ export const RegisterScreen: React.FC = () => {
                             type="email"
                             placeholder="seu@email.com"
                             className="w-full h-14 px-4 bg-gray-100 rounded-2xl border-none focus:ring-2 focus:ring-secondary/20 transition-all outline-none text-dark"
+                            value={formData.email}
                             onChange={e => setFormData({ ...formData, email: e.target.value })}
                         />
                     </div>
@@ -94,7 +119,8 @@ export const RegisterScreen: React.FC = () => {
                             <input
                                 type={showPassword ? "text" : "password"}
                                 className="w-full h-14 px-4 bg-gray-100 rounded-2xl border-none focus:ring-2 focus:ring-secondary/20 transition-all outline-none text-dark"
-                                placeholder="••••••••"
+                                placeholder=""
+                                value={formData.password}
                                 onChange={e => setFormData({ ...formData, password: e.target.value })}
                             />
                             <button
@@ -110,8 +136,12 @@ export const RegisterScreen: React.FC = () => {
                         <label className="text-xs font-bold text-dark ml-1">Confirmar Senha</label>
                         <input
                             type="password"
-                            className="w-full h-14 px-4 bg-gray-100 rounded-2xl border-none focus:ring-2 focus:ring-secondary/20 transition-all outline-none text-dark"
-                            placeholder="••••••••"
+                            className={cn(
+                                "w-full h-14 px-4 bg-gray-100 rounded-2xl border-none focus:ring-2 transition-all outline-none text-dark",
+                                passwordsMatch ? "ring-2 ring-primary/40 bg-primary/5" : "focus:ring-secondary/20"
+                            )}
+                            placeholder=""
+                            value={formData.confirmPassword}
                             onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })}
                         />
                     </div>
@@ -131,13 +161,33 @@ export const RegisterScreen: React.FC = () => {
                             )}>{req.label}</span>
                         </div>
                     ))}
+                    {/* Match validation */}
+                    <div className="flex items-center gap-2">
+                        <div className={cn(
+                            "w-2.5 h-2.5 rounded-full transition-colors",
+                            passwordsMatch ? "bg-primary" : "bg-gray-300"
+                        )} />
+                        <span className={cn(
+                            "text-[11px] font-medium transition-colors",
+                            passwordsMatch ? "text-dark" : "text-gray-400"
+                        )}>As senhas coincidem</span>
+                    </div>
                 </div>
 
                 <Button
                     variant="primary"
-                    className="w-full h-16 rounded-2xl text-lg font-bold bg-[#70F3A2] text-dark shadow-none hover:bg-[#5EDC8F]"
-                    onClick={() => setLoading(true)}
+                    className={cn(
+                        "w-full h-16 rounded-2xl text-lg font-bold text-dark transition-all shadow-none",
+                        isFormValid ? "bg-primary hover:bg-primary/90" : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    )}
+                    onClick={() => {
+                        if (isFormValid) {
+                            setLoading(true);
+                            setTimeout(() => navigate('/register-step-2'), 800);
+                        }
+                    }}
                     isLoading={loading}
+                    disabled={!isFormValid}
                 >
                     AVANÇAR
                 </Button>
