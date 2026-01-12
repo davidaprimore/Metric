@@ -7,6 +7,7 @@ interface AuthContextType {
     user: User | null
     loading: boolean
     signOut: () => Promise<void>
+    signUp: (email: string, password: string, metadata: any) => Promise<{ error: any }>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -38,11 +39,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await supabase.auth.signOut()
     }
 
+    const signUp = async (email: string, password: string, metadata: any) => {
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: metadata
+            }
+        })
+        return { error }
+    }
+
     const value = {
         session,
         user,
         loading,
         signOut,
+        signUp,
     }
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -1,12 +1,49 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Calendar, Ruler, Weight, Info, CheckCircle } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const RegisterStep2: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const { signUp } = useAuth();
     const [loading, setLoading] = useState(false);
     const [gender, setGender] = useState('masculino');
+
+    const [formData, setFormData] = useState({
+        birthDate: '',
+        height: '',
+        weight: ''
+    });
+
+    const step1Data = location.state?.step1;
+
+    const handleFinish = async () => {
+        if (!step1Data) return;
+        setLoading(true);
+
+        // Format metadata for profile creation
+        const metadata = {
+            first_name: step1Data.name,
+            last_name: step1Data.surname,
+            cpf: step1Data.cpf,
+            birth_date: formData.birthDate,
+            gender: gender,
+            height: parseFloat(formData.height),
+            weight: parseFloat(formData.weight)
+        };
+
+        const { error } = await signUp(step1Data.email, step1Data.password, metadata);
+
+        setLoading(false);
+        if (error) {
+            alert(error.message);
+        } else {
+            // Success - Supabase handles redirection if session is active or user gets confirmation email
+            navigate('/');
+        }
+    };
 
     return (
         <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans">
@@ -31,6 +68,8 @@ export const RegisterStep2: React.FC = () => {
                                 type="text"
                                 placeholder="DD/MM/AAAA"
                                 className="w-full h-16 px-5 bg-white rounded-3xl border-none shadow-sm focus:ring-2 focus:ring-secondary/20 transition-all outline-none text-dark"
+                                value={formData.birthDate}
+                                onChange={e => setFormData({ ...formData, birthDate: e.target.value })}
                             />
                             <Calendar className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-300" size={20} />
                         </div>
@@ -64,6 +103,8 @@ export const RegisterStep2: React.FC = () => {
                                     type="number"
                                     placeholder="175"
                                     className="w-full h-16 px-5 bg-white rounded-3xl border-none shadow-sm focus:ring-2 focus:ring-secondary/20 transition-all outline-none text-dark"
+                                    value={formData.height}
+                                    onChange={e => setFormData({ ...formData, height: e.target.value })}
                                 />
                                 <Ruler className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-300" size={20} />
                             </div>
@@ -75,6 +116,8 @@ export const RegisterStep2: React.FC = () => {
                                     type="number"
                                     placeholder="70.0"
                                     className="w-full h-16 px-5 bg-white rounded-3xl border-none shadow-sm focus:ring-2 focus:ring-secondary/20 transition-all outline-none text-dark"
+                                    value={formData.weight}
+                                    onChange={e => setFormData({ ...formData, weight: e.target.value })}
                                 />
                                 <Weight className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-300" size={20} />
                             </div>
@@ -97,11 +140,9 @@ export const RegisterStep2: React.FC = () => {
                 <Button
                     variant="primary"
                     className="w-full h-16 rounded-3xl text-lg font-bold bg-[#4ADE80] text-dark shadow-none hover:bg-[#3be074] flex items-center justify-center gap-3"
-                    onClick={() => {
-                        setLoading(true);
-                        setTimeout(() => navigate('/'), 1500);
-                    }}
+                    onClick={handleFinish}
                     isLoading={loading}
+                    disabled={!formData.birthDate || !formData.height || !formData.weight}
                 >
                     Finalizar Cadastro
                     <CheckCircle size={20} />

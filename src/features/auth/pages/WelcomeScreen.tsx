@@ -49,8 +49,8 @@ export const WelcomeScreen: React.FC = () => {
                 </Button>
 
                 <div className="text-center pt-2">
-                    <button onClick={() => navigate('/forgot-password')} className="text-white/40 text-xs font-bold uppercase tracking-widest hover:text-secondary transition-colors">
-                        Esqueci a conta
+                    <button onClick={() => navigate('/forgot-password')} className="text-white/40 text-[10px] font-bold uppercase tracking-widest hover:text-white transition-colors leading-relaxed">
+                        ESQUECI A SENHA. <span className="text-secondary">Clique aqui para redefinir</span>
                     </button>
                 </div>
 

@@ -183,7 +183,7 @@ export const RegisterScreen: React.FC = () => {
                     onClick={() => {
                         if (isFormValid) {
                             setLoading(true);
-                            setTimeout(() => navigate('/register-step-2'), 800);
+                            setTimeout(() => navigate('/register-step-2', { state: { step1: formData } }), 800);
                         }
                     }}
                     isLoading={loading}
