@@ -17,7 +17,7 @@ export const Logo1: React.FC<{ className?: string }> = ({ className = "" }) => {
                 <h1 className="text-white text-[38px] font-display font-black tracking-[0.16em] leading-none mr-[-0.16em]">
                     METRIK
                 </h1>
-                <p className="text-secondary text-[10px] font-bold tracking-[0.14em] leading-tight whitespace-nowrap uppercase">
+                <p className="text-secondary text-[10px] font-bold tracking-[0.41em] leading-tight whitespace-nowrap uppercase mr-[-0.41em]">
                     PRECISION LAB
                 </p>
             </div>
