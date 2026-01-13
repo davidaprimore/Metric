@@ -27,6 +27,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { DefaultAvatar } from '@/components/shared/DefaultAvatar';
 
 const chartData = [
   { name: 'JUN', weight: 81 },
@@ -115,7 +116,11 @@ export const DashboardScreen: React.FC = () => {
           onClick={() => navigate('/profile')}
         >
           <div className="w-12 h-12 rounded-full border-2 border-secondary p-0.5 bg-white shadow-sm overflow-hidden group-hover:scale-105 transition-transform">
-            <img src="https://i.pravatar.cc/150?u=alex" alt="Profile" className="w-full h-full rounded-full object-cover" />
+            {user?.user_metadata?.avatar_url && !user.user_metadata.avatar_url.includes('pravatar.cc') ? (
+              <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full rounded-full object-cover" />
+            ) : (
+              <DefaultAvatar gender={user?.user_metadata?.gender} className="w-full h-full rounded-full" />
+            )}
           </div>
           <div className="flex flex-col">
             <h1 className="text-xl font-bold text-dark leading-tight">Olá, {firstName}</h1>
@@ -124,7 +129,7 @@ export const DashboardScreen: React.FC = () => {
         </div>
         <button className="w-11 h-11 bg-gray-200/50 rounded-full flex items-center justify-center text-dark relative">
           <Bell size={20} fill="currentColor" className="text-dark" />
-          {upcomingAppointments.length > 0 || pendingAnamnesis ? (
+          {upcomingAppointments.length > 0 || pendingAnamnesis || profileIncomplete ? (
             <div className="absolute top-3.5 right-3.5 w-2 h-2 bg-red-500 rounded-full border-2 border-[#F1F3F5]"></div>
           ) : null}
         </button>
@@ -132,11 +137,54 @@ export const DashboardScreen: React.FC = () => {
 
       {/* COMPROMISSOS & PENDING TASKS SECTION */}
       <div className="mb-8 space-y-4">
-        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-2">Meus Compromissos</p>
+        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-2">Centro de Avisos</p>
 
-        {/* Next Appointment Card */}
+        {/* Profile Incomplete Alert - ALWAYS AT TOP */}
+        {profileIncomplete && (
+          <div className="bg-secondary/10 border border-secondary/20 p-5 rounded-[2rem] flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-sm">
+              <ShieldCheck className="text-secondary" size={24} strokeWidth={2.5} />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs font-black text-dark uppercase tracking-tight text-secondary">Perfil Incompleto</p>
+              <p className="text-[10px] text-dark/60 font-medium leading-tight mt-0.5">
+                Faltando: <span className="font-bold">{missingFields.join(', ')}</span>.
+              </p>
+            </div>
+            <button
+              onClick={() => navigate('/profile/data')}
+              className="w-10 h-10 bg-secondary text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+            >
+              <ArrowRight size={18} />
+            </button>
+          </div>
+        )}
+
+        {/* Pending Anamnesis Alert */}
+        {pendingAnamnesis && (
+          <div className="bg-primary/20 border border-primary/30 p-5 rounded-[2rem] flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500 delay-75">
+            <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-sm">
+              <AlertCircle className="text-dark" size={24} strokeWidth={2.5} />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs font-black text-dark uppercase tracking-tight">Anamnese Pendente</p>
+              <p className="text-[10px] text-dark/60 font-medium leading-tight mt-0.5">Clique para completar sua entrevista prévia.</p>
+            </div>
+            <button
+              onClick={() => navigate('/assessment/anamnesis')}
+              className="w-10 h-10 bg-dark text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+            >
+              <ArrowRight size={18} />
+            </button>
+          </div>
+        )}
+
+        {/* Appointment Section */}
+        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-2 pt-2">Meus Compromissos</p>
+
         {upcomingAppointments.length > 0 ? (
           <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100 group hover:shadow-md transition-all duration-300">
+            {/* ... appointment card content ... */}
             <div className="flex justify-between items-start mb-4">
               <span className="bg-secondary/10 text-secondary text-[10px] font-extrabold px-3 py-1 rounded-lg uppercase tracking-wider">Próximo Agendamento</span>
               <div className="w-10 h-10 bg-secondary/10 rounded-2xl flex items-center justify-center">
@@ -165,52 +213,12 @@ export const DashboardScreen: React.FC = () => {
               Ver Detalhes
             </Button>
           </div>
-        ) : !pendingAnamnesis ? (
+        ) : (
           <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 flex items-center gap-4 opacity-70">
             <div className="w-10 h-10 rounded-2xl bg-gray-50 flex items-center justify-center shrink-0">
               <ShieldCheck className="text-gray-400" size={20} />
             </div>
-            <p className="text-xs font-bold text-gray-400">Sua agenda está em dia!</p>
-          </div>
-        ) : null}
-
-        {/* Pending Anamnesis Alert */}
-        {pendingAnamnesis && (
-          <div className="bg-primary/20 border border-primary/30 p-5 rounded-[2rem] flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
-            <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-sm">
-              <AlertCircle className="text-dark" size={24} strokeWidth={2.5} />
-            </div>
-            <div className="flex-1">
-              <p className="text-xs font-black text-dark uppercase tracking-tight">Anamnese Pendente</p>
-              <p className="text-[10px] text-dark/60 font-medium leading-tight mt-0.5">Clique para completar sua entrevista prévia.</p>
-            </div>
-            <button
-              onClick={() => navigate('/assessment/anamnesis')}
-              className="w-10 h-10 bg-dark text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform"
-            >
-              <ArrowRight size={18} />
-            </button>
-          </div>
-        )}
-
-        {/* Profile Incomplete Alert */}
-        {profileIncomplete && (
-          <div className="bg-secondary/10 border border-secondary/20 p-5 rounded-[2rem] flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500 delay-150">
-            <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-sm">
-              <ShieldCheck className="text-secondary" size={24} strokeWidth={2.5} />
-            </div>
-            <div className="flex-1">
-              <p className="text-xs font-black text-dark uppercase tracking-tight text-secondary">Perfil Incompleto</p>
-              <p className="text-[10px] text-dark/60 font-medium leading-tight mt-0.5">
-                Faltando: <span className="font-bold">{missingFields.join(', ')}</span>.
-              </p>
-            </div>
-            <button
-              onClick={() => navigate('/profile/data')}
-              className="w-10 h-10 bg-secondary text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform"
-            >
-              <ArrowRight size={18} />
-            </button>
+            <p className="text-xs font-bold text-gray-400">Nenhum agendamento no momento.</p>
           </div>
         )}
       </div>

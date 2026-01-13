@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { DefaultAvatar } from '@/components/shared/DefaultAvatar';
 import { Toast } from '@/components/ui/Toast';
 import { supabase } from '@/lib/supabase';
 
@@ -142,11 +143,15 @@ export const PersonalDataScreen: React.FC = () => {
                 <div className="flex flex-col items-center mb-8">
                     <div className="relative">
                         <div className="w-28 h-28 rounded-full border-[3px] border-white p-1 bg-white shadow-xl overflow-hidden">
-                            <img
-                                src="https://i.pravatar.cc/150?u=Ricardo"
-                                alt="Avatar"
-                                className="w-full h-full rounded-full object-cover"
-                            />
+                            {user?.user_metadata?.avatar_url && !user.user_metadata.avatar_url.includes('pravatar.cc') ? (
+                                <img
+                                    src={user.user_metadata.avatar_url}
+                                    alt="Avatar"
+                                    className="w-full h-full rounded-full object-cover"
+                                />
+                            ) : (
+                                <DefaultAvatar gender={formData.gender} className="w-full h-full rounded-full" />
+                            )}
                         </div>
                         <button
                             onClick={triggerCamera}

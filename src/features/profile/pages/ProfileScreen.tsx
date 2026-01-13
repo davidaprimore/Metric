@@ -13,6 +13,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { DefaultAvatar } from '@/components/shared/DefaultAvatar';
 import { cn } from '@/lib/utils';
 
 export const ProfileScreen: React.FC = () => {
@@ -68,12 +69,16 @@ export const ProfileScreen: React.FC = () => {
             {/* Profile Info */}
             <div className="flex flex-col items-center mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="relative">
-                    <div className="w-32 h-32 rounded-full border-[3px] border-secondary p-1 bg-white shadow-xl">
-                        <img
-                            src="https://i.pravatar.cc/150?u=Ricardo"
-                            alt="Avatar"
-                            className="w-full h-full rounded-full object-cover"
-                        />
+                    <div className="w-32 h-32 rounded-full border-[3px] border-secondary p-1 bg-white shadow-xl overflow-hidden">
+                        {user?.user_metadata?.avatar_url && !user.user_metadata.avatar_url.includes('pravatar.cc') ? (
+                            <img
+                                src={user.user_metadata.avatar_url}
+                                alt="Avatar"
+                                className="w-full h-full rounded-full object-cover"
+                            />
+                        ) : (
+                            <DefaultAvatar gender={user?.user_metadata?.gender} className="w-full h-full rounded-full" />
+                        )}
                     </div>
                     <button className="absolute bottom-1 right-1 w-8 h-8 bg-secondary text-white rounded-full flex items-center justify-center border-2 border-white shadow-lg">
                         <Pencil size={14} strokeWidth={2.5} />
