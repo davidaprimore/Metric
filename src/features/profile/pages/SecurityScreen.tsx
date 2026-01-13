@@ -10,6 +10,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { Toast } from '@/components/ui/Toast';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 
@@ -18,6 +19,7 @@ export const SecurityScreen: React.FC = () => {
     const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
     const [showPasswords, setShowPasswords] = useState({ current: false, new: false, confirm: false });
     const [loading, setLoading] = useState(false);
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' as 'success' | 'error' | 'loading' });
 
     const toggleShow = (key: keyof typeof showPasswords) => {
         setShowPasswords(prev => ({ ...prev, [key]: !prev[key] }));
@@ -25,11 +27,11 @@ export const SecurityScreen: React.FC = () => {
 
     const handleUpdate = async () => {
         if (!passwords.new || passwords.new !== passwords.confirm) {
-            alert('As senhas não coincidem!');
+            setToast({ show: true, message: 'As senhas digitadas não coincidem!', type: 'error' });
             return;
         }
         if (passwords.new.length < 8) {
-            alert('A nova senha deve ter pelo menos 8 caracteres.');
+            setToast({ show: true, message: 'Sua nova senha precisa ter pelo menos 8 caracteres.', type: 'error' });
             return;
         }
 
@@ -41,10 +43,18 @@ export const SecurityScreen: React.FC = () => {
 
             if (error) throw error;
 
-            alert('Senha atualizada com sucesso!');
-            navigate('/profile');
+            setToast({
+                show: true,
+                message: 'Segurança atualizada! Sua nova senha já está valendo. 🔒',
+                type: 'success'
+            });
+            setTimeout(() => navigate('/profile'), 2000);
         } catch (error: any) {
-            alert('Erro ao atualizar: ' + (error.message || 'Erro desconhecido'));
+            setToast({
+                show: true,
+                message: 'Erro ao trocar senha: ' + (error.message || 'Erro desconhecido'),
+                type: 'error'
+            });
         } finally {
             setLoading(false);
         }
@@ -59,6 +69,12 @@ export const SecurityScreen: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-[#F1F3F5] pb-32 font-sans px-5">
+            <Toast
+                isVisible={toast.show}
+                message={toast.message}
+                type={toast.type}
+                onClose={() => setToast({ ...toast, show: false })}
+            />
             <header className="pt-8 flex items-center mb-8">
                 <button
                     onClick={() => navigate(-1)}

@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { Toast } from '@/components/ui/Toast';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
@@ -18,14 +19,15 @@ export const NotificationSettingsScreen: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' as 'success' | 'error' | 'loading' });
 
-    // Default preferences
+    // Default preferences - all enabled by default now
     const [prefs, setPrefs] = useState({
         push_evaluation: user?.user_metadata?.prefs?.push_evaluation ?? true,
-        push_tips: user?.user_metadata?.prefs?.push_tips ?? false,
+        push_tips: user?.user_metadata?.prefs?.push_tips ?? true,
         push_updates: user?.user_metadata?.prefs?.push_updates ?? true,
         email_summary: user?.user_metadata?.prefs?.email_summary ?? true,
-        email_promo: user?.user_metadata?.prefs?.email_promo ?? false,
+        email_promo: user?.user_metadata?.prefs?.email_promo ?? true,
         email_security: user?.user_metadata?.prefs?.email_security ?? true
     });
 
@@ -44,10 +46,18 @@ export const NotificationSettingsScreen: React.FC = () => {
 
             if (error) throw error;
 
-            alert('Preferências salvas com sucesso!');
-            navigate('/profile');
+            setToast({
+                show: true,
+                message: 'Tudo pronto! Suas preferências de notificação foram atualizadas. ✨',
+                type: 'success'
+            });
+            setTimeout(() => navigate('/profile'), 2000);
         } catch (error: any) {
-            alert('Erro ao salvar: ' + (error.message || 'Erro desconhecido'));
+            setToast({
+                show: true,
+                message: 'Não foi possível salvar: ' + (error.message || 'Erro desconhecido'),
+                type: 'error'
+            });
         } finally {
             setLoading(false);
         }
@@ -70,6 +80,12 @@ export const NotificationSettingsScreen: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-[#F1F3F5] pb-32 font-sans">
+            <Toast
+                isVisible={toast.show}
+                message={toast.message}
+                type={toast.type}
+                onClose={() => setToast({ ...toast, show: false })}
+            />
             <header className="pt-8 px-5 flex items-center mb-8">
                 <button
                     onClick={() => navigate(-1)}

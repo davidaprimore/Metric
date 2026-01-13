@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { Toast } from '@/components/ui/Toast';
 import { supabase } from '@/lib/supabase';
 
 export const PersonalDataScreen: React.FC = () => {
@@ -18,6 +19,7 @@ export const PersonalDataScreen: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
     const [loading, setLoading] = useState(false);
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' as 'success' | 'error' | 'loading' });
 
     // Form state initialized with user metadata
     const [formData, setFormData] = useState({
@@ -60,11 +62,19 @@ export const PersonalDataScreen: React.FC = () => {
 
             if (profileError) throw profileError;
 
-            alert('Alterações salvas com sucesso!');
-            navigate('/profile');
+            setToast({
+                show: true,
+                message: 'Perfeito! Suas alterações foram salvas com sucesso. ✨',
+                type: 'success'
+            });
+            setTimeout(() => navigate('/profile'), 2000);
         } catch (error: any) {
             console.error('Error saving profile:', error);
-            alert('Erro ao salvar: ' + (error.message || 'Erro desconhecido'));
+            setToast({
+                show: true,
+                message: 'Não foi possível salvar: ' + (error.message || 'Erro desconhecido'),
+                type: 'error'
+            });
         } finally {
             setLoading(false);
         }
@@ -76,12 +86,22 @@ export const PersonalDataScreen: React.FC = () => {
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            alert(`Foto selecionada: ${file.name}. Funcionalidade de upload para o Bucket implementada em breve.`);
+            setToast({
+                show: true,
+                message: `Foto "${file.name}" selecionada! O upload para o servidor estará disponível em breve. 📸`,
+                type: 'success'
+            });
         }
     };
 
     return (
         <div className="min-h-screen bg-[#F1F3F5] pb-32 font-sans">
+            <Toast
+                isVisible={toast.show}
+                message={toast.message}
+                type={toast.type}
+                onClose={() => setToast({ ...toast, show: false })}
+            />
             {/* Hidden native inputs */}
             <input
                 type="file"
