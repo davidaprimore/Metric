@@ -25,11 +25,18 @@ export const BottomNav: React.FC = () => {
         <div className="fixed bottom-0 left-0 w-full px-0 pb-0 z-50 pointer-events-none">
             <div className="max-w-md mx-auto relative h-28 flex items-end pointer-events-auto">
 
-                {/* Custom SVG Background for the curved bar */}
-                <div className="absolute inset-x-0 bottom-0 h-20 w-full">
-                    <svg viewBox="0 0 400 80" className="w-full h-full drop-shadow-[0_-5px_25px_rgba(0,0,0,0.06)]" preserveAspectRatio="none">
+                {/* Custom SVG Background for the curved bar - Protruding Upwards */}
+                <div className="absolute inset-x-0 bottom-0 h-24 w-full">
+                    <svg viewBox="0 0 400 100" className="w-full h-full drop-shadow-[0_-5px_25px_rgba(0,0,0,0.06)]" preserveAspectRatio="none">
                         <path
-                            d="M0 20 C0 8.95431 8.95431 0 20 0 H140 C160 0 165 25 200 25 C235 25 240 0 260 0 H380 C391.046 0 400 8.95431 400 20 V80 H0 V20 Z"
+                            d="M0 40 
+                               C0 40 10 40 20 40
+                               H155 
+                               C175 40 180 10 200 10 
+                               C220 10 225 40 245 40 
+                               H380 
+                               C390 40 400 40 400 40 
+                               V100 H0 Z"
                             fill="white"
                         />
                     </svg>
