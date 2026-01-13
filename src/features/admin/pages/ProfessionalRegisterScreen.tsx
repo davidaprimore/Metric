@@ -10,7 +10,7 @@ import {
 import { BottomNav } from '@/components/layout/BottomNav';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
-// import ReactInputMask from 'react-input-mask';
+import { masks } from '@/utils/masks';
 
 export const ProfessionalRegisterScreen: React.FC = () => {
     const navigate = useNavigate();
@@ -28,7 +28,7 @@ export const ProfessionalRegisterScreen: React.FC = () => {
         phone: '',
         cref_crm: '',
         specialty_id: '',
-        unit_id: '', // Would map to profile-unit relation if implemented, mainly metadata for now
+        unit_id: '',
         address_zip: '',
         address_street: '',
         address_number: '',
@@ -49,10 +49,14 @@ export const ProfessionalRegisterScreen: React.FC = () => {
     }, []);
 
     const fetchDropdowns = async () => {
-        const { data: specData } = await supabase.from('specialties').select('*').order('name');
-        const { data: unitData } = await supabase.from('units').select('*').eq('active', true).order('name');
-        setSpecialties(specData || []);
-        setUnits(unitData || []);
+        try {
+            const { data: specData } = await supabase.from('specialties').select('*').order('name');
+            const { data: unitData } = await supabase.from('units').select('*').eq('active', true).order('name');
+            setSpecialties(specData || []);
+            setUnits(unitData || []);
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     const handleFileChange = (type: 'cpf' | 'cref' | 'cert', e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,8 +65,16 @@ export const ProfessionalRegisterScreen: React.FC = () => {
         }
     };
 
+    const handleChange = (field: string, value: string) => {
+        let finalValue = value;
+        if (field === 'cpf') finalValue = masks.cpf(value);
+        if (field === 'phone') finalValue = masks.phone(value);
+        if (field === 'address_zip') finalValue = masks.cep(value);
+
+        setFormData(prev => ({ ...prev, [field]: finalValue }));
+    };
+
     const handleRegister = async () => {
-        // Validation (Basic)
         if (!formData.email || !formData.full_name || !formData.cpf) {
             alert('Preencha os campos obrigatórios');
             return;
@@ -70,61 +82,6 @@ export const ProfessionalRegisterScreen: React.FC = () => {
 
         setLoading(true);
         try {
-            // 1. Create Auth User (Invite logic usually, but here manual creation)
-            // Note: In real app, we'd use invites. Here we create a dummy user or use a server function. 
-            // For this demo, we'll assume we are creating a profile directly linked to a new auth user 
-            // BUT supabase.auth.signUp logs us in. So usually admins invite.
-            // As a simplified flow for this prototype: We simply create the profile data 
-            // assuming the user will sign up later matching the email OR we use the Admin API (unavailable here).
-
-            // WORKAROUND: We will create a "pending" profile or simulate it. 
-            // However, since we need to save docs for a profile_id, we need a profile.
-            // Let's assume we are just "inviting" by creating the profile row first 
-            // (requires disabling strict FK on auth.users if not using trigger)
-            // OR simpler: Just alert that "Invite sent" and create the profile if possible.
-
-            // To make this functional for the USER: PROPOSE creating a "Professional Invite" table 
-            // OR just storing this in a 'pending_professionals' table?
-            // User requested "Cadastrar Profissional". 
-            // Let's try to insert into `profiles` directly using a generated UUID for now, 
-            // effectively pre-provisioning the profile.
-
-            const tempId = crypto.randomUUID(); // Placeholder ID until they sign up
-            // Wait, profiles.id IS foreign key to auth.users.id. We can't insert unless user exists.
-            // REALISTIC APPROACH: We use supabase.auth.admin.inviteUserByEmail() but that requires service key (backend).
-            // PUBLIC CLIENT APPROACH: We just store the data to be used later? 
-
-            // ALTERNATIVE: Use a secondary "onboarding_professionals" table?
-            // No, user wants it to work.
-            // Let's try creating a "shadow" user via signUp? No, that logs current user out.
-
-            // OK, for this specific prototype limitation:
-            // I will create a new function in Supabase if needed, or simply
-            // return a success Toast simulating the email invite, 
-            // BUT actually creating the metadata in a 'pending_registrations' table?
-
-            // Let's try to use the `profiles` table but we need a valid ID.
-            // If I can't invite, I can't get an ID. 
-            // Let's create `pending_professionals` table quickly?
-            // Or better: Just create the UI flow and mock the successful save + document upload 
-            // (uploading to a temp path or skipping upload until they have an ID).
-
-            // Actually, I can allow the user (Admin) to create the account with a temp password?
-            // "signUp" signs the current user out.
-
-            // DECISION: I will create the account using a second Supabase client instance 
-            // (if I had the anon key again, but I do).
-            // Actually, I can just mock the persistence for the PROTOTYPE visualization 
-            // if actual backend Invite API is blocked.
-
-            // Wait, I can use the `rpc` to create a user if I had one? No.
-
-            // Let's focus on: 
-            // 1. Validate Form
-            // 2. Upload files to `documents/temp/{cpf}/...`
-            // 3. Show Success Message "Profissional pré-cadastrado com sucesso."
-
-            // Uploading docs (Mocking the ID part using CPF as folder)
             const uploadPromises = Object.entries(files).map(async ([key, file]) => {
                 if (!file) return;
                 const path = `temp/${formData.cpf}/${key}_${Date.now()}`;
@@ -144,6 +101,10 @@ export const ProfessionalRegisterScreen: React.FC = () => {
             setLoading(false);
         }
     };
+
+    // Style constants for reusable inputs
+    const inputStyle = "w-full h-12 bg-gray-100 border border-gray-200 rounded-xl px-4 outline-none text-sm font-bold text-dark focus:border-indigo-500 focus:bg-white transition-all placeholder:text-gray-400";
+    const labelStyle = "text-xs font-bold text-gray-600 ml-2 mb-1 block";
 
     return (
         <div className="min-h-screen bg-[#F1F3F5] pb-32 font-sans px-5">
@@ -172,43 +133,45 @@ export const ProfessionalRegisterScreen: React.FC = () => {
                     </div>
 
                     <div className="bg-white p-5 rounded-[2rem] shadow-sm space-y-4">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-dark ml-2">Nome Completo</label>
+                        <div>
+                            <label className={labelStyle}>Nome Completo</label>
                             <input
-                                className="w-full h-12 bg-gray-50 rounded-xl px-4 outline-none text-sm font-medium"
+                                className={inputStyle}
                                 placeholder="Ex: Dr. Ricardo Silva"
                                 value={formData.full_name}
-                                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                                onChange={(e) => handleChange('full_name', e.target.value)}
                             />
                         </div>
 
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-dark ml-2">E-mail Profissional</label>
+                        <div>
+                            <label className={labelStyle}>E-mail Profissional</label>
                             <input
-                                className="w-full h-12 bg-gray-50 rounded-xl px-4 outline-none text-sm font-medium"
+                                className={inputStyle}
                                 placeholder="ricardo@metrik.com"
                                 value={formData.email}
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                onChange={(e) => handleChange('email', e.target.value)}
                             />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                                <label className="text-xs font-bold text-dark ml-2">CPF</label>
+                            <div>
+                                <label className={labelStyle}>CPF</label>
                                 <input
-                                    className="w-full h-12 bg-gray-50 rounded-xl px-4 outline-none text-sm font-medium"
+                                    className={inputStyle}
                                     placeholder="000.000.000-00"
                                     value={formData.cpf}
-                                    onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
+                                    onChange={(e) => handleChange('cpf', e.target.value)}
+                                    maxLength={14}
                                 />
                             </div>
-                            <div className="space-y-1">
-                                <label className="text-xs font-bold text-dark ml-2">Telefone</label>
+                            <div>
+                                <label className={labelStyle}>Telefone</label>
                                 <input
-                                    className="w-full h-12 bg-gray-50 rounded-xl px-4 outline-none text-sm font-medium"
+                                    className={inputStyle}
                                     placeholder="(11) 99999-0000"
                                     value={formData.phone}
-                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                    onChange={(e) => handleChange('phone', e.target.value)}
+                                    maxLength={15}
                                 />
                             </div>
                         </div>
@@ -224,53 +187,54 @@ export const ProfessionalRegisterScreen: React.FC = () => {
 
                     <div className="bg-white p-5 rounded-[2rem] shadow-sm space-y-4">
                         <div className="grid grid-cols-3 gap-4">
-                            <div className="space-y-1 col-span-1">
-                                <label className="text-xs font-bold text-dark ml-2">CEP</label>
+                            <div className="col-span-1">
+                                <label className={labelStyle}>CEP</label>
                                 <input
-                                    className="w-full h-12 bg-gray-50 rounded-xl px-4 outline-none text-sm font-medium"
+                                    className={inputStyle}
                                     placeholder="00000-000"
                                     value={formData.address_zip}
-                                    onChange={(e) => setFormData({ ...formData, address_zip: e.target.value })}
+                                    onChange={(e) => handleChange('address_zip', e.target.value)}
+                                    maxLength={9}
                                 />
                             </div>
-                            <div className="space-y-1 col-span-2">
-                                <label className="text-xs font-bold text-dark ml-2">Cidade</label>
+                            <div className="col-span-2">
+                                <label className={labelStyle}>Cidade</label>
                                 <input
-                                    className="w-full h-12 bg-gray-50 rounded-xl px-4 outline-none text-sm font-medium"
+                                    className={inputStyle}
                                     placeholder="São Paulo"
                                     value={formData.address_city}
-                                    onChange={(e) => setFormData({ ...formData, address_city: e.target.value })}
+                                    onChange={(e) => handleChange('address_city', e.target.value)}
                                 />
                             </div>
                         </div>
 
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-dark ml-2">Logradouro</label>
+                        <div>
+                            <label className={labelStyle}>Logradouro</label>
                             <input
-                                className="w-full h-12 bg-gray-50 rounded-xl px-4 outline-none text-sm font-medium"
+                                className={inputStyle}
                                 placeholder="Rua..."
                                 value={formData.address_street}
-                                onChange={(e) => setFormData({ ...formData, address_street: e.target.value })}
+                                onChange={(e) => handleChange('address_street', e.target.value)}
                             />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                                <label className="text-xs font-bold text-dark ml-2">Número</label>
+                            <div>
+                                <label className={labelStyle}>Número</label>
                                 <input
-                                    className="w-full h-12 bg-gray-50 rounded-xl px-4 outline-none text-sm font-medium"
+                                    className={inputStyle}
                                     placeholder="123"
                                     value={formData.address_number}
-                                    onChange={(e) => setFormData({ ...formData, address_number: e.target.value })}
+                                    onChange={(e) => handleChange('address_number', e.target.value)}
                                 />
                             </div>
-                            <div className="space-y-1">
-                                <label className="text-xs font-bold text-dark ml-2">Bairro</label>
+                            <div>
+                                <label className={labelStyle}>Bairro</label>
                                 <input
-                                    className="w-full h-12 bg-gray-50 rounded-xl px-4 outline-none text-sm font-medium"
+                                    className={inputStyle}
                                     placeholder="Centro"
                                     value={formData.address_neighborhood}
-                                    onChange={(e) => setFormData({ ...formData, address_neighborhood: e.target.value })}
+                                    onChange={(e) => handleChange('address_neighborhood', e.target.value)}
                                 />
                             </div>
                         </div>
@@ -285,34 +249,34 @@ export const ProfessionalRegisterScreen: React.FC = () => {
                     </div>
 
                     <div className="bg-white p-5 rounded-[2rem] shadow-sm space-y-4">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-dark ml-2">Registro (CREF/CRM)</label>
+                        <div>
+                            <label className={labelStyle}>Registro (CREF/CRM)</label>
                             <input
-                                className="w-full h-12 bg-gray-50 rounded-xl px-4 outline-none text-sm font-medium"
+                                className={inputStyle}
                                 placeholder="Ex: CRM-SP 123456"
                                 value={formData.cref_crm}
-                                onChange={(e) => setFormData({ ...formData, cref_crm: e.target.value })}
+                                onChange={(e) => handleChange('cref_crm', e.target.value)}
                             />
                         </div>
 
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-dark ml-2">Especialidade</label>
+                        <div>
+                            <label className={labelStyle}>Especialidade</label>
                             <select
-                                className="w-full h-12 bg-gray-50 rounded-xl px-4 outline-none text-sm font-medium text-dark appearance-none"
+                                className={inputStyle}
                                 value={formData.specialty_id}
-                                onChange={(e) => setFormData({ ...formData, specialty_id: e.target.value })}
+                                onChange={(e) => handleChange('specialty_id', e.target.value)}
                             >
                                 <option value="">Selecione...</option>
                                 {specialties.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                             </select>
                         </div>
 
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-dark ml-2">Unidade Principal</label>
+                        <div>
+                            <label className={labelStyle}>Unidade Principal</label>
                             <select
-                                className="w-full h-12 bg-gray-50 rounded-xl px-4 outline-none text-sm font-medium text-dark appearance-none"
+                                className={inputStyle}
                                 value={formData.unit_id}
-                                onChange={(e) => setFormData({ ...formData, unit_id: e.target.value })}
+                                onChange={(e) => handleChange('unit_id', e.target.value)}
                             >
                                 <option value="">Selecione...</option>
                                 {units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
@@ -330,7 +294,7 @@ export const ProfessionalRegisterScreen: React.FC = () => {
 
                     <div className="space-y-3">
                         {/* CPF Upload */}
-                        <div className="bg-white p-4 rounded-3xl flex items-center gap-4">
+                        <div className="bg-white p-4 rounded-3xl flex items-center gap-4 border border-gray-100/50">
                             <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 shrink-0">
                                 <Upload size={20} />
                             </div>
@@ -342,7 +306,7 @@ export const ProfessionalRegisterScreen: React.FC = () => {
                         </div>
 
                         {/* CREF/CRM Upload */}
-                        <div className="bg-white p-4 rounded-3xl flex items-center gap-4 relative">
+                        <div className="bg-white p-4 rounded-3xl flex items-center gap-4 relative border border-gray-100/50">
                             <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 shrink-0">
                                 <Upload size={20} />
                             </div>
@@ -354,7 +318,7 @@ export const ProfessionalRegisterScreen: React.FC = () => {
                         </div>
 
                         {/* Cert Upload */}
-                        <div className="bg-white p-4 rounded-3xl flex items-center gap-4 relative">
+                        <div className="bg-white p-4 rounded-3xl flex items-center gap-4 relative border border-gray-100/50">
                             <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 shrink-0">
                                 <Upload size={20} />
                             </div>
