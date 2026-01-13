@@ -5,32 +5,60 @@ import {
     EyeOff,
     CheckCircle2,
     Lock,
-    RefreshCw,
-    Dot
+    Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
 
 export const SecurityScreen: React.FC = () => {
     const navigate = useNavigate();
+    const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
     const [showPasswords, setShowPasswords] = useState({ current: false, new: false, confirm: false });
+    const [loading, setLoading] = useState(false);
 
     const toggleShow = (key: keyof typeof showPasswords) => {
         setShowPasswords(prev => ({ ...prev, [key]: !prev[key] }));
     };
 
+    const handleUpdate = async () => {
+        if (!passwords.new || passwords.new !== passwords.confirm) {
+            alert('As senhas não coincidem!');
+            return;
+        }
+        if (passwords.new.length < 8) {
+            alert('A nova senha deve ter pelo menos 8 caracteres.');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const { error } = await supabase.auth.updateUser({
+                password: passwords.new
+            });
+
+            if (error) throw error;
+
+            alert('Senha atualizada com sucesso!');
+            navigate('/profile');
+        } catch (error: any) {
+            alert('Erro ao atualizar: ' + (error.message || 'Erro desconhecido'));
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const requirements = [
-        { label: 'Minimo de 8 caracteres', met: true },
-        { label: 'Pelo menos uma letra maiúscula', met: true },
-        { label: 'Pelo menos um caractere especial (!@#$)', met: false },
-        { label: 'Pelo menos um número', met: false }
+        { label: 'Minimo de 8 caracteres', met: passwords.new.length >= 8 },
+        { label: 'Pelo menos uma letra maiúscula', met: /[A-Z]/.test(passwords.new) },
+        { label: 'Pelo menos um caractere especial (!@#$)', met: /[!@#$%^&*]/.test(passwords.new) },
+        { label: 'Pelo menos um número', met: /[0-9]/.test(passwords.new) }
     ];
 
     return (
         <div className="min-h-screen bg-[#F1F3F5] pb-32 font-sans px-5">
-            {/* Simple White Header with Back Arrow */}
             <header className="pt-8 flex items-center mb-8">
                 <button
                     onClick={() => navigate(-1)}
@@ -50,7 +78,6 @@ export const SecurityScreen: React.FC = () => {
                 </p>
             </div>
 
-            {/* Input Fields */}
             <div className="space-y-4 mb-8">
                 {[
                     { id: 'current', label: 'SENHA ATUAL' },
@@ -63,7 +90,9 @@ export const SecurityScreen: React.FC = () => {
                             <input
                                 type={showPasswords[input.id as keyof typeof showPasswords] ? 'text' : 'password'}
                                 className="bg-transparent flex-1 text-lg font-black tracking-widest text-dark outline-none py-1"
-                                defaultValue="••••••••"
+                                placeholder="••••••••"
+                                value={passwords[input.id as keyof typeof passwords]}
+                                onChange={(e) => setPasswords({ ...passwords, [input.id]: e.target.value })}
                             />
                             <button
                                 onClick={() => toggleShow(input.id as keyof typeof showPasswords)}
@@ -76,31 +105,35 @@ export const SecurityScreen: React.FC = () => {
                 ))}
             </div>
 
-            {/* Password Requirements */}
             <div className="space-y-4 mb-10">
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1 mb-2">Critérios de Segurança</p>
                 {requirements.map((req, idx) => (
                     <div key={idx} className="flex items-center gap-3">
                         <div className={cn(
-                            "w-5 h-5 rounded-full flex items-center justify-center border",
+                            "w-5 h-5 rounded-full flex items-center justify-center border transition-colors",
                             req.met ? "bg-primary border-primary text-dark" : "bg-transparent border-gray-200 text-transparent"
                         )}>
                             <CheckCircle2 size={12} strokeWidth={3} />
                         </div>
                         <span className={cn(
-                            "text-xs font-bold",
+                            "text-xs font-bold transition-colors",
                             req.met ? "text-dark" : "text-gray-400"
                         )}>{req.label}</span>
                     </div>
                 ))}
             </div>
 
-            {/* Update Button */}
             <Button
-                className="w-full h-16 rounded-[2rem] bg-primary text-dark font-black gap-3 shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all"
+                onClick={handleUpdate}
+                disabled={loading}
+                className="w-full h-16 rounded-[2rem] bg-primary text-dark font-black gap-3 shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
             >
-                <Lock size={20} strokeWidth={3} />
-                ATUALIZAR SENHA
+                {loading ? (
+                    <Loader2 className="w-6 h-6 animate-spin text-dark" />
+                ) : (
+                    <CheckCircle2 size={24} strokeWidth={3} />
+                )}
+                {loading ? 'ATUALIZANDO...' : 'ATUALIZAR SENHA'}
             </Button>
 
             <BottomNav />

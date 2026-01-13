@@ -16,6 +16,7 @@ import { ProfileScreen } from '@/features/profile/pages/ProfileScreen';
 import { PersonalDataScreen } from '@/features/profile/pages/PersonalDataScreen';
 import { UserAppointmentsScreen } from '@/features/profile/pages/UserAppointmentsScreen';
 import { SecurityScreen } from '@/features/profile/pages/SecurityScreen';
+import { NotificationSettingsScreen } from '@/features/profile/pages/NotificationSettingsScreen';
 
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -91,6 +92,12 @@ function App() {
             <Route path="/profile/security" element={
               <PrivateRoute>
                 <SecurityScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/profile/notifications" element={
+              <PrivateRoute>
+                <NotificationSettingsScreen />
               </PrivateRoute>
             } />
 

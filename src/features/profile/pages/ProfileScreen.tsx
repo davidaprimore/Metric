@@ -38,18 +38,11 @@ export const ProfileScreen: React.FC = () => {
             color: 'bg-purple-50 text-purple-500'
         },
         {
-            icon: CreditCard,
-            title: 'Assinatura e Planos',
-            subtitle: 'Plano Premium Mensal',
-            path: '/profile/billing',
+            icon: Bell,
+            title: 'Notificações e Pushs',
+            subtitle: 'Preferências de alerta',
+            path: '/profile/notifications',
             color: 'bg-blue-50 text-blue-500'
-        },
-        {
-            icon: MapPin,
-            title: 'Preferências de Unidades',
-            subtitle: 'Unidades favoritas',
-            path: '/profile/locations',
-            color: 'bg-violet-50 text-violet-500'
         },
         {
             icon: Shield,
