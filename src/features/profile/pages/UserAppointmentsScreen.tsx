@@ -17,6 +17,9 @@ import { cn } from '@/lib/utils';
 export const UserAppointmentsScreen: React.FC = () => {
     const navigate = useNavigate();
 
+    // For demonstration, let's assume there are no upcoming appointments
+    const upcomingAppointments = [];
+
     const history = [
         {
             title: 'Avaliação Bioimpedância',
@@ -46,7 +49,7 @@ export const UserAppointmentsScreen: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-[#F1F3F5] pb-32 font-sans px-5">
-            {/* Header */}
+            {/* Header omitted for brevity in diff, but kept in full file */}
             <header className="pt-8 flex justify-between items-center mb-10">
                 <button
                     onClick={() => navigate(-1)}
@@ -66,50 +69,69 @@ export const UserAppointmentsScreen: React.FC = () => {
                 </button>
             </header>
 
-            {/* Next Appointment Card */}
+            {/* Upcoming Appointment Section */}
             <div className="mb-10">
                 <div className="flex justify-between items-center mb-4">
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-2">Próximo Agendamento</p>
-                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_8px_rgba(202,255,10,0.8)]"></div>
                 </div>
 
-                <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100/50">
-                    <div className="flex gap-4 mb-6">
-                        <div className="w-14 h-14 bg-secondary/10 rounded-2xl flex flex-col items-center justify-center shrink-0">
-                            <CalendarIcon size={20} className="text-secondary" />
+                {upcomingAppointments.length > 0 ? (
+                    <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100/50">
+                        <div className="flex gap-4 mb-6">
+                            <div className="w-14 h-14 bg-secondary/10 rounded-2xl flex flex-col items-center justify-center shrink-0">
+                                <CalendarIcon size={20} className="text-secondary" />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-xl font-black text-dark leading-tight">24 de Outubro</h3>
+                                <p className="text-sm font-bold text-secondary">14:00h</p>
+                            </div>
                         </div>
-                        <div className="flex-1">
-                            <h3 className="text-xl font-black text-dark leading-tight">24 de Outubro</h3>
-                            <p className="text-sm font-bold text-secondary">14:00h</p>
+
+                        <div className="flex items-center gap-4 py-4 border-t border-gray-50">
+                            <img src="https://i.pravatar.cc/100?u=Ale" alt="Prof" className="w-10 h-10 rounded-2xl object-cover" />
+                            <div className="flex-1">
+                                <p className="text-[10px] font-bold text-gray-400 uppercase">Profissional Responsável</p>
+                                <p className="text-sm font-black text-dark">Alê - Mentor</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 py-4 text-gray-400">
+                            <MapPin size={16} />
+                            <p className="text-xs font-bold">Sala 03 - Unidade Centro</p>
+                        </div>
+
+                        <div className="flex gap-2 mt-4 pt-4 border-t border-gray-50">
+                            <button className="flex-1 h-12 rounded-xl border border-secondary text-secondary font-black text-[10px] uppercase tracking-wider hover:bg-secondary/5 transition-all">Reagendar</button>
+                            <button className="flex-1 h-12 rounded-xl text-gray-400 font-black text-[10px] uppercase tracking-wider hover:text-red-500 transition-all">Cancelar</button>
                         </div>
                     </div>
+                ) : (
+                    <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100/50 flex flex-col items-center text-center overflow-hidden relative">
+                        {/* Decorative Background Element */}
+                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl"></div>
 
-                    <div className="flex items-center gap-4 py-4 border-t border-gray-50">
-                        <img
-                            src="https://i.pravatar.cc/100?u=Ale"
-                            alt="Prof"
-                            className="w-10 h-10 rounded-2xl object-cover"
-                        />
-                        <div className="flex-1">
-                            <p className="text-[10px] font-bold text-gray-400 uppercase">Profissional Responsável</p>
-                            <p className="text-sm font-black text-dark">Alê - Mentor</p>
+                        <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mb-6 relative">
+                            <CalendarPlus size={32} className="text-dark" strokeWidth={2.5} />
+                            <div className="absolute -top-1 -right-1 w-6 h-6 bg-secondary text-white rounded-full flex items-center justify-center text-[10px] font-black animate-bounce shadow-lg">!</div>
                         </div>
-                    </div>
 
-                    <div className="flex items-center gap-3 py-4 text-gray-400">
-                        <MapPin size={16} />
-                        <p className="text-xs font-bold">Sala 03 - Unidade Centro</p>
-                    </div>
+                        <h3 className="text-xl font-black text-dark leading-tight mb-3 px-4">
+                            Sua agenda está <span className="text-secondary">vazia...</span>
+                        </h3>
 
-                    <div className="flex gap-2 mt-4 pt-4 border-t border-gray-50">
-                        <button className="flex-1 h-12 rounded-xl border border-secondary text-secondary font-black text-[10px] uppercase tracking-wider hover:bg-secondary/5 transition-all">
-                            Reagendar
-                        </button>
-                        <button className="flex-1 h-12 rounded-xl text-gray-400 font-black text-[10px] uppercase tracking-wider hover:text-red-500 transition-all">
-                            Cancelar
-                        </button>
+                        <p className="text-xs font-medium text-gray-500 leading-relaxed mb-8 px-6">
+                            Você foi <span className="text-secondary font-black">escolhido</span> para uma oferta imperdível! Que tal agendar sua próxima avaliação agora e garantir um <span className="font-black text-dark">bônus exclusivo</span>?
+                        </p>
+
+                        <Button
+                            onClick={() => navigate('/schedule')}
+                            className="w-full h-14 rounded-2xl bg-primary text-dark font-black text-xs gap-3 shadow-md shadow-primary/20 hover:scale-[1.02] transition-all"
+                        >
+                            <CalendarPlus size={18} strokeWidth={3} />
+                            NOVO AGENDAMENTO
+                        </Button>
                     </div>
-                </div>
+                )}
             </div>
 
             {/* History Section */}
