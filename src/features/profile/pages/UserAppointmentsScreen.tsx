@@ -109,6 +109,19 @@ export const UserAppointmentsScreen: React.FC = () => {
                 )}
             </div>
 
+            {/* Middle New Appointment Button - Only shown if there are active appointments */}
+            {upcomingAppointments.length > 0 && (
+                <div className="mb-10">
+                    <Button
+                        onClick={() => navigate('/schedule')}
+                        className="w-full h-16 rounded-[2rem] bg-primary text-dark font-black gap-3 shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all"
+                    >
+                        <CalendarPlus size={22} strokeWidth={3} />
+                        NOVO AGENDAMENTO
+                    </Button>
+                </div>
+            )}
+
             {/* History Section */}
             <div className="space-y-4">
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-2 mb-4">Histórico de Avaliações</p>
@@ -138,15 +151,6 @@ export const UserAppointmentsScreen: React.FC = () => {
                 )}
             </div>
 
-            {/* New Appointment FAB */}
-            <div className="mt-10">
-                <Button
-                    className="w-full h-16 rounded-[2rem] bg-primary text-dark font-black gap-3 shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all"
-                >
-                    <CalendarPlus size={22} strokeWidth={3} />
-                    NOVO AGENDAMENTO
-                </Button>
-            </div>
 
             <BottomNav />
         </div>
