@@ -125,9 +125,9 @@ export const ProfileScreen: React.FC = () => {
                         {isAdmin && (
                             <button
                                 onClick={() => navigate('/admin')}
-                                className="w-full bg-secondary/5 p-4 rounded-[1.5rem] flex items-center gap-4 border border-secondary/10 shadow-sm active:scale-95 transition-all duration-200"
+                                className="w-full bg-[#FAFAFA] p-4 rounded-[1.5rem] flex items-center gap-4 border border-gray-100 shadow-sm active:scale-95 transition-all duration-200"
                             >
-                                <div className="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center shrink-0 text-secondary">
+                                <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center shrink-0 text-indigo-500">
                                     <Settings size={22} />
                                 </div>
                                 <div className="flex-1 text-left">
@@ -141,16 +141,16 @@ export const ProfileScreen: React.FC = () => {
                         {isDeveloper && (
                             <button
                                 onClick={() => navigate('/dev')}
-                                className="w-full bg-dark p-4 rounded-[1.5rem] flex items-center gap-4 border border-dark/20 shadow-sm active:scale-95 transition-all duration-200"
+                                className="w-full bg-[#EDBAB1] p-4 rounded-[1.5rem] flex items-center gap-4 border border-rose-200 shadow-sm active:scale-95 transition-all duration-200"
                             >
-                                <div className="w-12 h-12 rounded-2xl bg-gray-800 flex items-center justify-center shrink-0 text-primary">
+                                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0 text-white">
                                     <Terminal size={22} />
                                 </div>
                                 <div className="flex-1 text-left">
                                     <h3 className="text-sm font-bold text-white leading-tight">Desenvolvedor</h3>
-                                    <p className="text-[10px] text-gray-500 font-medium">Acesso total e ferramentas de sistema</p>
+                                    <p className="text-[10px] text-white/80 font-medium">Acesso total e ferramentas de sistema</p>
                                 </div>
-                                <ChevronRight size={18} className="text-gray-300" />
+                                <ChevronRight size={18} className="text-white/50" />
                             </button>
                         )}
                     </div>

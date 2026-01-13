@@ -18,6 +18,10 @@ import { PersonalDataScreen } from '@/features/profile/pages/PersonalDataScreen'
 import { UserAppointmentsScreen } from '@/features/profile/pages/UserAppointmentsScreen';
 import { SecurityScreen } from '@/features/profile/pages/SecurityScreen';
 import { NotificationSettingsScreen } from '@/features/profile/pages/NotificationSettingsScreen';
+import { AdminScreen } from '@/features/admin/pages/AdminScreen';
+import { AdminRegistrationsScreen } from '@/features/admin/pages/AdminRegistrationsScreen';
+import { ProfessionalsScreen } from '@/features/admin/pages/ProfessionalsScreen';
+import { UnitsScreen } from '@/features/admin/pages/UnitsScreen';
 
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -105,6 +109,30 @@ function App() {
             <Route path="/profile/notifications" element={
               <PrivateRoute>
                 <NotificationSettingsScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/admin" element={
+              <PrivateRoute>
+                <AdminScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/admin/registrations" element={
+              <PrivateRoute>
+                <AdminRegistrationsScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/admin/registrations/professionals" element={
+              <PrivateRoute>
+                <ProfessionalsScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/admin/registrations/units" element={
+              <PrivateRoute>
+                <UnitsScreen />
               </PrivateRoute>
             } />
 
