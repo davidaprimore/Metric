@@ -22,6 +22,9 @@ import { AdminScreen } from '@/features/admin/pages/AdminScreen';
 import { AdminRegistrationsScreen } from '@/features/admin/pages/AdminRegistrationsScreen';
 import { ProfessionalsScreen } from '@/features/admin/pages/ProfessionalsScreen';
 import { UnitsScreen } from '@/features/admin/pages/UnitsScreen';
+import { SpecialtiesScreen } from '@/features/admin/pages/SpecialtiesScreen';
+import { ProfessionalRegisterScreen } from '@/features/admin/pages/ProfessionalRegisterScreen';
+import { ProfessionalVerificationScreen } from '@/features/admin/pages/ProfessionalVerificationScreen';
 
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -133,6 +136,24 @@ function App() {
             <Route path="/admin/registrations/units" element={
               <PrivateRoute>
                 <UnitsScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/admin/registrations/specialties" element={
+              <PrivateRoute>
+                <SpecialtiesScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/admin/professionals/new" element={
+              <PrivateRoute>
+                <ProfessionalRegisterScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/admin/professionals/verify/:id" element={
+              <PrivateRoute>
+                <ProfessionalVerificationScreen />
               </PrivateRoute>
             } />
 

@@ -5,7 +5,8 @@ import {
     ChevronRight,
     Users,
     Building2,
-    DollarSign
+    DollarSign,
+    Award
 } from 'lucide-react';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { cn } from '@/lib/utils';
@@ -27,6 +28,13 @@ export const AdminRegistrationsScreen: React.FC = () => {
             subtitle: 'Gestão da equipe multidisciplinar',
             path: '/admin/registrations/professionals',
             color: 'bg-emerald-50 text-emerald-500'
+        },
+        {
+            icon: Award,
+            title: 'Especialidades',
+            subtitle: 'Áreas de atuação',
+            path: '/admin/registrations/specialties',
+            color: 'bg-indigo-50 text-indigo-500'
         },
         {
             icon: DollarSign,

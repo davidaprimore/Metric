@@ -64,7 +64,7 @@ export const ProfessionalsScreen: React.FC = () => {
                 <div className="flex gap-2">
                     <Button
                         className="bg-white text-emerald-600 font-bold rounded-xl h-10 text-xs flex-1 hover:bg-emerald-50"
-                        onClick={() => { }} // Placeholder for add action
+                        onClick={() => navigate('/admin/professionals/new')}
                     >
                         <Plus size={16} className="mr-2" />
                         Novo Profissional
@@ -82,7 +82,11 @@ export const ProfessionalsScreen: React.FC = () => {
             ) : professionals.length > 0 ? (
                 <div className="space-y-3">
                     {professionals.map((pro) => (
-                        <div key={pro.id} className="bg-white p-4 rounded-[1.5rem] flex items-center gap-4 border border-gray-100/50 shadow-sm">
+                        <div
+                            key={pro.id}
+                            onClick={() => navigate(`/admin/professionals/verify/${pro.id}`)}
+                            className="bg-white p-4 rounded-[1.5rem] flex items-center gap-4 border border-gray-100/50 shadow-sm active:scale-95 transition-all cursor-pointer"
+                        >
                             <div className="w-12 h-12 rounded-full border-2 border-emerald-100 p-0.5 overflow-hidden">
                                 <img
                                     src={pro.avatar_url || `https://ui-avatars.com/api/?name=${pro.full_name}&background=10b981&color=fff`}
