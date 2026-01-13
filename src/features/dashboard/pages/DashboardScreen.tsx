@@ -47,13 +47,16 @@ export const DashboardScreen: React.FC = () => {
     <div className="min-h-screen bg-[#F1F3F5] pb-32 font-sans px-5">
       {/* Header */}
       <header className="pt-8 flex justify-between items-center mb-8">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full border-2 border-secondary p-0.5 bg-white shadow-sm overflow-hidden">
+        <div
+          className="flex items-center gap-3 cursor-pointer group"
+          onClick={() => navigate('/profile')}
+        >
+          <div className="w-12 h-12 rounded-full border-2 border-secondary p-0.5 bg-white shadow-sm overflow-hidden group-hover:scale-105 transition-transform">
             <img src="https://i.pravatar.cc/150?u=alex" alt="Profile" className="w-full h-full rounded-full object-cover" />
           </div>
           <div className="flex flex-col">
             <h1 className="text-xl font-bold text-dark leading-tight">Olá, {firstName}</h1>
-            <span className="text-[10px] font-extrabold text-secondary uppercase tracking-[0.1em]">Plano Pro</span>
+            <span className="text-[10px] font-extrabold text-secondary uppercase tracking-[0.1em] group-hover:underline">Ver Perfil</span>
           </div>
         </div>
         <button className="w-11 h-11 bg-gray-200/50 rounded-full flex items-center justify-center text-dark relative">

@@ -12,7 +12,10 @@ import { DashboardScreen } from '@/features/dashboard/pages/DashboardScreen';
 import { AssessmentScreen } from '@/features/assessment/pages/AssessmentScreen';
 import { ResultsScreen } from '@/features/assessment/pages/ResultsScreen';
 import { ScheduleScreen } from '@/features/schedule/pages/ScheduleScreen';
-// import { ProfileScreen } from './screens_temp/ProfileScreen'; // Assuming it exists or will exist
+import { ProfileScreen } from '@/features/profile/pages/ProfileScreen';
+import { PersonalDataScreen } from '@/features/profile/pages/PersonalDataScreen';
+import { UserAppointmentsScreen } from '@/features/profile/pages/UserAppointmentsScreen';
+import { SecurityScreen } from '@/features/profile/pages/SecurityScreen';
 
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -64,6 +67,30 @@ function App() {
             <Route path="/schedule" element={
               <PrivateRoute>
                 <ScheduleScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/profile" element={
+              <PrivateRoute>
+                <ProfileScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/profile/data" element={
+              <PrivateRoute>
+                <PersonalDataScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/profile/appointments" element={
+              <PrivateRoute>
+                <UserAppointmentsScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/profile/security" element={
+              <PrivateRoute>
+                <SecurityScreen />
               </PrivateRoute>
             } />
 
