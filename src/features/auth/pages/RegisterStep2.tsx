@@ -40,6 +40,7 @@ export const RegisterStep2: React.FC = () => {
             first_name: step1Data.name,
             last_name: step1Data.surname,
             cpf: step1Data.cpf,
+            phone: step1Data.phone,
             birth_date: formData.birthDate,
             gender: gender,
             height: parseFloat(formData.height),

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 import {
   Bell,
   Calendar as CalendarIcon,
@@ -40,11 +41,44 @@ export const DashboardScreen: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'peso' | 'gordura'>('peso');
 
-  // MOCK DATA FOR HONESTY DEMONSTRATION
-  // These should eventually come from Supabase tables
-  const upcomingAppointments = []; // Set to [] to test empty state
-  const pendingAnamnesis = true;    // Set to true to test pending anamnesis
-  const assessments = [];           // Set to [] to test no assessments state
+  const [pendingAnamnesis, setPendingAnamnesis] = useState(false);
+  const [profileIncomplete, setProfileIncomplete] = useState(false);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
+  const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
+  const [assessments, setAssessments] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!user) return;
+
+      // 1. Check Anamnesis
+      const { data: anamnesisData, error: anamnesisError } = await supabase
+        .from('anamnesis')
+        .select('id')
+        .eq('user_id', user.id);
+
+      setPendingAnamnesis(!anamnesisData || anamnesisData.length === 0);
+
+      // 2. Check Profile Completeness (Metadata)
+      const meta = user.user_metadata || {};
+      const missing = [];
+      if (!meta.phone) missing.push('Telefone');
+      if (!meta.weight) missing.push('Peso');
+      if (!meta.height) missing.push('Altura');
+      // For photo, we check avatar_url. If it's a default or missing:
+      if (!meta.avatar_url || meta.avatar_url.includes('pravatar.cc')) missing.push('Foto de Perfil');
+
+      setMissingFields(missing);
+      setProfileIncomplete(missing.length > 0);
+
+      // 3. Fetch (future) Appointments and Assessments
+      // Mocked for now until those tables are fully implemented/queried
+      setUpcomingAppointments([]);
+      setAssessments([]);
+    };
+
+    fetchUserData();
+  }, [user]);
 
   const assessmentCount = assessments.length;
   const firstName = user?.user_metadata?.first_name || 'Usuário';
@@ -153,6 +187,27 @@ export const DashboardScreen: React.FC = () => {
             <button
               onClick={() => navigate('/assessment/anamnesis')}
               className="w-10 h-10 bg-dark text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+            >
+              <ArrowRight size={18} />
+            </button>
+          </div>
+        )}
+
+        {/* Profile Incomplete Alert */}
+        {profileIncomplete && (
+          <div className="bg-secondary/10 border border-secondary/20 p-5 rounded-[2rem] flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500 delay-150">
+            <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-sm">
+              <ShieldCheck className="text-secondary" size={24} strokeWidth={2.5} />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs font-black text-dark uppercase tracking-tight text-secondary">Perfil Incompleto</p>
+              <p className="text-[10px] text-dark/60 font-medium leading-tight mt-0.5">
+                Faltando: <span className="font-bold">{missingFields.join(', ')}</span>.
+              </p>
+            </div>
+            <button
+              onClick={() => navigate('/profile/data')}
+              className="w-10 h-10 bg-secondary text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform"
             >
               <ArrowRight size={18} />
             </button>

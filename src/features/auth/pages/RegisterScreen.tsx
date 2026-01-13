@@ -14,6 +14,7 @@ export const RegisterScreen: React.FC = () => {
         name: '',
         surname: '',
         cpf: '',
+        phone: '',
         email: '',
         password: '',
         confirmPassword: ''
@@ -28,8 +29,26 @@ export const RegisterScreen: React.FC = () => {
             .replace(/(-\d{2})\d+?$/, '$1');
     };
 
+    const formatPhone = (value: string) => {
+        const raw = value.replace(/\D/g, '');
+        if (raw.length <= 10) {
+            return raw
+                .replace(/(\d{2})(\d)/, '($1) $2')
+                .replace(/(\d{4})(\d)/, '$1-$2');
+        } else {
+            return raw
+                .replace(/(\d{2})(\d)/, '($1) $2')
+                .replace(/(\d{5})(\d)/, '$1-$2')
+                .replace(/(-\d{4})\d+?$/, '$1');
+        }
+    };
+
     const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, cpf: formatCPF(e.target.value) });
+    };
+
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({ ...formData, phone: formatPhone(e.target.value) });
     };
 
     const requirements = [
@@ -42,6 +61,7 @@ export const RegisterScreen: React.FC = () => {
     const passwordsMatch = formData.password.length > 0 && formData.password === formData.confirmPassword;
     const isFormValid = formData.name.length > 2 &&
         formData.cpf.length === 14 &&
+        formData.phone.length >= 14 &&
         formData.email.includes('@') &&
         requirements.every(r => r.met) &&
         passwordsMatch;
@@ -99,6 +119,18 @@ export const RegisterScreen: React.FC = () => {
                             value={formData.cpf}
                             onChange={handleCPFChange}
                             maxLength={14}
+                        />
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-dark ml-1">Telefone</label>
+                        <input
+                            type="text"
+                            placeholder="(00) 00000-0000"
+                            className="w-full h-14 px-4 bg-gray-100 rounded-2xl border-none focus:ring-2 focus:ring-secondary/20 transition-all outline-none text-dark font-mono"
+                            value={formData.phone}
+                            onChange={handlePhoneChange}
+                            maxLength={15}
                         />
                     </div>
 
