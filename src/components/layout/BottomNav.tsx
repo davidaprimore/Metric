@@ -22,34 +22,34 @@ export const BottomNav: React.FC = () => {
     ];
 
     return (
-        <div className="fixed bottom-0 left-0 w-full px-0 pb-0 z-50 pointer-events-none">
+        <div className="fixed bottom-6 left-0 w-full px-4 z-50 pointer-events-none">
             <div className="max-w-md mx-auto relative h-28 flex items-end pointer-events-auto">
 
                 {/* Custom SVG Background for the curved bar - Protruding Upwards */}
-                <div className="absolute inset-x-0 bottom-0 h-24 w-full">
+                <div className="absolute inset-x-0 bottom-0 h-20 w-full">
                     <svg viewBox="0 0 400 100" className="w-full h-full drop-shadow-[0_-5px_25px_rgba(0,0,0,0.06)]" preserveAspectRatio="none">
                         <path
-                            d="M0 40 
+                            d="M0 40
                                C0 40 10 40 20 40
-                               H155 
-                               C175 40 180 10 200 10 
-                               C220 10 225 40 245 40 
-                               H380 
-                               C390 40 400 40 400 40 
+                               H155
+                               C175 40 180 10 200 10
+                               C220 10 225 40 245 40
+                               H380
+                               C390 40 400 40 400 40
                                V100 H0 Z"
                             fill="white"
                         />
                     </svg>
                 </div>
 
-                <nav className="relative w-full h-20 flex justify-between items-center px-6">
+                <nav className="relative w-full h-20 flex justify-between items-center px-6 pt-4">
                     {navItems.map((item) => {
                         const isActive = location.pathname === item.path;
                         const Icon = item.icon;
 
                         if (item.isCenter) {
                             return (
-                                <div key={item.label} className="relative flex flex-col items-center mb-12">
+                                <div key={item.label} className="relative flex flex-col items-center mb-14">
                                     <button
                                         onClick={() => navigate(item.path)}
                                         className={cn(
@@ -63,12 +63,6 @@ export const BottomNav: React.FC = () => {
                                     >
                                         <Plus className={cn("w-8 h-8", isActive ? "animate-pulse" : "")} strokeWidth={3} />
                                     </button>
-                                    <span className={cn(
-                                        "absolute -bottom-6 text-[7px] font-black tracking-widest uppercase transition-all duration-300",
-                                        isActive ? "text-primary opacity-100" : "text-gray-400 opacity-60"
-                                    )}>
-                                        {item.label}
-                                    </span>
                                 </div>
                             );
                         }
@@ -87,7 +81,7 @@ export const BottomNav: React.FC = () => {
                                     isActive ? "scale-110" : ""
                                 )} />
                                 <span className={cn(
-                                    "text-[7px] font-black tracking-widest uppercase mt-1 transition-all",
+                                    "text-[7px] font-black tracking-widest uppercase mt-0.5 transition-all",
                                     isActive ? "opacity-100" : "opacity-0 group-hover:opacity-60"
                                 )}>
                                     {item.label}
