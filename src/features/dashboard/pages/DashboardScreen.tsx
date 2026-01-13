@@ -51,6 +51,8 @@ export const DashboardScreen: React.FC = () => {
 
   // Metrics Logic
   const latestAssessment = assessmentCount > 0 ? assessments[assessmentCount - 1] : null;
+  const userWeight = user?.user_metadata?.weight || '0.0';
+
   const metrics = [
     {
       label: 'Gordura Corporal',
@@ -61,7 +63,7 @@ export const DashboardScreen: React.FC = () => {
     },
     {
       label: 'Peso Atual',
-      value: latestAssessment?.weight || '0.0',
+      value: userWeight,
       unit: 'kg',
       trend: assessmentCount >= 2 ? '-0.5kg' : null,
       up: false
@@ -149,7 +151,7 @@ export const DashboardScreen: React.FC = () => {
               <p className="text-[10px] text-dark/60 font-medium leading-tight mt-0.5">Clique para completar sua entrevista prévia.</p>
             </div>
             <button
-              onClick={() => navigate('/assessment')}
+              onClick={() => navigate('/assessment/anamnesis')}
               className="w-10 h-10 bg-dark text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform"
             >
               <ArrowRight size={18} />

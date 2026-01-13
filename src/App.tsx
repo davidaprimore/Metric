@@ -10,6 +10,7 @@ import { RegistrationSuccess } from '@/features/auth/pages/RegistrationSuccess';
 import { ForgotPasswordScreen } from '@/features/auth/pages/ForgotPasswordScreen';
 import { DashboardScreen } from '@/features/dashboard/pages/DashboardScreen';
 import { AssessmentScreen } from '@/features/assessment/pages/AssessmentScreen';
+import { AnamnesisScreen } from '@/features/assessment/pages/AnamnesisScreen';
 import { ResultsScreen } from '@/features/assessment/pages/ResultsScreen';
 import { ScheduleScreen } from '@/features/schedule/pages/ScheduleScreen';
 import { ProfileScreen } from '@/features/profile/pages/ProfileScreen';
@@ -56,6 +57,12 @@ function App() {
             <Route path="/assessment" element={
               <PrivateRoute>
                 <AssessmentScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/assessment/anamnesis" element={
+              <PrivateRoute>
+                <AnamnesisScreen />
               </PrivateRoute>
             } />
 
