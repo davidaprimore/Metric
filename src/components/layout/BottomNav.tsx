@@ -5,7 +5,7 @@ import {
     Calendar,
     Plus,
     BarChart3,
-    UserCircle
+    Dumbbell
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -18,38 +18,38 @@ export const BottomNav: React.FC = () => {
         { icon: Calendar, label: 'AGENDA', path: '/schedule' },
         { icon: Plus, label: 'NOVA', path: '/assessment', isCenter: true },
         { icon: BarChart3, label: 'RESULTADOS', path: '/results' },
-        { icon: UserCircle, label: 'PERFIL', path: '/profile' }
+        { icon: Dumbbell, label: 'TREINOS', path: '/workouts' }
     ];
 
     return (
         <div className="fixed bottom-6 left-0 w-full px-4 z-50 pointer-events-none">
             <div className="max-w-md mx-auto relative h-28 flex items-end pointer-events-auto">
 
-                {/* Custom SVG Background for the curved bar - Protruding Upwards */}
-                <div className="absolute inset-x-0 bottom-0 h-20 w-full">
+                {/* Custom SVG Background for the curved bar - Protruding Upwards & Taller */}
+                <div className="absolute inset-x-0 bottom-0 h-24 w-full">
                     <svg viewBox="0 0 400 100" className="w-full h-full drop-shadow-[0_-5px_25px_rgba(0,0,0,0.06)]" preserveAspectRatio="none">
                         <path
-                            d="M0 40
-                               C0 40 10 40 20 40
+                            d="M0 30
+                               C0 30 10 30 20 30
                                H155
-                               C175 40 180 10 200 10
-                               C220 10 225 40 245 40
+                               C175 30 180 0 200 0
+                               C220 0 225 30 245 30
                                H380
-                               C390 40 400 40 400 40
+                               C390 30 400 30 400 30
                                V100 H0 Z"
                             fill="white"
                         />
                     </svg>
                 </div>
 
-                <nav className="relative w-full h-20 flex justify-between items-center px-6 pt-4">
+                <nav className="relative w-full h-20 flex justify-between items-center px-6 pt-2">
                     {navItems.map((item) => {
                         const isActive = location.pathname === item.path;
                         const Icon = item.icon;
 
                         if (item.isCenter) {
                             return (
-                                <div key={item.label} className="relative flex flex-col items-center mb-14">
+                                <div key={item.label} className="relative flex flex-col items-center mb-16">
                                     <button
                                         onClick={() => navigate(item.path)}
                                         className={cn(
@@ -61,7 +61,7 @@ export const BottomNav: React.FC = () => {
                                             "border-[5px] border-white z-10"
                                         )}
                                     >
-                                        <Plus className={cn("w-8 h-8", isActive ? "animate-pulse" : "")} strokeWidth={3} />
+                                        <Plus className={cn("w-8 h-8", isActive ? "animate-pulse" : "")} strokeWidth={4} />
                                     </button>
                                 </div>
                             );
