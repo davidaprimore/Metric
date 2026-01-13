@@ -10,7 +10,7 @@ import {
 import { BottomNav } from '@/components/layout/BottomNav';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
-import ReactInputMask from 'react-input-mask';
+// import ReactInputMask from 'react-input-mask';
 
 export const ProfessionalRegisterScreen: React.FC = () => {
     const navigate = useNavigate();
@@ -195,8 +195,7 @@ export const ProfessionalRegisterScreen: React.FC = () => {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
                                 <label className="text-xs font-bold text-dark ml-2">CPF</label>
-                                <ReactInputMask
-                                    mask="999.999.999-99"
+                                <input
                                     className="w-full h-12 bg-gray-50 rounded-xl px-4 outline-none text-sm font-medium"
                                     placeholder="000.000.000-00"
                                     value={formData.cpf}
@@ -205,8 +204,7 @@ export const ProfessionalRegisterScreen: React.FC = () => {
                             </div>
                             <div className="space-y-1">
                                 <label className="text-xs font-bold text-dark ml-2">Telefone</label>
-                                <ReactInputMask
-                                    mask="(99) 99999-9999"
+                                <input
                                     className="w-full h-12 bg-gray-50 rounded-xl px-4 outline-none text-sm font-medium"
                                     placeholder="(11) 99999-0000"
                                     value={formData.phone}
@@ -228,8 +226,7 @@ export const ProfessionalRegisterScreen: React.FC = () => {
                         <div className="grid grid-cols-3 gap-4">
                             <div className="space-y-1 col-span-1">
                                 <label className="text-xs font-bold text-dark ml-2">CEP</label>
-                                <ReactInputMask
-                                    mask="99999-999"
+                                <input
                                     className="w-full h-12 bg-gray-50 rounded-xl px-4 outline-none text-sm font-medium"
                                     placeholder="00000-000"
                                     value={formData.address_zip}
