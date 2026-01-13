@@ -11,15 +11,17 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { DefaultAvatar } from '@/components/shared/DefaultAvatar';
+import { ImageCropper } from '@/components/shared/ImageCropper';
 import { Toast } from '@/components/ui/Toast';
 import { supabase } from '@/lib/supabase';
 
 export const PersonalDataScreen: React.FC = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, refreshProfile } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
     const [loading, setLoading] = useState(false);
+    const [imageToCrop, setImageToCrop] = useState<string | null>(null);
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' as 'success' | 'error' | 'loading' });
 
     // Form state initialized with user metadata
@@ -84,6 +86,55 @@ export const PersonalDataScreen: React.FC = () => {
     const triggerFilePicker = () => fileInputRef.current?.click();
     const triggerCamera = () => cameraInputRef.current?.click();
 
+    const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const reader = new FileReader();
+            reader.addEventListener('load', () => setImageToCrop(reader.result?.toString() || null));
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    };
+
+    const handleCropComplete = async (croppedBlob: Blob) => {
+        setImageToCrop(null);
+        setLoading(true);
+        setToast({ show: true, message: 'Enviando foto...', type: 'loading' });
+
+        try {
+            const fileName = `avatar_${user?.id}_${Date.now()}.jpg`;
+            const { error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(fileName, croppedBlob, {
+                    contentType: 'image/jpeg',
+                    upsert: true
+                });
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(fileName);
+
+            // 1. Update auth metadata
+            const { error: authError } = await supabase.auth.updateUser({
+                data: { avatar_url: publicUrl }
+            });
+            if (authError) throw authError;
+
+            // 2. Update profiles table
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .update({ avatar_url: publicUrl })
+                .eq('id', user?.id);
+            if (profileError) throw profileError;
+
+            await refreshProfile();
+            setToast({ show: true, message: 'Foto atualizada com sucesso!', type: 'success' });
+        } catch (error: any) {
+            console.error('Upload error:', error);
+            setToast({ show: true, message: error.message || 'Erro ao enviar foto', type: 'error' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -139,6 +190,23 @@ export const PersonalDataScreen: React.FC = () => {
             </header>
 
             <div className="px-5">
+                {/* Hidden Inputs */}
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={onSelectFile}
+                />
+                <input
+                    type="file"
+                    ref={cameraInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={onSelectFile}
+                />
+
                 {/* Avatar Section */}
                 <div className="flex flex-col items-center mb-8">
                     <div className="relative">
@@ -167,6 +235,14 @@ export const PersonalDataScreen: React.FC = () => {
                         Alterar Foto
                     </button>
                 </div>
+
+                {imageToCrop && (
+                    <ImageCropper
+                        image={imageToCrop}
+                        onCropComplete={handleCropComplete}
+                        onCancel={() => setImageToCrop(null)}
+                    />
+                )}
 
                 {/* Form Sections */}
                 <div className="space-y-6">

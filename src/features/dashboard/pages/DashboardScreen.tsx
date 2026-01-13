@@ -39,7 +39,7 @@ const chartData = [
 
 export const DashboardScreen: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<'peso' | 'gordura'>('peso');
 
   const [pendingAnamnesis, setPendingAnamnesis] = useState(false);
@@ -116,10 +116,10 @@ export const DashboardScreen: React.FC = () => {
           onClick={() => navigate('/profile')}
         >
           <div className="w-12 h-12 rounded-full border-2 border-secondary p-0.5 bg-white shadow-sm overflow-hidden group-hover:scale-105 transition-transform">
-            {user?.user_metadata?.avatar_url && !user.user_metadata.avatar_url.includes('pravatar.cc') ? (
-              <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full rounded-full object-cover" />
+            {(userProfile?.avatar_url || (user?.user_metadata?.avatar_url && !user.user_metadata.avatar_url.includes('pravatar.cc'))) ? (
+              <img src={userProfile?.avatar_url || user?.user_metadata?.avatar_url} alt="Profile" className="w-full h-full rounded-full object-cover" />
             ) : (
-              <DefaultAvatar gender={user?.user_metadata?.gender} className="w-full h-full rounded-full" />
+              <DefaultAvatar gender={userProfile?.gender || user?.user_metadata?.gender} className="w-full h-full rounded-full" />
             )}
           </div>
           <div className="flex flex-col">

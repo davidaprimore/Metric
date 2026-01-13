@@ -8,7 +8,10 @@ import {
     MapPin,
     Shield,
     LogOut,
-    Pencil
+    Pencil,
+    Terminal,
+    Settings,
+    ShieldAlert
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,10 +21,14 @@ import { cn } from '@/lib/utils';
 
 export const ProfileScreen: React.FC = () => {
     const navigate = useNavigate();
-    const { user, signOut } = useAuth();
-    const firstName = user?.user_metadata?.first_name || 'Usuário';
-    const lastName = user?.user_metadata?.last_name || '';
+    const { user, signOut, userProfile } = useAuth();
+    const firstName = userProfile?.first_name || user?.user_metadata?.first_name || 'Usuário';
+    const lastName = userProfile?.last_name || user?.user_metadata?.last_name || '';
     const email = user?.email || 'email@exemplo.com';
+    const role = userProfile?.role || 'usuario';
+
+    const isDeveloper = role === 'desenvolvedor';
+    const isAdmin = role === 'administrador' || isDeveloper;
 
     const menuItems = [
         {
@@ -70,14 +77,14 @@ export const ProfileScreen: React.FC = () => {
             <div className="flex flex-col items-center mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="relative">
                     <div className="w-32 h-32 rounded-full border-[3px] border-secondary p-1 bg-white shadow-xl overflow-hidden">
-                        {user?.user_metadata?.avatar_url && !user.user_metadata.avatar_url.includes('pravatar.cc') ? (
+                        {(userProfile?.avatar_url || (user?.user_metadata?.avatar_url && !user.user_metadata.avatar_url.includes('pravatar.cc'))) ? (
                             <img
-                                src={user.user_metadata.avatar_url}
+                                src={userProfile?.avatar_url || user?.user_metadata?.avatar_url}
                                 alt="Avatar"
                                 className="w-full h-full rounded-full object-cover"
                             />
                         ) : (
-                            <DefaultAvatar gender={user?.user_metadata?.gender} className="w-full h-full rounded-full" />
+                            <DefaultAvatar gender={userProfile?.gender || user?.user_metadata?.gender} className="w-full h-full rounded-full" />
                         )}
                     </div>
                     <button className="absolute bottom-1 right-1 w-8 h-8 bg-secondary text-white rounded-full flex items-center justify-center border-2 border-white shadow-lg">
@@ -109,6 +116,45 @@ export const ProfileScreen: React.FC = () => {
                         <ChevronRight size={18} className="text-gray-300" />
                     </button>
                 ))}
+
+                {/* Management Section (Admin/Dev only) */}
+                {(isAdmin || isDeveloper) && (
+                    <div className="pt-4 space-y-4">
+                        <p className="text-[10px] font-black text-secondary uppercase tracking-[0.2em] mb-4 px-2">Gestão</p>
+
+                        {isAdmin && (
+                            <button
+                                onClick={() => navigate('/admin')}
+                                className="w-full bg-secondary/5 p-4 rounded-[1.5rem] flex items-center gap-4 border border-secondary/10 shadow-sm active:scale-95 transition-all duration-200"
+                            >
+                                <div className="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center shrink-0 text-secondary">
+                                    <Settings size={22} />
+                                </div>
+                                <div className="flex-1 text-left">
+                                    <h3 className="text-sm font-bold text-dark leading-tight">Administração</h3>
+                                    <p className="text-[10px] text-gray-400 font-medium">Gestão de clientes e profissionais</p>
+                                </div>
+                                <ChevronRight size={18} className="text-gray-300" />
+                            </button>
+                        )}
+
+                        {isDeveloper && (
+                            <button
+                                onClick={() => navigate('/dev')}
+                                className="w-full bg-dark p-4 rounded-[1.5rem] flex items-center gap-4 border border-dark/20 shadow-sm active:scale-95 transition-all duration-200"
+                            >
+                                <div className="w-12 h-12 rounded-2xl bg-gray-800 flex items-center justify-center shrink-0 text-primary">
+                                    <Terminal size={22} />
+                                </div>
+                                <div className="flex-1 text-left">
+                                    <h3 className="text-sm font-bold text-white leading-tight">Desenvolvedor</h3>
+                                    <p className="text-[10px] text-gray-500 font-medium">Acesso total e ferramentas de sistema</p>
+                                </div>
+                                <ChevronRight size={18} className="text-gray-300" />
+                            </button>
+                        )}
+                    </div>
+                )}
 
                 {/* Logout Button */}
                 <button
