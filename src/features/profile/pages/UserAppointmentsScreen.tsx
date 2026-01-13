@@ -20,32 +20,7 @@ export const UserAppointmentsScreen: React.FC = () => {
     // For demonstration, let's assume there are no upcoming appointments
     const upcomingAppointments = [];
 
-    const history = [
-        {
-            title: 'Avaliação Bioimpedância',
-            date: '12 Set • 09:30',
-            status: 'CONCLUÍDO',
-            statusColor: 'bg-green-100 text-green-600',
-            icon: CheckCircle2,
-            iconColor: 'bg-green-100 text-green-600'
-        },
-        {
-            title: 'Revisão de Metas',
-            date: '28 Ago • 16:00',
-            status: 'CONCLUÍDO',
-            statusColor: 'bg-green-100 text-green-600',
-            icon: CheckCircle2,
-            iconColor: 'bg-green-100 text-green-600'
-        },
-        {
-            title: 'Treino Acompanhado',
-            date: '15 Ago • 14:00',
-            status: 'CANCELADO',
-            statusColor: 'bg-red-100 text-red-600',
-            icon: XCircle,
-            iconColor: 'bg-red-100 text-red-600'
-        }
-    ];
+    const history = [];
 
     return (
         <div className="min-h-screen bg-[#F1F3F5] pb-32 font-sans px-5">
