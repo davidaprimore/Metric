@@ -136,25 +136,31 @@ export const UserAppointmentsScreen: React.FC = () => {
 
             {/* History Section */}
             <div className="space-y-4">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-2 mb-4">Histórico de Consultas</p>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-2 mb-4">Histórico de Avaliações</p>
 
-                {history.map((item, idx) => (
-                    <div key={idx} className="bg-white p-4 rounded-3xl flex items-center gap-4 border border-gray-50 shadow-sm">
-                        <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shrink-0", item.iconColor)}>
-                            <item.icon size={22} />
+                {history.length > 0 ? (
+                    history.map((item, idx) => (
+                        <div key={idx} className="bg-white p-4 rounded-3xl flex items-center gap-4 border border-gray-50 shadow-sm">
+                            <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shrink-0", item.iconColor)}>
+                                <item.icon size={22} />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-xs font-black text-dark">{item.title}</h3>
+                                <p className="text-[10px] text-gray-400 font-bold">{item.date}</p>
+                            </div>
+                            <div className="flex flex-col items-end gap-2 text-right">
+                                <span className={cn("text-[7px] font-black px-2 py-0.5 rounded-md uppercase", item.statusColor)}>
+                                    {item.status}
+                                </span>
+                                <button className="text-[9px] font-black text-secondary hover:underline">Ver Detalhes</button>
+                            </div>
                         </div>
-                        <div className="flex-1">
-                            <h3 className="text-xs font-black text-dark">{item.title}</h3>
-                            <p className="text-[10px] text-gray-400 font-bold">{item.date}</p>
-                        </div>
-                        <div className="flex flex-col items-end gap-2 text-right">
-                            <span className={cn("text-[7px] font-black px-2 py-0.5 rounded-md uppercase", item.statusColor)}>
-                                {item.status}
-                            </span>
-                            <button className="text-[9px] font-black text-secondary hover:underline">Ver Detalhes</button>
-                        </div>
+                    ))
+                ) : (
+                    <div className="bg-white/50 p-8 rounded-3xl border border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
+                        <p className="text-xs font-bold text-gray-400 italic">Ainda não há histórico de Avaliações.</p>
                     </div>
-                ))}
+                )}
             </div>
 
             {/* New Appointment FAB */}
