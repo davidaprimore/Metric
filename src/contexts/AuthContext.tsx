@@ -22,19 +22,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true)
 
     const fetchProfile = async (userId: string) => {
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', userId)
-            .single()
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+                .single()
 
-        if (!error && data) {
-            setUserProfile(data)
+            if (!error && data) {
+                setUserProfile(data)
+            } else if (error && error.code === 'PGRST116') {
+                // Profile missing in DB, but user exists in Auth
+                console.warn('Profile record missing for user:', userId);
+                setUserProfile(null);
+            }
+        } catch (err) {
+            console.error('Error fetching profile:', err);
         }
     }
 
     const refreshProfile = async () => {
-        if (user) await fetchProfile(user.id);
+        if (user) {
+            await fetchProfile(user.id);
+        }
     }
 
     useEffect(() => {
