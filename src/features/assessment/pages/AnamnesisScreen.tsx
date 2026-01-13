@@ -63,9 +63,12 @@ export const AnamnesisScreen: React.FC = () => {
 
         setLoading(true);
         try {
+            // Remove locally used fields that don't exist in DB
+            const { agreed_to_terms, ...dataToSave } = formData;
+
             const { error } = await supabase.from('anamnesis').insert([{
                 user_id: user?.id,
-                ...formData,
+                ...dataToSave,
                 token_auth: `MK-${Math.random().toString(36).substr(2, 4).toUpperCase()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`
             }]);
 
