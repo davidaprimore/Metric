@@ -43,6 +43,7 @@ export const ScheduleScreen: React.FC = () => {
   const [pixData, setPixData] = useState<{ encodedImage: string, payload: string } | null>(null);
   const [paying, setPaying] = useState(false);
   const [appointmentId, setAppointmentId] = useState<string | null>(null);
+  const [confirmedDate, setConfirmedDate] = useState<Date | null>(null);
 
   // Auto-select Professional (Priority: Alex)
   useEffect(() => {
@@ -199,6 +200,7 @@ export const ScheduleScreen: React.FC = () => {
 
       console.log('Reservation Successful:', data.id);
       setAppointmentId(data.id);
+      setConfirmedDate(start); // Capture the exact scheduled time
       setWizardStep('checkout');
     } catch (error: any) {
       console.error('CATCH REASON:', error);
@@ -230,7 +232,7 @@ export const ScheduleScreen: React.FC = () => {
       await supabase.from('notifications').insert({
         user_id: selectedProfessional.id,
         title: 'Novo Agendamento Confirmado! ✅',
-        message: `Agendamento de ${selectedPlan === 'basic' ? 'Avaliação Básica' : 'Avaliação Individualizada'} confirmado para ${format(selectedDate, "dd/MM 'às' HH:mm", { locale: ptBR })}`,
+        message: `Agendamento de ${selectedPlan === 'basic' ? 'Avaliação Básica' : 'Avaliação Individualizada'} confirmado para ${format(confirmedDate || selectedDate, "dd/MM 'às' HH:mm", { locale: ptBR })}`,
         type: 'appointment'
       });
 

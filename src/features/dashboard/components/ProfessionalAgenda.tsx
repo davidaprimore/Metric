@@ -89,15 +89,18 @@ export const ProfessionalAgenda: React.FC = () => {
             const dayEnd = new Date(selectedDate);
             dayEnd.setHours(23, 59, 59, 999);
 
-            const { data } = await supabase
+            const { data, error } = await supabase
                 .from('appointments')
-                .select('*, profiles!patient_id(full_name, avatar_url, gender)')
+                .select('*, patient:profiles!patient_id(full_name, avatar_url, gender)')
                 .eq('professional_id', session.user.id)
                 .eq('status', 'confirmed')
                 .gte('start_time', dayStart.toISOString())
                 .lte('start_time', dayEnd.toISOString());
 
-            if (data) setAppointments(data);
+            if (data) {
+                console.log('Appointments fetched:', data.length);
+                setAppointments(data);
+            }
         } catch (error) {
             console.error('Error fetching appointments:', error);
         } finally {
@@ -365,9 +368,8 @@ export const ProfessionalAgenda: React.FC = () => {
                         if (hour >= start && hour < end) isOpen = true;
                     }
 
-                    // Real Booking Logic
-                    const booked = appointments.find(a => format(new Date(a.start_time), 'HH') === hour.toString().padStart(2, '0'));
-                    const isBooked = !!booked;
+                    // Real Booking Logic - Handle multiple appointments in the same "hour block"
+                    const hourlyBookings = appointments.filter(a => format(new Date(a.start_time), 'HH') === hour.toString().padStart(2, '0'));
 
                     return (
                         <div key={hour} className="flex group items-stretch min-h-[5rem]">
@@ -375,19 +377,19 @@ export const ProfessionalAgenda: React.FC = () => {
                                 <span className="text-xs font-bold text-white tracking-wider">{timeString}</span>
                             </div>
 
-                            <div className="flex-1 relative">
+                            <div className="flex-1 relative space-y-2 pb-2">
                                 {!isOpen ? (
-                                    <div className="h-full rounded-[1.5rem] border border-white/5 bg-black/20 flex items-center px-6 gap-3 opacity-30">
+                                    <div className="h-full min-h-[4rem] rounded-[1.5rem] border border-white/5 bg-black/20 flex items-center px-6 gap-3 opacity-30">
                                         <div className="w-2 h-2 rounded-full bg-slate-700"></div>
                                         <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Indisponível</span>
                                     </div>
                                 ) : isLunch ? (
-                                    <div className="h-full rounded-[1.5rem] border border-white/5 bg-white/5 flex items-center px-6 gap-3 opacity-50">
+                                    <div className="h-full min-h-[4rem] rounded-[1.5rem] border border-white/5 bg-white/5 flex items-center px-6 gap-3 opacity-50">
                                         <Clock size={16} className="text-slate-400" />
                                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pausa de Almoço</span>
                                     </div>
                                 ) : isUserBlocked ? (
-                                    <div className="h-full rounded-[1.5rem] border border-red-900/30 bg-red-900/10 flex items-center px-6 gap-3 relative overflow-hidden group/blocked">
+                                    <div className="h-full min-h-[4rem] rounded-[1.5rem] border border-red-900/30 bg-red-900/10 flex items-center px-6 gap-3 relative overflow-hidden group/blocked">
                                         <div className="absolute inset-0 pattern-diagonal-lines opacity-10"></div>
                                         <Lock size={16} className="text-red-500" />
                                         <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">Bloqueado</span>
@@ -398,58 +400,56 @@ export const ProfessionalAgenda: React.FC = () => {
                                             <X size={14} />
                                         </button>
                                     </div>
-                                ) : isBooked ? (
-                                    <div
-                                        onClick={() => navigate(`/appointment/${hour}`)}
-                                        className="h-full rounded-[1.5rem] bg-[#0A1F0A] border border-[#39FF14]/20 p-3 pr-4 flex items-center justify-between relative overflow-hidden group/card shadow-lg transition-all hover:bg-[#0F2F0F] cursor-pointer"
-                                        style={{ boxShadow: '0 0 20px rgba(57, 255, 20, 0.05)' }}
-                                    >
-                                        <div className="w-1.5 h-full absolute left-0 top-0 bg-[#39FF14]"></div>
+                                ) : hourlyBookings.length > 0 ? (
+                                    hourlyBookings.map(booked => (
+                                        <div
+                                            key={booked.id}
+                                            onClick={() => navigate(`/appointment/${booked.id}`)}
+                                            className="h-full min-h-[4rem] rounded-[1.5rem] bg-[#0A1F0A] border border-[#39FF14]/20 p-3 pr-4 flex items-center justify-between relative overflow-hidden group/card shadow-lg transition-all hover:bg-[#0F2F0F] cursor-pointer"
+                                            style={{ boxShadow: '0 0 20px rgba(57, 255, 20, 0.05)' }}
+                                        >
+                                            <div className="w-1.5 h-full absolute left-0 top-0 bg-[#39FF14]"></div>
 
-                                        {/* Profile Section */}
-                                        <div className="flex items-center gap-4 z-10 pl-3">
-                                            <div className="w-14 h-14 rounded-2xl bg-black/40 border border-[#39FF14]/30 p-0.5 relative shrink-0">
-                                                <img src={`https://i.pravatar.cc/150?u=${hour}`} className="w-full h-full rounded-[0.7rem] object-cover" />
+                                            {/* Profile Section */}
+                                            <div className="flex items-center gap-4 z-10 pl-3">
+                                                <div className="w-12 h-12 rounded-2xl bg-black/40 border border-[#39FF14]/30 p-0.5 relative shrink-0">
+                                                    <img
+                                                        src={booked.patient?.avatar_url || `https://ui-avatars.com/api/?name=${booked.patient?.full_name || 'P'}&background=random`}
+                                                        className="w-full h-full rounded-[0.7rem] object-cover"
+                                                    />
+                                                    <div className="absolute -bottom-1 -right-1 bg-black rounded-md px-1 text-[8px] text-[#39FF14] font-black border border-[#39FF14]/30">
+                                                        {format(new Date(booked.start_time), 'HH:mm')}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold text-white text-sm leading-tight">
+                                                        {booked.patient?.full_name || 'Paciente s/ Perfil'}
+                                                    </h4>
+                                                    <p className="text-[9px] text-[#39FF14] font-bold uppercase tracking-widest mt-0.5 opacity-90">
+                                                        {booked.notes?.includes('Individualizada') ? 'Assessoria Individual' : 'Avaliação Básica'}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h4 className="font-bold text-white text-base leading-tight">
-                                                    {booked?.profiles?.full_name || 'Paciente'}
-                                                </h4>
-                                                <p className="text-[10px] text-[#39FF14] font-bold uppercase tracking-widest mt-0.5 opacity-90">
-                                                    {booked?.notes?.includes('Individualizada') ? 'Assessoria Individual' : 'Avaliação Física'}
-                                                </p>
+
+                                            {/* Action Buttons */}
+                                            <div className="flex items-center gap-3 z-10">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); navigate('/assessment'); }}
+                                                    className="h-9 w-9 rounded-xl bg-[#39FF14] text-black flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-[0_0_15px_rgba(57,255,20,0.4)]"
+                                                    title="Iniciar"
+                                                >
+                                                    <Activity size={18} strokeWidth={2.5} />
+                                                </button>
                                             </div>
                                         </div>
-
-                                        {/* Action Buttons */}
-                                        <div className="flex items-center gap-3 z-10">
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); navigate('/assessment'); }}
-                                                className="h-10 w-10 rounded-xl bg-[#39FF14] text-black flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-[0_0_15px_rgba(57,255,20,0.4)]"
-                                                title="Iniciar"
-                                            >
-                                                <Activity size={20} strokeWidth={2.5} />
-                                            </button>
-
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); setDelayModal({ show: true, hour }); }}
-                                                className="h-10 w-10 rounded-xl bg-white/5 border border-white/5 text-slate-400 hover:text-white hover:bg-white/10 flex items-center justify-center transition-all active:scale-95"
-                                                title="Adiar"
-                                            >
-                                                <Clock size={20} />
-                                            </button>
-                                        </div>
-                                    </div>
+                                    ))
                                 ) : (
                                     <div
                                         onClick={() => setConfirmBlock({ show: true, hour })}
-                                        className="h-full rounded-[1.5rem] border border-dashed border-white/10 hover:border-[#FBBF24]/50 bg-transparent hover:bg-[#FBBF24]/5 transition-all cursor-pointer flex items-center justify-between px-6 group/available"
+                                        className="h-full min-h-[4rem] rounded-[1.5rem] border border-dashed border-white/10 hover:border-[#FBBF24]/50 bg-transparent hover:bg-[#FBBF24]/5 transition-all cursor-pointer flex items-center justify-between px-6 group/available"
                                     >
                                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest group-hover/available:text-[#FBBF24] transition-colors">Horário Livre</span>
                                         <div className="flex items-center gap-2">
-                                            <span className="text-[10px] text-[#FBBF24] opacity-0 group-hover/available:opacity-100 transition-opacity font-bold uppercase tracking-wider hidden sm:block">
-                                                Bloquear
-                                            </span>
                                             <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-500 group-hover/available:text-[#FBBF24] group-hover/available:bg-[#FBBF24]/10 transition-all">
                                                 <Lock size={14} />
                                             </div>
