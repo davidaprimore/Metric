@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     ChevronLeft,
@@ -21,6 +21,9 @@ import {
 import { cn } from '@/lib/utils';
 import { ProfessionalBottomNav } from '@/components/layout/ProfessionalBottomNav';
 import { Toast } from '@/components/ui/Toast';
+import { supabase } from '@/lib/supabase';
+import { format } from 'date-fns';
+import { Loader } from 'lucide-react';
 
 export const AppointmentDetailScreen: React.FC = () => {
     const { id } = useParams();
@@ -28,32 +31,79 @@ export const AppointmentDetailScreen: React.FC = () => {
     const [showDelayModal, setShowDelayModal] = useState(false);
     const [delayTime, setDelayTime] = useState<string | null>(null);
     const [delayMessage, setDelayMessage] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [appointmentData, setAppointmentData] = useState<any>(null);
+    const [patientData, setPatientData] = useState<any>(null);
+    const [anamnesisData, setAnamnesisData] = useState<any>(null);
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' as any });
 
-    // Mock Patient Data
-    const patient = {
-        name: 'Lucas Silva',
-        age: 28,
-        weight: '82.5 kg',
-        height: '1.80 m',
-        objective: 'Hipertrofia & Definição',
-        avatar: 'https://i.pravatar.cc/150?u=lucas',
-        appointmentTime: '14:00',
-        lastAssessed: '15/12/2025',
-        history: [
-            { date: '15/12/2025', type: 'Avaliação Antropométrica', status: 'Concluída' },
-            { date: '10/10/2025', type: 'Protocolo Pollok 7 Dobras', status: 'Concluída' },
-            { date: '05/08/2025', type: 'Bioimpedância', status: 'Concluída' },
-        ]
+    useEffect(() => {
+        if (id) {
+            fetchFullData();
+        }
+    }, [id]);
+
+    const fetchFullData = async () => {
+        setLoading(true);
+        try {
+            // 1. Fetch Appointment Info
+            const { data: app, error: appError } = await supabase
+                .from('appointments')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (appError) throw appError;
+            setAppointmentData(app);
+
+            // 2. Fetch Patient Profile
+            const { data: prof, error: profError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', app.patient_id)
+                .single();
+
+            if (profError) throw profError;
+            setPatientData(prof);
+
+            // 3. Fetch Latest Anamnesis
+            const { data: ana } = await supabase
+                .from('anamnesis')
+                .select('*')
+                .eq('user_id', app.patient_id)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+
+            setAnamnesisData(ana);
+
+        } catch (error) {
+            console.error('Error fetching appointment details:', error);
+            setToast({ show: true, message: 'Erro ao carregar dados do agendamento.', type: 'error' });
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleNotifyDelay = () => {
-        const finalMessage = delayMessage.trim() || `Olá ${patient.name.split(' ')[0]}, infelizmente precisarei atrasar por ${delayTime} minutos. Obrigado pela compreensão.`;
+    const handleNotifyDelay = async () => {
+        if (!delayTime || !patientData) return;
 
-        console.log('Sending Notification:', finalMessage);
+        try {
+            const finalMessage = delayMessage.trim() || `Olá ${patientData.full_name?.split(' ')[0]}, infelizmente precisarei atrasar por ${delayTime} minutos. Obrigado pela compreensão.`;
 
-        setToast({ show: true, message: `Notificação enviada para ${patient.name}.`, type: 'success' });
-        setShowDelayModal(false);
+            await supabase.from('notifications').insert({
+                user_id: patientData.id,
+                title: 'Atraso Comunicado',
+                message: finalMessage,
+                type: 'info',
+                read: false
+            });
+
+            setToast({ show: true, message: `Notificação enviada para ${patientData.full_name}.`, type: 'success' });
+            setShowDelayModal(false);
+        } catch (error) {
+            setToast({ show: true, message: 'Erro ao enviar notificação.', type: 'error' });
+        }
     };
 
     const renderDelayModal = () => (
@@ -107,6 +157,21 @@ export const AppointmentDetailScreen: React.FC = () => {
         </div>
     );
 
+    if (loading) return (
+        <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-[#39FF14]">
+            <Loader className="animate-spin mb-4" size={40} />
+            <p className="text-[10px] font-black uppercase tracking-widest">Sincronizando Dados...</p>
+        </div>
+    );
+
+    if (!patientData) return (
+        <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white p-10 text-center">
+            <Info size={40} className="text-red-500 mb-4" />
+            <h2 className="text-xl font-bold mb-4">Agendamento não encontrado</h2>
+            <button onClick={() => navigate(-1)} className="px-6 py-3 bg-white/10 rounded-full text-xs font-bold uppercase tracking-widest">Voltar</button>
+        </div>
+    );
+
     return (
         <div className="min-h-screen bg-[#050505] text-white font-sans pb-40 relative overflow-hidden flex flex-col items-center">
             {/* Theme: Organic Toxic Smoke */}
@@ -127,7 +192,7 @@ export const AppointmentDetailScreen: React.FC = () => {
                     >
                         <ChevronLeft size={24} className="text-slate-400 group-hover:text-[#39FF14]" />
                     </button>
-                    <h1 className="text-xl font-black uppercase tracking-tighter text-white text-center flex-1">Agendamento<span className="text-[#39FF14]">.Io</span></h1>
+                    <h1 className="text-xl font-black uppercase tracking-tighter text-white text-center flex-1">Paciente<span className="text-[#39FF14]">.Io</span></h1>
                     <div className="w-14"></div>
                 </header>
 
@@ -152,34 +217,34 @@ export const AppointmentDetailScreen: React.FC = () => {
                 {/* Patient Profile Card (Clean Glass) */}
                 <div className="bg-white/5 backdrop-blur-3xl rounded-[3rem] p-10 border border-white/5 mb-8 relative overflow-hidden group shadow-2xl">
                     <div className="absolute top-0 right-0 p-8">
-                        <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center text-[#39FF14] border border-white/10">
+                        <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center text-[#39FF14] border border-white/5">
                             <Info size={20} />
                         </div>
                     </div>
 
                     <div className="flex flex-col items-center">
                         <div className="w-32 h-32 rounded-full border-2 border-[#39FF14] p-1 mb-6 shadow-lg shadow-[#39FF14]/20 group-hover:scale-105 transition-transform duration-500 bg-[#050505] relative">
-                            <img src={patient.avatar} className="w-full h-full object-cover rounded-full" alt={patient.name} />
+                            <img src={patientData.avatar_url || `https://ui-avatars.com/api/?name=${patientData.full_name}&background=random`} className="w-full h-full object-cover rounded-full" alt={patientData.full_name} />
                         </div>
-                        <h2 className="text-3xl font-bold uppercase tracking-tight mb-2 text-white">{patient.name}</h2>
+                        <h2 className="text-3xl font-bold uppercase tracking-tight mb-2 text-white text-center">{patientData.full_name}</h2>
                         <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-full border border-white/5 mb-8">
                             <Clock size={16} className="text-[#39FF14]" />
-                            <span className="text-sm font-bold text-white">14:00</span>
+                            <span className="text-sm font-bold text-white">{appointmentData.start_time ? format(new Date(appointmentData.start_time), 'HH:mm') : '--:--'}</span>
                             <div className="w-1.5 h-1.5 bg-[#39FF14] rounded-full shadow-[0_0_5px_#39FF14] animate-pulse"></div>
                         </div>
 
                         <div className="w-full grid grid-cols-3 gap-4">
                             <div className="text-center p-4 rounded-3xl bg-white/5 border border-white/5 shadow-inner transition-colors">
                                 <p className="text-[8px] text-slate-400 uppercase font-bold tracking-widest mb-1">Idade</p>
-                                <p className="text-lg font-bold text-white">{patient.age}</p>
+                                <p className="text-lg font-bold text-white">{patientData.birth_date ? (new Date().getFullYear() - new Date(patientData.birth_date).getFullYear()) : '?'}</p>
                             </div>
                             <div className="text-center p-4 rounded-3xl bg-white/5 border border-white/5 shadow-inner transition-colors">
                                 <p className="text-[8px] text-slate-400 uppercase font-bold tracking-widest mb-1">Peso</p>
-                                <p className="text-lg font-bold text-white">82.5 <span className="text-[10px] text-slate-500">kg</span></p>
+                                <p className="text-lg font-bold text-white">{patientData.weight || '?'}<span className="text-[10px] text-slate-500 ml-1">kg</span></p>
                             </div>
                             <div className="text-center p-4 rounded-3xl bg-white/5 border border-white/5 shadow-inner transition-colors">
                                 <p className="text-[8px] text-slate-400 uppercase font-bold tracking-widest mb-1">Altura</p>
-                                <p className="text-lg font-bold text-white">1.80 <span className="text-[10px] text-slate-500">m</span></p>
+                                <p className="text-lg font-bold text-white">{patientData.height || '?'}<span className="text-[10px] text-slate-500 ml-1">m</span></p>
                             </div>
                         </div>
                     </div>
@@ -193,7 +258,7 @@ export const AppointmentDetailScreen: React.FC = () => {
                     </div>
                     <div className="bg-white/5 backdrop-blur-md p-6 rounded-[2rem] border border-white/5 shadow-lg relative overflow-hidden">
                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#39FF14]"></div>
-                        <p className="text-xl font-bold uppercase tracking-tight text-white font-sans">{patient.objective}</p>
+                        <p className="text-xl font-bold uppercase tracking-tight text-white font-sans">{anamnesisData?.focus || 'Avaliação Geral'}</p>
                     </div>
                 </div>
 
@@ -205,28 +270,12 @@ export const AppointmentDetailScreen: React.FC = () => {
                     </div>
 
                     <div className="space-y-4">
-                        {patient.history.map((item, i) => (
-                            <div key={i} className="flex items-center justify-between p-6 bg-white/5 backdrop-blur-md rounded-[2rem] border border-white/5 hover:bg-white/10 transition-all cursor-pointer group shadow-lg">
-                                <div className="flex items-center gap-5">
-                                    <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center text-[#39FF14] border border-white/5 group-hover:scale-105 transition-transform">
-                                        <Calendar size={20} />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-bold text-white uppercase tracking-tight">{item.type}</p>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <p className="text-[10px] text-slate-500 uppercase font-bold">{item.date} • {item.status}</p>
-                                            <div className="w-1.5 h-1.5 bg-[#39FF14] rounded-full shadow-[0_0_5px_#39FF14]"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <ChevronRight size={20} className="text-slate-600 group-hover:text-[#39FF14]" />
-                            </div>
-                        ))}
+                        <div className="p-6 bg-white/2 rounded-[2rem] border border-white/5 text-center">
+                            <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest leading-loose">
+                                Histórico de avaliações ficará visível aqui assim que a primeira avaliação for concluída.
+                            </p>
+                        </div>
                     </div>
-
-                    <button className="w-full mt-6 py-5 bg-white/5 rounded-full border border-dashed border-white/10 text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:border-[#39FF14]/50 hover:text-[#39FF14] transition-all">
-                        Carregar Mais
-                    </button>
                 </div>
             </div>
 

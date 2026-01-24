@@ -17,6 +17,7 @@ import { cn } from '../../../lib/utils';
 import { ProfessionalBottomNav } from '../../../components/layout/ProfessionalBottomNav';
 import { Toast } from '../../../components/ui/Toast';
 import { ProfessionalAgenda } from '../components/ProfessionalAgenda';
+import { format } from 'date-fns';
 
 /* 
   BREAKING BAD THEME: "LIVING GREEN FOG"
@@ -31,6 +32,7 @@ const ProfessionalDashboardScreen = () => {
     const [loading, setLoading] = useState(true);
     const [freshProfile, setFreshProfile] = useState<any>(null);
     const [notifications, setNotifications] = useState<any[]>([]);
+    const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' as 'success' | 'error' | 'info' });
     const [showNotifications, setShowNotifications] = useState(false);
     const [activeTab, setActiveTab] = useState('home');
@@ -65,6 +67,20 @@ const ProfessionalDashboardScreen = () => {
 
             if (n) setNotifications(n);
 
+            // 3. Get upcoming confirmed appointments
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const { data: apps, error: aError } = await supabase
+                .from('appointments')
+                .select('*, patient:profiles!patient_id(full_name, avatar_url)')
+                .eq('professional_id', session.user.id)
+                .eq('status', 'confirmed')
+                .gte('start_time', today.toISOString())
+                .order('start_time', { ascending: true })
+                .limit(5);
+
+            if (apps) setUpcomingAppointments(apps);
         } catch (error) {
             console.error('Error loading dashboard:', error);
         } finally {
@@ -226,21 +242,30 @@ const ProfessionalDashboardScreen = () => {
 
                             <h3 className="text-2xl font-bold mb-2 text-white tracking-tight relative z-10">Agenda Diária</h3>
                             <p className="text-slate-400 text-sm mb-6 font-medium flex items-center gap-2 relative z-10">
-                                <span className="text-[#39FF14] font-bold text-xl">4</span> consultas confirmadas hoje.
+                                <span className="text-[#39FF14] font-bold text-xl">{upcomingAppointments.length}</span> consultas confirmadas.
                             </p>
 
                             <div className="space-y-3 relative z-10">
-                                <div className="flex items-center gap-4 p-4 bg-black/50 rounded-3xl border-l-4 border-[#FBBF24] hover:bg-black/70 transition-colors">
-                                    <div className="text-center w-12 shrink-0">
-                                        <span className="block text-[10px] text-[#FBBF24] uppercase font-bold">Hoje</span>
-                                        <span className="block text-lg font-bold text-white">14:00</span>
+                                {upcomingAppointments.length > 0 ? (
+                                    <div
+                                        onClick={(e) => { e.stopPropagation(); navigate(`/appointment/${upcomingAppointments[0].id}`); }}
+                                        className="flex items-center gap-4 p-4 bg-black/50 rounded-3xl border-l-4 border-[#39FF14] hover:bg-black/70 transition-colors"
+                                    >
+                                        <div className="text-center w-12 shrink-0">
+                                            <span className="block text-[10px] text-[#39FF14] uppercase font-bold">Hoje</span>
+                                            <span className="block text-lg font-bold text-white">{format(new Date(upcomingAppointments[0].start_time), 'HH:mm')}</span>
+                                        </div>
+                                        <div className="w-px h-8 bg-white/10"></div>
+                                        <div className="flex-1">
+                                            <h4 className="font-bold text-sm text-white">{upcomingAppointments[0].patient?.full_name || 'Paciente'}</h4>
+                                            <p className="text-[10px] text-[#39FF14] font-bold uppercase tracking-wider">{upcomingAppointments[0].notes || 'Consulta'}</p>
+                                        </div>
                                     </div>
-                                    <div className="w-px h-8 bg-white/10"></div>
-                                    <div className="flex-1">
-                                        <h4 className="font-bold text-sm text-white">Ana Silva</h4>
-                                        <p className="text-[10px] text-[#39FF14] font-bold uppercase tracking-wider shadow-[#39FF14]/20">Avaliação Física</p>
+                                ) : (
+                                    <div className="p-4 bg-black/30 rounded-3xl border border-dashed border-white/5 text-center">
+                                        <p className="text-[10px] text-slate-500 uppercase font-black">Nenhum agendamento para hoje</p>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         </div>
 
