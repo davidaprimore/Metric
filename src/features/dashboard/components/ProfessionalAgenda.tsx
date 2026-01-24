@@ -174,7 +174,14 @@ export const ProfessionalAgenda: React.FC = () => {
 
     const weekDays = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
     const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-    const timeSlots = Array.from({ length: 13 }, (_, i) => i + 8); // 8:00 to 20:00
+
+    // 15-minute intervals from 08:00 to 20:00
+    const timeSlots = [];
+    for (let h = 8; h < 20; h++) {
+        for (let m = 0; m < 60; m += 15) {
+            timeSlots.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`);
+        }
+    }
 
     // ... Helper functions (same as before) ...
     const getDaysInMonth = (date: Date) => {
@@ -349,18 +356,16 @@ export const ProfessionalAgenda: React.FC = () => {
             </div>
 
             {/* Daily Schedule - Visualizing Availability */}
-            <div className="space-y-3">
-                {timeSlots.map((hour) => {
-                    const timeString = `${hour.toString().padStart(2, '0')}:00`;
-                    const dayOfWeek = selectedDate.getDay(); // 0-6
+            <div className="space-y-2">
+                {timeSlots.map((timeString) => {
+                    const hour = parseInt(timeString.split(':')[0]);
+                    const dayOfWeek = selectedDate.getDay();
 
                     // Check availability from Config
                     const dayConfig = availability.find(a => a.day_of_week === dayOfWeek && a.is_active);
-                    const isLunch = hour === 12; // Static lunch for now
+                    const isLunch = hour === 12;
                     const isUserBlocked = blockedSlots.includes(hour);
 
-                    // Determine if this slot is "Open" or "Closed" based on config
-                    // Simple logic: if day is active, and hour is within start/end (assuming 08-18 for simplicity or parsing strings)
                     let isOpen = false;
                     if (dayConfig) {
                         const start = parseInt(dayConfig.start_time.split(':')[0]);
@@ -368,91 +373,77 @@ export const ProfessionalAgenda: React.FC = () => {
                         if (hour >= start && hour < end) isOpen = true;
                     }
 
-                    // Real Booking Logic - Handle multiple appointments in the same "hour block"
-                    const hourlyBookings = appointments.filter(a => format(new Date(a.start_time), 'HH') === hour.toString().padStart(2, '0'));
+                    // Matching logic: Does an appointment start at this exact time?
+                    const slotBookings = appointments.filter(a => {
+                        const appTime = format(new Date(a.start_time), 'HH:mm');
+                        return appTime === timeString;
+                    });
 
                     return (
-                        <div key={hour} className="flex group items-stretch min-h-[5rem]">
-                            <div className="w-16 text-right pr-4 py-4 shrink-0 flex flex-col items-end justify-start">
-                                <span className="text-xs font-bold text-white tracking-wider">{timeString}</span>
+                        <div key={timeString} className="flex group items-stretch min-h-[4rem]">
+                            <div className="w-16 text-right pr-4 py-3 shrink-0 flex flex-col items-end justify-start">
+                                <span className={cn("text-[10px] font-bold tracking-wider", timeString.endsWith(':00') ? "text-white scale-110" : "text-slate-600")}>
+                                    {timeString}
+                                </span>
                             </div>
 
-                            <div className="flex-1 relative space-y-2 pb-2">
+                            <div className="flex-1 relative space-y-1 pb-1">
                                 {!isOpen ? (
-                                    <div className="h-full min-h-[4rem] rounded-[1.5rem] border border-white/5 bg-black/20 flex items-center px-6 gap-3 opacity-30">
-                                        <div className="w-2 h-2 rounded-full bg-slate-700"></div>
-                                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Indisponível</span>
+                                    <div className="h-full min-h-[3rem] rounded-2xl border border-white/5 bg-black/20 flex items-center px-6 gap-3 opacity-20 hover:opacity-40 transition-opacity">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-700"></div>
+                                        <span className="text-[9px] font-bold text-slate-700 uppercase tracking-widest">Indisponível</span>
                                     </div>
                                 ) : isLunch ? (
-                                    <div className="h-full min-h-[4rem] rounded-[1.5rem] border border-white/5 bg-white/5 flex items-center px-6 gap-3 opacity-50">
-                                        <Clock size={16} className="text-slate-400" />
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pausa de Almoço</span>
+                                    <div className="h-full min-h-[3rem] rounded-2xl border border-white/5 bg-white/5 flex items-center px-6 gap-3 opacity-30">
+                                        <Clock size={12} className="text-slate-400" />
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Pausa</span>
                                     </div>
                                 ) : isUserBlocked ? (
-                                    <div className="h-full min-h-[4rem] rounded-[1.5rem] border border-red-900/30 bg-red-900/10 flex items-center px-6 gap-3 relative overflow-hidden group/blocked">
-                                        <div className="absolute inset-0 pattern-diagonal-lines opacity-10"></div>
-                                        <Lock size={16} className="text-red-500" />
-                                        <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">Bloqueado</span>
-                                        <button
-                                            onClick={() => setBlockedSlots(prev => prev.filter(h => h !== hour))}
-                                            className="ml-auto w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 opacity-0 group-hover/blocked:opacity-100 transition-opacity hover:bg-red-500 hover:text-white"
-                                        >
-                                            <X size={14} />
-                                        </button>
+                                    <div className="h-full min-h-[3rem] rounded-2xl border border-red-900/20 bg-red-900/5 flex items-center px-6 gap-3 relative overflow-hidden group/blocked">
+                                        <Lock size={12} className="text-red-900/50" />
+                                        <span className="text-[9px] font-bold text-red-900/50 uppercase tracking-widest">Bloqueado</span>
                                     </div>
-                                ) : hourlyBookings.length > 0 ? (
-                                    hourlyBookings.map(booked => (
+                                ) : slotBookings.length > 0 ? (
+                                    slotBookings.map(booked => (
                                         <div
                                             key={booked.id}
                                             onClick={() => navigate(`/appointment/${booked.id}`)}
-                                            className="h-full min-h-[4rem] rounded-[1.5rem] bg-[#0A1F0A] border border-[#39FF14]/20 p-3 pr-4 flex items-center justify-between relative overflow-hidden group/card shadow-lg transition-all hover:bg-[#0F2F0F] cursor-pointer"
-                                            style={{ boxShadow: '0 0 20px rgba(57, 255, 20, 0.05)' }}
+                                            className="h-full min-h-[3.5rem] rounded-2xl bg-[#0A1F0A] border border-[#39FF14]/20 p-3 pr-4 flex items-center justify-between relative overflow-hidden group/card shadow-lg transition-all hover:bg-[#0F2F0F] cursor-pointer"
                                         >
                                             <div className="w-1.5 h-full absolute left-0 top-0 bg-[#39FF14]"></div>
 
-                                            {/* Profile Section */}
-                                            <div className="flex items-center gap-4 z-10 pl-3">
-                                                <div className="w-12 h-12 rounded-2xl bg-black/40 border border-[#39FF14]/30 p-0.5 relative shrink-0">
+                                            <div className="flex items-center gap-3 z-10 pl-2">
+                                                <div className="w-10 h-10 rounded-xl bg-black/40 border border-[#39FF14]/30 p-0.5 relative shrink-0">
                                                     <img
                                                         src={booked.patient?.avatar_url || `https://ui-avatars.com/api/?name=${booked.patient?.full_name || 'P'}&background=random`}
-                                                        className="w-full h-full rounded-[0.7rem] object-cover"
+                                                        className="w-full h-full rounded-[0.5rem] object-cover"
                                                     />
-                                                    <div className="absolute -bottom-1 -right-1 bg-black rounded-md px-1 text-[8px] text-[#39FF14] font-black border border-[#39FF14]/30">
-                                                        {format(new Date(booked.start_time), 'HH:mm')}
-                                                    </div>
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-bold text-white text-sm leading-tight">
+                                                    <h4 className="font-bold text-white text-xs leading-tight">
                                                         {booked.patient?.full_name || 'Paciente s/ Perfil'}
                                                     </h4>
-                                                    <p className="text-[9px] text-[#39FF14] font-bold uppercase tracking-widest mt-0.5 opacity-90">
+                                                    <p className="text-[8px] text-[#39FF14] font-black uppercase tracking-widest mt-0.5 opacity-90">
                                                         {booked.notes?.includes('Individualizada') ? 'Assessoria Individual' : 'Avaliação Básica'}
                                                     </p>
                                                 </div>
                                             </div>
 
-                                            {/* Action Buttons */}
-                                            <div className="flex items-center gap-3 z-10">
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); navigate('/assessment'); }}
-                                                    className="h-9 w-9 rounded-xl bg-[#39FF14] text-black flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-[0_0_15px_rgba(57,255,20,0.4)]"
-                                                    title="Iniciar"
-                                                >
-                                                    <Activity size={18} strokeWidth={2.5} />
-                                                </button>
+                                            <div className="flex items-center gap-2 z-10">
+                                                <div className="h-8 w-8 rounded-lg bg-[#39FF14] text-black flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-[0_0_10px_rgba(57,255,20,0.3)]">
+                                                    <Activity size={16} strokeWidth={3} />
+                                                </div>
                                             </div>
                                         </div>
                                     ))
                                 ) : (
                                     <div
                                         onClick={() => setConfirmBlock({ show: true, hour })}
-                                        className="h-full min-h-[4rem] rounded-[1.5rem] border border-dashed border-white/10 hover:border-[#FBBF24]/50 bg-transparent hover:bg-[#FBBF24]/5 transition-all cursor-pointer flex items-center justify-between px-6 group/available"
+                                        className="h-full min-h-[3rem] rounded-2xl border border-dashed border-white/5 hover:border-[#39FF14]/30 bg-transparent hover:bg-[#39FF14]/5 transition-all cursor-pointer flex items-center justify-between px-6 group/available"
                                     >
-                                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest group-hover/available:text-[#FBBF24] transition-colors">Horário Livre</span>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-500 group-hover/available:text-[#FBBF24] group-hover/available:bg-[#FBBF24]/10 transition-all">
-                                                <Lock size={14} />
-                                            </div>
+                                        <span className="text-[9px] font-bold text-slate-700 uppercase tracking-widest group-hover/available:text-[#39FF14]/50 transition-colors">Horário Livre</span>
+                                        <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-slate-700 group-hover/available:text-[#39FF14]/50 transition-all">
+                                            <Lock size={12} />
                                         </div>
                                     </div>
                                 )}
