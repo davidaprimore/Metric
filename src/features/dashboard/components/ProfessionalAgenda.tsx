@@ -53,6 +53,24 @@ export const ProfessionalAgenda: React.FC = () => {
     useEffect(() => {
         if (session?.user.id && view === 'daily') {
             fetchAppointments();
+
+            // Realtime Channel
+            const channel = supabase
+                .channel('agenda-changes')
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'appointments',
+                    filter: `professional_id=eq.${session.user.id}`
+                }, () => {
+                    console.log('Realtime change detected, refreshing agenda...');
+                    fetchAppointments();
+                })
+                .subscribe();
+
+            return () => {
+                supabase.removeChannel(channel);
+            };
         }
     }, [session?.user.id, selectedDate, view]);
 
@@ -91,15 +109,31 @@ export const ProfessionalAgenda: React.FC = () => {
 
             const { data, error } = await supabase
                 .from('appointments')
-                .select('*, patient:profiles!patient_id(full_name, avatar_url, gender)')
+                .select('id, start_time, end_time, status, notes, patient_id')
                 .eq('professional_id', session.user.id)
                 .eq('status', 'confirmed')
                 .gte('start_time', dayStart.toISOString())
                 .lte('start_time', dayEnd.toISOString());
 
-            if (data) {
+            if (error) {
+                console.error('Fetch error:', error);
+                return;
+            }
+
+            if (data && data.length > 0) {
                 console.log('Appointments fetched:', data.length);
-                setAppointments(data);
+                const { data: profiles } = await supabase
+                    .from('profiles')
+                    .select('id, full_name, avatar_url, gender')
+                    .in('id', data.map(a => a.patient_id).filter(Boolean));
+
+                const combined = data.map(app => ({
+                    ...app,
+                    patient: profiles?.find(p => p.id === app.patient_id) || null
+                }));
+                setAppointments(combined);
+            } else {
+                setAppointments([]);
             }
         } catch (error) {
             console.error('Error fetching appointments:', error);
