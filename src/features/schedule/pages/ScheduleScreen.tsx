@@ -136,12 +136,18 @@ export const ScheduleScreen: React.FC = () => {
       const slots = [];
       const interval = selectedPlan === 'basic' ? 15 : 30;
 
+      console.log('--- FETCHING SLOTS DEBUG ---');
+      console.log('Professional ID:', selectedProfessional.id);
+      console.log('Day Range:', dayStart.toISOString(), 'to', dayEnd.toISOString());
+      console.log('Busy Records Found:', busySlots?.length);
+      console.log('Busy Times (Formatted):', busyTimes);
+
       // Use selectedDate to ensure we stay on the calendar day
       let current = new Date(selectedDate);
       current.setHours(startHour, parseInt(startSplit[1] || '0'), 0, 0);
 
       const end = new Date(selectedDate);
-      end.setHours(endHour, parseInt(endSplit[1] || '0'), 0, 0);
+      end.setHours(parseInt(endSplit[0] || '18'), parseInt(endSplit[1] || '0'), 0, 0);
 
       const LUNCH_START = 12;
       const LUNCH_END = 13;
@@ -153,9 +159,13 @@ export const ScheduleScreen: React.FC = () => {
 
         if (!busyTimes.includes(timeStr) && !isLunch) {
           slots.push(timeStr);
+        } else {
+          console.log(`Slot ${timeStr} filtered: Busy=${busyTimes.includes(timeStr)}, Lunch=${isLunch}`);
         }
         current = new Date(current.getTime() + interval * 60000);
       }
+      console.log('Available Slots Generated:', slots.length);
+      console.log('---------------------------');
       setAvailableSlots(slots);
     } catch (err) {
       console.error('Fetch slots failed:', err);
