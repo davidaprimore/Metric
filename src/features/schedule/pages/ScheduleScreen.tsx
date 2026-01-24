@@ -158,15 +158,27 @@ export const ScheduleScreen: React.FC = () => {
   };
 
   const reserveSlot = async () => {
+    console.log('--- STARTING RESERVATION ---');
+    console.log('Selected Slot:', selectedSlot);
+    console.log('Selected Date:', selectedDate);
+    console.log('Professional ID:', selectedProfessional?.id);
+    console.log('User ID:', session?.user?.id);
+
     setLoading(true);
     try {
-      if (!selectedSlot) return;
+      if (!selectedSlot) {
+        console.warn('No slot selected!');
+        return;
+      }
       const interval = selectedPlan === 'basic' ? 15 : 30;
       const start = new Date(selectedDate);
       const [hours, minutes] = selectedSlot.split(':').map(Number);
       start.setHours(hours, minutes, 0, 0);
       const end = new Date(start.getTime() + interval * 60000);
       const expiresAt = new Date(Date.now() + 30 * 60000);
+
+      console.log('Calculated Start:', start.toISOString());
+      console.log('Calculated End:', end.toISOString());
 
       // Create pending reservation
       const { data, error } = await supabase.from('appointments').insert({
@@ -180,15 +192,21 @@ export const ScheduleScreen: React.FC = () => {
         date: start.toISOString() // Legacy support
       }).select().single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('SUPABASE DB ERROR:', error);
+        throw error;
+      }
+
+      console.log('Reservation Successful:', data.id);
       setAppointmentId(data.id);
       setWizardStep('checkout');
     } catch (error: any) {
-      console.error('Reservation Error:', error);
-      setToast({ show: true, message: 'Erro ao reservar horário. Ele pode ter acabado de ser ocupado.', type: 'error' });
+      console.error('CATCH REASON:', error);
+      setToast({ show: true, message: `Erro: ${error.message || 'Erro ao agendar'}`, type: 'error' });
       fetchSlots();
     } finally {
       setLoading(false);
+      console.log('--- END RESERVATION ---');
     }
   };
 
