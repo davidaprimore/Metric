@@ -18,6 +18,8 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Toast } from '@/components/ui/Toast';
 import { Loader } from 'lucide-react';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 export const ProfessionalAgenda: React.FC = () => {
     const navigate = useNavigate();
@@ -36,8 +38,10 @@ export const ProfessionalAgenda: React.FC = () => {
     // Data
     const [blockedSlots, setBlockedSlots] = useState<number[]>([]);
     const [availability, setAvailability] = useState<any[]>([]);
+    const [appointments, setAppointments] = useState<any[]>([]);
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' as 'success' | 'error' | 'info' });
     const [loadingDelay, setLoadingDelay] = useState(false);
+    const [loadingDaily, setLoadingDaily] = useState(false);
 
     // Initial Data Fetch
     useEffect(() => {
@@ -45,6 +49,12 @@ export const ProfessionalAgenda: React.FC = () => {
             fetchAvailability();
         }
     }, [session?.user.id]);
+
+    useEffect(() => {
+        if (session?.user.id && view === 'daily') {
+            fetchAppointments();
+        }
+    }, [session?.user.id, selectedDate, view]);
 
     const fetchAvailability = async () => {
         try {
@@ -58,15 +68,40 @@ export const ProfessionalAgenda: React.FC = () => {
             } else {
                 // Default settings if none exist
                 setAvailability([
-                    { day_of_week: 1, start_time: '08:00', end_time: '18:00', is_active: true }, // Seg
-                    { day_of_week: 2, start_time: '08:00', end_time: '18:00', is_active: true }, // Ter
-                    { day_of_week: 3, start_time: '08:00', end_time: '18:00', is_active: true }, // Qua
-                    { day_of_week: 4, start_time: '08:00', end_time: '18:00', is_active: true }, // Qui
-                    { day_of_week: 5, start_time: '08:00', end_time: '18:00', is_active: true }, // Sex
+                    { day_of_week: 1, start_time: '08:00:00', end_time: '18:00:00', is_active: true },
+                    { day_of_week: 2, start_time: '08:00:00', end_time: '18:00:00', is_active: true },
+                    { day_of_week: 3, start_time: '08:00:00', end_time: '18:00:00', is_active: true },
+                    { day_of_week: 4, start_time: '08:00:00', end_time: '18:00:00', is_active: true },
+                    { day_of_week: 5, start_time: '08:00:00', end_time: '18:00:00', is_active: true },
                 ]);
             }
         } catch (error) {
             console.error('Error fetching availability:', error);
+        }
+    };
+
+    const fetchAppointments = async () => {
+        if (!session?.user.id) return;
+        setLoadingDaily(true);
+        try {
+            const dayStart = new Date(selectedDate);
+            dayStart.setHours(0, 0, 0, 0);
+            const dayEnd = new Date(selectedDate);
+            dayEnd.setHours(23, 59, 59, 999);
+
+            const { data } = await supabase
+                .from('appointments')
+                .select('*, profiles!patient_id(full_name, avatar_url, gender)')
+                .eq('professional_id', session.user.id)
+                .eq('status', 'confirmed')
+                .gte('start_time', dayStart.toISOString())
+                .lte('start_time', dayEnd.toISOString());
+
+            if (data) setAppointments(data);
+        } catch (error) {
+            console.error('Error fetching appointments:', error);
+        } finally {
+            setLoadingDaily(false);
         }
     };
 
@@ -330,8 +365,9 @@ export const ProfessionalAgenda: React.FC = () => {
                         if (hour >= start && hour < end) isOpen = true;
                     }
 
-                    // Mock Booking Logic (replace with real Fetch Appointments later)
-                    const isBooked = isOpen && !isLunch && !isUserBlocked && Math.random() > 0.8;
+                    // Real Booking Logic
+                    const booked = appointments.find(a => format(new Date(a.start_time), 'HH') === hour.toString().padStart(2, '0'));
+                    const isBooked = !!booked;
 
                     return (
                         <div key={hour} className="flex group items-stretch min-h-[5rem]">
@@ -376,8 +412,12 @@ export const ProfessionalAgenda: React.FC = () => {
                                                 <img src={`https://i.pravatar.cc/150?u=${hour}`} className="w-full h-full rounded-[0.7rem] object-cover" />
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-white text-base leading-tight">João Silva</h4>
-                                                <p className="text-[10px] text-[#39FF14] font-bold uppercase tracking-widest mt-0.5 opacity-90">Avaliação Física</p>
+                                                <h4 className="font-bold text-white text-base leading-tight">
+                                                    {booked?.profiles?.full_name || 'Paciente'}
+                                                </h4>
+                                                <p className="text-[10px] text-[#39FF14] font-bold uppercase tracking-widest mt-0.5 opacity-90">
+                                                    {booked?.notes?.includes('Individualizada') ? 'Assessoria Individual' : 'Avaliação Física'}
+                                                </p>
                                             </div>
                                         </div>
 

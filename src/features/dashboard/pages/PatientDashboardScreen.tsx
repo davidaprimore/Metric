@@ -77,9 +77,10 @@ export const PatientDashboardScreen: React.FC = () => {
         .from('appointments')
         .select('*')
         .eq('patient_id', user.id)
+        .eq('status', 'confirmed') // Show only confirmed ones
         .gte('start_time', new Date().toISOString())
         .order('start_time', { ascending: true })
-        .limit(1); // just next one
+        .limit(1);
 
       if (appts) setUpcomingAppointments(appts);
       setAssessments([]); // Still mocked/empty until we have real assessments

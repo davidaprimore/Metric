@@ -42,6 +42,7 @@ export const ScheduleScreen: React.FC = () => {
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' as 'success' | 'error' | 'info' });
   const [pixData, setPixData] = useState<{ encodedImage: string, payload: string } | null>(null);
   const [paying, setPaying] = useState(false);
+  const [appointmentId, setAppointmentId] = useState<string | null>(null);
 
   // Auto-select Professional (Priority: Alex)
   useEffect(() => {
@@ -89,53 +90,63 @@ export const ScheduleScreen: React.FC = () => {
   const fetchSlots = async () => {
     if (!selectedProfessional) return;
     setLoading(true);
-    setAvailableSlots([]); // Reset while loading
+    setAvailableSlots([]);
 
     try {
       const dayOfWeek = selectedDate.getDay();
 
-      // FIX: Ensure Sunday (0) is handled if Alex doesn't work Sundays
-      // Mon-Sat is 1-6.
-      const { data: config, error } = await supabase
+      const { data: config } = await supabase
         .from('professional_availability')
         .select('*')
         .eq('professional_id', selectedProfessional.id)
         .eq('day_of_week', dayOfWeek)
         .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching availability:', error);
-        return;
-      }
-
       if (!config || !config.is_active) {
         setAvailableSlots([]);
         return;
       }
 
-      // Generate slots based on config times
+      // Check existing appointments (Confirmed or Pending/Not Expired)
+      const dayStart = new Date(selectedDate);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(selectedDate);
+      dayEnd.setHours(23, 59, 59, 999);
+
+      const { data: busySlots } = await supabase
+        .from('appointments')
+        .select('start_time, status, expires_at')
+        .eq('professional_id', selectedProfessional.id)
+        .gte('start_time', dayStart.toISOString())
+        .lte('start_time', dayEnd.toISOString());
+
+      const now = new Date();
+      const busyTimes = busySlots?.filter(s => {
+        if (s.status === 'confirmed') return true;
+        if (s.status === 'pending' && s.expires_at && new Date(s.expires_at) > now) return true;
+        return false;
+      }).map(s => format(new Date(s.start_time), 'HH:mm')) || [];
+
       const startSplit = config.start_time.split(':');
       const endSplit = config.end_time.split(':');
-
       const startHour = parseInt(startSplit[0]);
-      const startMin = parseInt(startSplit[1] || '0');
       const endHour = parseInt(endSplit[0]);
-      const endMin = parseInt(endSplit[1] || '0');
 
       const slots = [];
       const interval = selectedPlan === 'basic' ? 15 : 30;
 
       let current = new Date();
-      current.setHours(startHour, startMin, 0, 0);
-
+      current.setHours(startHour, parseInt(startSplit[1] || '0'), 0, 0);
       const end = new Date();
-      end.setHours(endHour, endMin, 0, 0);
+      end.setHours(endHour, parseInt(endSplit[1] || '0'), 0, 0);
 
       while (current < end) {
-        slots.push(format(current, 'HH:mm'));
+        const timeStr = format(current, 'HH:mm');
+        if (!busyTimes.includes(timeStr)) {
+          slots.push(timeStr);
+        }
         current = new Date(current.getTime() + interval * 60000);
       }
-
       setAvailableSlots(slots);
     } catch (err) {
       console.error('Fetch slots failed:', err);
@@ -144,54 +155,65 @@ export const ScheduleScreen: React.FC = () => {
     }
   };
 
-  const handleConfirmBooking = async () => {
-    setPaying(true);
+  const reserveSlot = async () => {
+    setLoading(true);
     try {
-      // 1. Create the Appointment first (as pending)
       const interval = selectedPlan === 'basic' ? 15 : 30;
       const start = new Date(selectedDate);
       const [hours, minutes] = selectedSlot!.split(':').map(Number);
       start.setHours(hours, minutes, 0, 0);
       const end = new Date(start.getTime() + interval * 60000);
+      const expiresAt = new Date(Date.now() + 30 * 60000);
 
-      const { data: newApp, error: appErr } = await supabase.from('appointments').insert({
+      // Create pending reservation
+      const { data, error } = await supabase.from('appointments').insert({
         professional_id: selectedProfessional.id,
         patient_id: session?.user.id,
         start_time: start.toISOString(),
         end_time: end.toISOString(),
         status: 'pending',
-        notes: `Plano: ${selectedPlan === 'basic' ? 'Básica' : 'Individualizada'} | Pagamento: ${paymentMethod}`
+        expires_at: expiresAt.toISOString(),
+        notes: `Plano: ${selectedPlan === 'basic' ? 'Básica' : 'Individualizada'}`
       }).select().single();
 
-      if (appErr || !newApp) throw new Error('Erro ao criar agendamento.');
+      if (error) throw error;
+      setAppointmentId(data.id);
+      setWizardStep('checkout');
+    } catch (error: any) {
+      setToast({ show: true, message: 'Este horário acabou de ser reservado. Escolha outro.', type: 'error' });
+      fetchSlots();
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      // 2. Call Asaas Edge Function
-      const { data, error } = await supabase.functions.invoke('asaas-payment', {
-        body: {
-          appointmentId: newApp.id,
-          paymentMethod: paymentMethod === 'pix' ? 'PIX' : 'CREDIT_CARD',
-          creditCard: paymentMethod === 'credit' ? {
-            holderName: "DUMMY HOLDER",
-            number: "4444555566667777",
-            expiryMonth: "12",
-            expiryYear: "2025",
-            ccv: "123"
-          } : null
-        }
+  const handleConfirmBooking = async () => {
+    if (!appointmentId) return;
+    setPaying(true);
+    try {
+      // 1. Confirm and Update Status (Temporary Bypass as requested)
+      const { error: updateErr } = await supabase
+        .from('appointments')
+        .update({
+          status: 'confirmed',
+          expires_at: null,
+          payment_status: 'PAID'
+        })
+        .eq('id', appointmentId);
+
+      if (updateErr) throw updateErr;
+
+      // 2. Notify Professional
+      await supabase.from('notifications').insert({
+        user_id: selectedProfessional.id,
+        title: 'Novo Agendamento Confirmado! ✅',
+        message: `Agendamento de ${selectedPlan === 'basic' ? 'Avaliação Básica' : 'Avaliação Individualizada'} confirmado para ${format(selectedDate, "dd/MM 'às' HH:mm", { locale: ptBR })}`,
+        type: 'appointment'
       });
 
-      if (error || !data.success) {
-        throw new Error(data?.error || 'Erro no processamento do pagamento.');
-      }
-
-      if (paymentMethod === 'pix' && data.pix) {
-        setPixData(data.pix);
-        setToast({ show: true, message: 'QR Code Pix gerado!', type: 'success' });
-      } else {
-        setWizardStep('success');
-      }
+      setWizardStep('success');
     } catch (error: any) {
-      setToast({ show: true, message: error.message || 'Erro ao processar agendamento.', type: 'error' });
+      setToast({ show: true, message: 'Erro ao confirmar agendamento.', type: 'error' });
     } finally {
       setPaying(false);
     }
@@ -397,11 +419,11 @@ export const ScheduleScreen: React.FC = () => {
         </div>
 
         <button
-          disabled={!selectedSlot}
-          onClick={() => setWizardStep('checkout')}
-          className="w-full py-4 rounded-xl bg-[#FBBF24] text-black font-black uppercase tracking-widest text-xs hover:bg-[#f59e0b] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(251,191,36,0.3)] sticky bottom-0"
+          disabled={!selectedSlot || loading}
+          onClick={reserveSlot}
+          className="w-full py-4 rounded-xl bg-[#FBBF24] text-black font-black uppercase tracking-widest text-xs hover:bg-[#f59e0b] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(251,191,36,0.3)] sticky bottom-0 flex items-center justify-center gap-2"
         >
-          Confirmar Agendamento
+          {loading ? <Loader className="animate-spin" size={16} /> : 'Confirmar Agendamento'}
         </button>
       </div>
     );
