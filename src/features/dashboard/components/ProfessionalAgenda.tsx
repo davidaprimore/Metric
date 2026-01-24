@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     ChevronLeft,
     ChevronRight,
@@ -8,37 +8,137 @@ import {
     Lock,
     Settings,
     Activity,
-    AlertTriangle
+    AlertTriangle,
+    Save,
+    Check
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
+import { Toast } from '@/components/ui/Toast';
+import { Loader } from 'lucide-react';
 
 export const ProfessionalAgenda: React.FC = () => {
     const navigate = useNavigate();
+    const { userProfile: profile, session } = useAuth();
+
+    // States
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const [showConfig, setShowConfig] = useState(false);
     const [view, setView] = useState<'daily' | 'monthly'>('daily');
+    const [loading, setLoading] = useState(false);
+
+    // Modals
+    const [showConfig, setShowConfig] = useState(false);
     const [confirmBlock, setConfirmBlock] = useState<{ show: boolean, hour: number | null }>({ show: false, hour: null });
     const [delayModal, setDelayModal] = useState<{ show: boolean, hour: number | null }>({ show: false, hour: null });
+
+    // Data
     const [blockedSlots, setBlockedSlots] = useState<number[]>([]);
+    const [availability, setAvailability] = useState<any[]>([]);
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' as 'success' | 'error' | 'info' });
+    const [loadingDelay, setLoadingDelay] = useState(false);
+
+    // Initial Data Fetch
+    useEffect(() => {
+        if (session?.user.id) {
+            fetchAvailability();
+        }
+    }, [session?.user.id]);
+
+    const fetchAvailability = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('professional_availability')
+                .select('*')
+                .eq('professional_id', session?.user.id);
+
+            if (data && data.length > 0) {
+                setAvailability(data);
+            } else {
+                // Default settings if none exist
+                setAvailability([
+                    { day_of_week: 1, start_time: '08:00', end_time: '18:00', is_active: true }, // Seg
+                    { day_of_week: 2, start_time: '08:00', end_time: '18:00', is_active: true }, // Ter
+                    { day_of_week: 3, start_time: '08:00', end_time: '18:00', is_active: true }, // Qua
+                    { day_of_week: 4, start_time: '08:00', end_time: '18:00', is_active: true }, // Qui
+                    { day_of_week: 5, start_time: '08:00', end_time: '18:00', is_active: true }, // Sex
+                ]);
+            }
+        } catch (error) {
+            console.error('Error fetching availability:', error);
+        }
+    };
+
+    const saveAvailability = async () => {
+        setLoading(true);
+        try {
+            // Delete existing (simple replace strategy for MVP)
+            await supabase.from('professional_availability').delete().eq('professional_id', session?.user.id);
+
+            // Insert new
+            const toInsert = availability.filter(a => a.is_active).map(a => ({
+                professional_id: session?.user.id,
+                day_of_week: a.day_of_week,
+                start_time: a.start_time,
+                end_time: a.end_time,
+                is_active: true
+            }));
+
+            const { error } = await supabase.from('professional_availability').insert(toInsert);
+
+            if (error) throw error;
+            setToast({ show: true, message: 'Disponibilidade salva com sucesso!', type: 'success' });
+            setShowConfig(false);
+        } catch (error) {
+            setToast({ show: true, message: 'Erro ao salvar disponibilidade.', type: 'error' });
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     const handleBlockSlot = () => {
         if (confirmBlock.hour !== null) {
             setBlockedSlots([...blockedSlots, confirmBlock.hour]);
             setConfirmBlock({ show: false, hour: null });
+            setToast({ show: true, message: `Horário das ${confirmBlock.hour}:00 bloqueado.`, type: 'info' });
         }
     };
 
-    const handleDelaySlot = () => {
-        // Logic to notify system of delay
-        setDelayModal({ show: false, hour: null });
-        alert('Atraso comunicado ao paciente com sucesso.'); // Simplified for now
+    const handleDelaySlot = async () => {
+        if (delayModal.hour === null) return;
+        setLoadingDelay(true);
+
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            if (session?.user.id) {
+                await supabase.from('notifications').insert({
+                    user_id: session.user.id, // For demo, notifies self. In real app, would query appointment -> patient_id
+                    title: 'Atraso Comunicado',
+                    message: `O paciente agendado para as ${delayModal.hour}:00 foi notificado sobre o atraso.`,
+                    type: 'info',
+                    read: false
+                });
+            }
+
+            setToast({ show: true, message: 'Paciente notificado com sucesso!', type: 'success' });
+            setDelayModal({ show: false, hour: null });
+        } catch (error) {
+            console.error(error);
+            setToast({ show: true, message: 'Erro ao comunicar atraso.', type: 'error' });
+        } finally {
+            setLoadingDelay(false);
+        }
     };
 
     const weekDays = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
     const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
     const timeSlots = Array.from({ length: 13 }, (_, i) => i + 8); // 8:00 to 20:00
 
+    // ... Helper functions (same as before) ...
     const getDaysInMonth = (date: Date) => {
         const year = date.getFullYear();
         const month = date.getMonth();
@@ -54,6 +154,68 @@ export const ProfessionalAgenda: React.FC = () => {
         newDate.setMonth(newDate.getMonth() + delta);
         setSelectedDate(newDate);
     };
+
+    // Render Logic
+    const renderConfigModal = () => (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-[#111] border border-white/10 rounded-[2rem] p-6 w-full max-w-md shadow-2xl h-[80vh] flex flex-col">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-white">Configurar Agenda</h3>
+                    <button onClick={() => setShowConfig(false)} className="p-2 bg-white/5 rounded-full hover:bg-white/10 text-slate-400 hover:text-white">
+                        <X size={20} />
+                    </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto custom-scrollbar space-y-6">
+                    <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                        <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Dias de Atendimento</h4>
+                        <div className="space-y-2">
+                            {weekDays.map((day, idx) => {
+                                const isActive = availability.some(a => a.day_of_week === idx && a.is_active);
+                                const availableConfig = availability.find(a => a.day_of_week === idx);
+
+                                return (
+                                    <div key={day} className="flex items-center justify-between p-3 bg-black/40 rounded-xl border border-white/5">
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                onClick={() => {
+                                                    const exists = availability.find(a => a.day_of_week === idx);
+                                                    if (exists) {
+                                                        setAvailability(availability.filter(a => a.day_of_week !== idx));
+                                                    } else {
+                                                        setAvailability([...availability, { day_of_week: idx, start_time: '08:00', end_time: '18:00', is_active: true }]);
+                                                    }
+                                                }}
+                                                className={cn("w-6 h-6 rounded-lg flex items-center justify-center transition-all", isActive ? "bg-[#39FF14] text-black" : "bg-white/10 text-transparent")}
+                                            >
+                                                <Check size={14} strokeWidth={4} />
+                                            </button>
+                                            <span className={cn("text-sm font-bold", isActive ? "text-white" : "text-slate-600")}>{day}</span>
+                                        </div>
+                                        {isActive && (
+                                            <div className="flex items-center gap-2 text-xs">
+                                                <span className="text-slate-400">08:00 - 18:00</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="pt-4 mt-4 border-t border-white/10">
+                    <button
+                        onClick={saveAvailability}
+                        disabled={loading}
+                        className="w-full py-4 bg-[#39FF14] hover:bg-[#32d411] text-black font-bold uppercase tracking-widest rounded-2xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                        {loading ? <Loader className="animate-spin" /> : <><Save size={18} /> Salvar Disponibilidade</>}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
 
     const renderMonthView = () => {
         const daysInMonth = getDaysInMonth(selectedDate);
@@ -148,13 +310,28 @@ export const ProfessionalAgenda: React.FC = () => {
                 </div>
             </div>
 
-            {/* Cleaned Up Daily Schedule */}
+            {/* Daily Schedule - Visualizing Availability */}
             <div className="space-y-3">
                 {timeSlots.map((hour) => {
                     const timeString = `${hour.toString().padStart(2, '0')}:00`;
-                    const isLunch = hour === 12;
+                    const dayOfWeek = selectedDate.getDay(); // 0-6
+
+                    // Check availability from Config
+                    const dayConfig = availability.find(a => a.day_of_week === dayOfWeek && a.is_active);
+                    const isLunch = hour === 12; // Static lunch for now
                     const isUserBlocked = blockedSlots.includes(hour);
-                    const isBooked = !isLunch && !isUserBlocked && Math.random() > 0.8;
+
+                    // Determine if this slot is "Open" or "Closed" based on config
+                    // Simple logic: if day is active, and hour is within start/end (assuming 08-18 for simplicity or parsing strings)
+                    let isOpen = false;
+                    if (dayConfig) {
+                        const start = parseInt(dayConfig.start_time.split(':')[0]);
+                        const end = parseInt(dayConfig.end_time.split(':')[0]);
+                        if (hour >= start && hour < end) isOpen = true;
+                    }
+
+                    // Mock Booking Logic (replace with real Fetch Appointments later)
+                    const isBooked = isOpen && !isLunch && !isUserBlocked && Math.random() > 0.8;
 
                     return (
                         <div key={hour} className="flex group items-stretch min-h-[5rem]">
@@ -163,7 +340,12 @@ export const ProfessionalAgenda: React.FC = () => {
                             </div>
 
                             <div className="flex-1 relative">
-                                {isLunch ? (
+                                {!isOpen ? (
+                                    <div className="h-full rounded-[1.5rem] border border-white/5 bg-black/20 flex items-center px-6 gap-3 opacity-30">
+                                        <div className="w-2 h-2 rounded-full bg-slate-700"></div>
+                                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Indisponível</span>
+                                    </div>
+                                ) : isLunch ? (
                                     <div className="h-full rounded-[1.5rem] border border-white/5 bg-white/5 flex items-center px-6 gap-3 opacity-50">
                                         <Clock size={16} className="text-slate-400" />
                                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pausa de Almoço</span>
@@ -261,9 +443,10 @@ export const ProfessionalAgenda: React.FC = () => {
                             </button>
                             <button
                                 onClick={handleDelaySlot}
-                                className="flex-1 py-4 rounded-xl bg-[#FBBF24] text-black font-bold text-xs uppercase tracking-widest hover:bg-[#f59e0b] transition-colors shadow-lg shadow-[#FBBF24]/20"
+                                disabled={loadingDelay}
+                                className="flex-1 py-4 rounded-xl bg-[#FBBF24] text-black font-bold text-xs uppercase tracking-widest hover:bg-[#f59e0b] transition-colors shadow-lg shadow-[#FBBF24]/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Confirmar
+                                {loadingDelay ? <Loader size={16} className="animate-spin" /> : 'Confirmar'}
                             </button>
                         </div>
                     </div>
@@ -299,6 +482,14 @@ export const ProfessionalAgenda: React.FC = () => {
                     </div>
                 </div>
             )}
+        </div>
+    );
+
+    return (
+        <div className="h-full">
+            {view === 'monthly' ? renderMonthView() : renderDailyView()}
+            {showConfig && renderConfigModal()}
+            <Toast isVisible={toast.show} message={toast.message} type={toast.type} onClose={() => setToast({ ...toast, show: false })} />
         </div>
     );
 };
