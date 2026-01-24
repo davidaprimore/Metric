@@ -455,7 +455,7 @@ export const ProfessionalAgenda: React.FC = () => {
                                                 </div>
                                                 <div>
                                                     <h4 className="font-bold text-white text-xs leading-tight">
-                                                        {booked.patient?.full_name || 'Paciente s/ Perfil'}
+                                                        {booked.patient?.full_name || 'Paciente'}
                                                     </h4>
                                                     <p className="text-[8px] text-[#39FF14] font-black uppercase tracking-widest mt-0.5 opacity-90">
                                                         {booked.notes?.includes('Individualizada') ? 'Assessoria Individual' : 'Avaliação Básica'}
