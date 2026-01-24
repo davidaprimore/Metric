@@ -40,6 +40,8 @@ export const ScheduleScreen: React.FC = () => {
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' as 'success' | 'error' | 'info' });
+  const [pixData, setPixData] = useState<{ encodedImage: string, payload: string } | null>(null);
+  const [paying, setPaying] = useState(false);
 
   // Auto-select Professional (Priority: Alex)
   useEffect(() => {
@@ -143,29 +145,55 @@ export const ScheduleScreen: React.FC = () => {
   };
 
   const handleConfirmBooking = async () => {
-    setLoading(true);
+    setPaying(true);
     try {
-      // Calculate End Time based on Interval
+      // 1. Create the Appointment first (as pending)
       const interval = selectedPlan === 'basic' ? 15 : 30;
       const start = new Date(selectedDate);
       const [hours, minutes] = selectedSlot!.split(':').map(Number);
       start.setHours(hours, minutes, 0, 0);
-
       const end = new Date(start.getTime() + interval * 60000);
 
-      await supabase.from('appointments').insert({
+      const { data: newApp, error: appErr } = await supabase.from('appointments').insert({
         professional_id: selectedProfessional.id,
         patient_id: session?.user.id,
         start_time: start.toISOString(),
         end_time: end.toISOString(),
-        status: 'confirmed',
+        status: 'pending',
         notes: `Plano: ${selectedPlan === 'basic' ? 'Básica' : 'Individualizada'} | Pagamento: ${paymentMethod}`
+      }).select().single();
+
+      if (appErr || !newApp) throw new Error('Erro ao criar agendamento.');
+
+      // 2. Call Asaas Edge Function
+      const { data, error } = await supabase.functions.invoke('asaas-payment', {
+        body: {
+          appointmentId: newApp.id,
+          paymentMethod: paymentMethod === 'pix' ? 'PIX' : 'CREDIT_CARD',
+          creditCard: paymentMethod === 'credit' ? {
+            holderName: "DUMMY HOLDER",
+            number: "4444555566667777",
+            expiryMonth: "12",
+            expiryYear: "2025",
+            ccv: "123"
+          } : null
+        }
       });
-      setWizardStep('success');
-    } catch (error) {
-      setToast({ show: true, message: 'Erro ao processar agendamento.', type: 'error' });
+
+      if (error || !data.success) {
+        throw new Error(data?.error || 'Erro no processamento do pagamento.');
+      }
+
+      if (paymentMethod === 'pix' && data.pix) {
+        setPixData(data.pix);
+        setToast({ show: true, message: 'QR Code Pix gerado!', type: 'success' });
+      } else {
+        setWizardStep('success');
+      }
+    } catch (error: any) {
+      setToast({ show: true, message: error.message || 'Erro ao processar agendamento.', type: 'error' });
     } finally {
-      setLoading(false);
+      setPaying(false);
     }
   };
 
@@ -383,63 +411,95 @@ export const ScheduleScreen: React.FC = () => {
     <div className="space-y-6 animate-in slide-in-from-right duration-300">
       <h2 className="text-2xl font-black text-white uppercase tracking-tight">Checkout</h2>
 
-      <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6">
-        <div className="flex gap-4 mb-6">
-          <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center", selectedPlan === 'basic' ? "bg-white" : "bg-[#FBBF24]")}>
-            {selectedPlan === 'basic' ? <Dumbbell size={24} className="text-black" /> : <Activity size={24} className="text-black" />}
+      {pixData ? (
+        <div className="bg-white rounded-[2rem] p-8 text-center animate-in zoom-in duration-300 shadow-2xl">
+          <h3 className="text-black font-black text-lg mb-4 uppercase">Pagamento via Pix</h3>
+          <div className="w-48 h-48 mx-auto mb-6 bg-gray-100 rounded-2xl flex items-center justify-center p-4 border-2 border-dashed border-[#FBBF24]">
+            <img src={`data:image/png;base64,${pixData.encodedImage}`} alt="QR Code" className="w-full h-full" />
           </div>
+          <p className="text-slate-500 text-xs mb-6 font-bold leading-relaxed px-4">
+            Aponte a câmera do seu banco para o código acima ou use o código Copia e Cola abaixo.
+          </p>
+
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(pixData.payload);
+              setToast({ show: true, message: 'Copiado para a área de transferência!', type: 'success' });
+            }}
+            className="w-full py-4 rounded-xl bg-black text-[#FBBF24] font-black uppercase tracking-widest text-xs mb-4 flex items-center justify-center gap-2"
+          >
+            Copiar Código Pix <QrCode size={16} />
+          </button>
+
+          <button
+            onClick={() => setWizardStep('success')}
+            className="w-full py-4 rounded-xl bg-[#39FF14] text-black font-black uppercase tracking-widest text-xs shadow-lg"
+          >
+            Já realizei o pagamento
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6">
+            <div className="flex gap-4 mb-6">
+              <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center", selectedPlan === 'basic' ? "bg-white" : "bg-[#FBBF24]")}>
+                {selectedPlan === 'basic' ? <Dumbbell size={24} className="text-black" /> : <Activity size={24} className="text-black" />}
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase">Resumo do Pedido</p>
+                <h3 className="text-lg font-bold text-white leading-tight mb-1">{selectedPlan === 'basic' ? 'Avaliação Básica' : 'Avaliação Individualizada'}</h3>
+                <p className="text-xs text-slate-400">Com {selectedProfessional?.full_name}</p>
+              </div>
+            </div>
+            <div className="flex justify-between items-center pt-4 border-t border-white/10">
+              <span className="text-sm font-bold text-slate-400 uppercase tracking-wider">Total a Pagar</span>
+              <span className={cn("text-2xl font-black", selectedPlan === 'basic' ? "text-white" : "text-[#FBBF24]")}>{selectedPlan === 'basic' ? 'R$ 39,90' : 'R$ 89,90'}</span>
+            </div>
+          </div>
+
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase">Resumo do Pedido</p>
-            <h3 className="text-lg font-bold text-white leading-tight mb-1">{selectedPlan === 'basic' ? 'Avaliação Básica' : 'Avaliação Individualizada'}</h3>
-            <p className="text-xs text-slate-400">Com {selectedProfessional?.full_name}</p>
+            <h3 className="text-sm font-bold text-slate-400 mb-4 uppercase tracking-widest">Forma de Pagamento</h3>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <button
+                onClick={() => setPaymentMethod('pix')}
+                className={cn(
+                  "p-4 rounded-2xl border flex flex-col items-center gap-2 transition-all relative overflow-hidden",
+                  paymentMethod === 'pix' ? "bg-[#39FF14]/10 border-[#39FF14] text-white" : "bg-white/5 border-white/10 text-slate-500"
+                )}
+              >
+                {paymentMethod === 'pix' && <div className="absolute top-0 right-0 px-2 py-0.5 bg-[#39FF14] text-black text-[8px] font-black uppercase">Instantâneo</div>}
+                <QrCode size={24} />
+                <span className="text-xs font-bold">Pix</span>
+              </button>
+              <button
+                onClick={() => setPaymentMethod('credit')}
+                className={cn(
+                  "p-4 rounded-2xl border flex flex-col items-center gap-2 transition-all",
+                  paymentMethod === 'credit' ? "bg-[#39FF14]/10 border-[#39FF14] text-white" : "bg-white/5 border-white/10 text-slate-500"
+                )}
+              >
+                <CreditCard size={24} />
+                <span className="text-xs font-bold">Cartão</span>
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="flex justify-between items-center pt-4 border-t border-white/10">
-          <span className="text-sm font-bold text-slate-400 uppercase tracking-wider">Total a Pagar</span>
-          <span className={cn("text-2xl font-black", selectedPlan === 'basic' ? "text-white" : "text-[#FBBF24]")}>{selectedPlan === 'basic' ? 'R$ 39,90' : 'R$ 89,90'}</span>
-        </div>
-      </div>
 
-      <div>
-        <h3 className="text-sm font-bold text-slate-400 mb-4 uppercase tracking-widest">Forma de Pagamento</h3>
-        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="bg-[#39FF14]/5 border border-[#39FF14]/20 p-4 rounded-xl flex items-start gap-3">
+            <ShieldCheck size={18} className="text-[#39FF14] shrink-0 mt-0.5" />
+            <p className="text-[10px] text-slate-400 leading-relaxed">
+              Seus dados são criptografados de ponta-a-ponta. Processamento seguro via protocolo SSL 256 bits.
+            </p>
+          </div>
+
           <button
-            onClick={() => setPaymentMethod('pix')}
-            className={cn(
-              "p-4 rounded-2xl border flex flex-col items-center gap-2 transition-all relative overflow-hidden",
-              paymentMethod === 'pix' ? "bg-[#39FF14]/10 border-[#39FF14] text-white" : "bg-white/5 border-white/10 text-slate-500"
-            )}
+            onClick={handleConfirmBooking}
+            disabled={paying}
+            className="w-full py-4 rounded-xl bg-[#39FF14] text-black font-black uppercase tracking-widest text-xs hover:bg-[#32d411] transition-all shadow-[0_0_20px_rgba(57,255,20,0.3)] flex items-center justify-center gap-2"
           >
-            {paymentMethod === 'pix' && <div className="absolute top-0 right-0 px-2 py-0.5 bg-[#39FF14] text-black text-[8px] font-black uppercase">Instantâneo</div>}
-            <QrCode size={24} />
-            <span className="text-xs font-bold">Pix</span>
+            {paying ? <Loader className="animate-spin" size={16} /> : 'Finalizar Pagamento'}
           </button>
-          <button
-            onClick={() => setPaymentMethod('credit')}
-            className={cn(
-              "p-4 rounded-2xl border flex flex-col items-center gap-2 transition-all",
-              paymentMethod === 'credit' ? "bg-[#39FF14]/10 border-[#39FF14] text-white" : "bg-white/5 border-white/10 text-slate-500"
-            )}
-          >
-            <CreditCard size={24} />
-            <span className="text-xs font-bold">Cartão</span>
-          </button>
-        </div>
-      </div>
-
-      <div className="bg-[#39FF14]/5 border border-[#39FF14]/20 p-4 rounded-xl flex items-start gap-3">
-        <ShieldCheck size={18} className="text-[#39FF14] shrink-0 mt-0.5" />
-        <p className="text-[10px] text-slate-400 leading-relaxed">
-          Seus dados são criptografados de ponta-a-ponta. Processamento seguro via protocolo SSL 256 bits.
-        </p>
-      </div>
-
-      <button
-        onClick={handleConfirmBooking}
-        className="w-full py-4 rounded-xl bg-[#39FF14] text-black font-black uppercase tracking-widest text-xs hover:bg-[#32d411] transition-all shadow-[0_0_20px_rgba(57,255,20,0.3)]"
-      >
-        Finalizar Pagamento
-      </button>
+        </>
+      )}
     </div>
   );
 
