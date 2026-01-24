@@ -135,9 +135,11 @@ export const ScheduleScreen: React.FC = () => {
       const slots = [];
       const interval = selectedPlan === 'basic' ? 15 : 30;
 
-      let current = new Date();
+      // Use selectedDate to ensure we stay on the calendar day
+      let current = new Date(selectedDate);
       current.setHours(startHour, parseInt(startSplit[1] || '0'), 0, 0);
-      const end = new Date();
+
+      const end = new Date(selectedDate);
       end.setHours(endHour, parseInt(endSplit[1] || '0'), 0, 0);
 
       while (current < end) {
@@ -158,9 +160,10 @@ export const ScheduleScreen: React.FC = () => {
   const reserveSlot = async () => {
     setLoading(true);
     try {
+      if (!selectedSlot) return;
       const interval = selectedPlan === 'basic' ? 15 : 30;
       const start = new Date(selectedDate);
-      const [hours, minutes] = selectedSlot!.split(':').map(Number);
+      const [hours, minutes] = selectedSlot.split(':').map(Number);
       start.setHours(hours, minutes, 0, 0);
       const end = new Date(start.getTime() + interval * 60000);
       const expiresAt = new Date(Date.now() + 30 * 60000);
@@ -173,14 +176,16 @@ export const ScheduleScreen: React.FC = () => {
         end_time: end.toISOString(),
         status: 'pending',
         expires_at: expiresAt.toISOString(),
-        notes: `Plano: ${selectedPlan === 'basic' ? 'Básica' : 'Individualizada'}`
+        notes: `Plano: ${selectedPlan === 'basic' ? 'Básica' : 'Individualizada'}`,
+        date: start.toISOString() // Legacy support
       }).select().single();
 
       if (error) throw error;
       setAppointmentId(data.id);
       setWizardStep('checkout');
     } catch (error: any) {
-      setToast({ show: true, message: 'Este horário acabou de ser reservado. Escolha outro.', type: 'error' });
+      console.error('Reservation Error:', error);
+      setToast({ show: true, message: 'Erro ao reservar horário. Ele pode ter acabado de ser ocupado.', type: 'error' });
       fetchSlots();
     } finally {
       setLoading(false);
