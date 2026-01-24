@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { ArrowRight, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Logo1, ColorWaveform } from '@/components/shared/WelcomeBranding';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Toast } from '@/components/ui/Toast';
 import { cn } from '@/lib/utils';
 
 export const LoginScreen: React.FC = () => {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { signOut } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -24,7 +25,11 @@ export const LoginScreen: React.FC = () => {
 
     setLoading(true);
     try {
-      const { error } = await signIn(formData.email, formData.password);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password
+      });
+
       if (error) throw error;
 
       setToast({ show: true, message: 'Login realizado! Bem-vindo de volta. 🚀', type: 'success' });

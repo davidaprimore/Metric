@@ -10,11 +10,14 @@ import {
 import { BottomNav } from '@/components/layout/BottomNav';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
+import { cn } from '@/lib/utils';
 import { masks } from '@/utils/masks';
+import { fetchAddressByCEP } from '@/utils/cep';
 
 export const ProfessionalRegisterScreen: React.FC = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [fetchingCep, setFetchingCep] = useState(false);
 
     // Dropdown data
     const [specialties, setSpecialties] = useState<any[]>([]);
@@ -65,11 +68,32 @@ export const ProfessionalRegisterScreen: React.FC = () => {
         }
     };
 
+    const handleCepLookup = async (cep: string) => {
+        const cleanCep = cep.replace(/\D/g, '');
+        if (cleanCep.length === 8) {
+            setFetchingCep(true);
+            const data = await fetchAddressByCEP(cleanCep);
+            if (data) {
+                setFormData(prev => ({
+                    ...prev,
+                    address_street: data.logradouro,
+                    address_neighborhood: data.bairro,
+                    address_city: data.localidade,
+                    address_state: data.uf
+                }));
+            }
+            setFetchingCep(false);
+        }
+    };
+
     const handleChange = (field: string, value: string) => {
         let finalValue = value;
         if (field === 'cpf') finalValue = masks.cpf(value);
         if (field === 'phone') finalValue = masks.phone(value);
-        if (field === 'address_zip') finalValue = masks.cep(value);
+        if (field === 'address_zip') {
+            finalValue = masks.cep(value);
+            handleCepLookup(finalValue);
+        }
 
         setFormData(prev => ({ ...prev, [field]: finalValue }));
     };
@@ -82,16 +106,42 @@ export const ProfessionalRegisterScreen: React.FC = () => {
 
         setLoading(true);
         try {
+            // Create user in Auth with approved status (since it's an admin creating it)
+            const { data: authData, error: authError } = await supabase.auth.signUp({
+                email: formData.email,
+                password: 'TempPassword123!', // Random or temp password
+                options: {
+                    data: {
+                        first_name: formData.full_name.split(' ')[0],
+                        last_name: formData.full_name.split(' ').slice(1).join(' '),
+                        role: 'profissional',
+                        approval_status: 'approved',
+                        cpf: formData.cpf,
+                        phone: formData.phone,
+                        ...formData
+                    }
+                }
+            });
+
+            if (authError) throw authError;
+
             const uploadPromises = Object.entries(files).map(async ([key, file]) => {
                 if (!file) return;
-                const path = `temp/${formData.cpf}/${key}_${Date.now()}`;
-                await supabase.storage.from('documents').upload(path, file);
-                return path;
+                const path = `documents/${authData.user?.id}/${key}_${Date.now()}`;
+                await supabase.storage.from('documents').upload(path, file as File);
+
+                // Create document record as approved
+                await supabase.from('professional_documents').insert({
+                    profile_id: authData.user?.id,
+                    document_type: key === 'cref' ? 'cref_crm' : key === 'cert' ? 'certificacao' : 'cpf',
+                    file_url: path,
+                    status: 'approved'
+                });
             });
 
             await Promise.all(uploadPromises);
 
-            alert('Profissional cadastrado com sucesso! (Simulação: Convite enviado por e-mail)');
+            alert(`🚀 Excelente! ${formData.full_name.split(' ')[0]} foi cadastrado e aprovado com sucesso.\n\nUm convite de acesso foi enviado para ${formData.email}.`);
             navigate('/admin/registrations/professionals');
 
         } catch (error) {
@@ -190,7 +240,7 @@ export const ProfessionalRegisterScreen: React.FC = () => {
                             <div className="col-span-1">
                                 <label className={labelStyle}>CEP</label>
                                 <input
-                                    className={inputStyle}
+                                    className={cn(inputStyle, fetchingCep && "animate-pulse")}
                                     placeholder="00000-000"
                                     value={formData.address_zip}
                                     onChange={(e) => handleChange('address_zip', e.target.value)}
@@ -200,10 +250,10 @@ export const ProfessionalRegisterScreen: React.FC = () => {
                             <div className="col-span-2">
                                 <label className={labelStyle}>Cidade</label>
                                 <input
-                                    className={inputStyle}
+                                    className={cn(inputStyle, "bg-indigo-50/30 border-indigo-100/50 text-indigo-900/40")}
                                     placeholder="São Paulo"
                                     value={formData.address_city}
-                                    onChange={(e) => handleChange('address_city', e.target.value)}
+                                    readOnly
                                 />
                             </div>
                         </div>
@@ -211,10 +261,10 @@ export const ProfessionalRegisterScreen: React.FC = () => {
                         <div>
                             <label className={labelStyle}>Logradouro</label>
                             <input
-                                className={inputStyle}
+                                className={cn(inputStyle, "bg-indigo-50/30 border-indigo-100/50 text-indigo-900/40")}
                                 placeholder="Rua..."
                                 value={formData.address_street}
-                                onChange={(e) => handleChange('address_street', e.target.value)}
+                                readOnly
                             />
                         </div>
 
@@ -231,10 +281,10 @@ export const ProfessionalRegisterScreen: React.FC = () => {
                             <div>
                                 <label className={labelStyle}>Bairro</label>
                                 <input
-                                    className={inputStyle}
+                                    className={cn(inputStyle, "bg-indigo-50/30 border-indigo-100/50 text-indigo-900/40")}
                                     placeholder="Centro"
                                     value={formData.address_neighborhood}
-                                    onChange={(e) => handleChange('address_neighborhood', e.target.value)}
+                                    readOnly
                                 />
                             </div>
                         </div>
@@ -294,7 +344,7 @@ export const ProfessionalRegisterScreen: React.FC = () => {
 
                     <div className="space-y-3">
                         {/* CPF Upload */}
-                        <div className="bg-white p-4 rounded-3xl flex items-center gap-4 border border-gray-100/50">
+                        <div className="bg-white p-4 rounded-3xl flex items-center gap-4 relative border border-gray-100/50">
                             <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 shrink-0">
                                 <Upload size={20} />
                             </div>

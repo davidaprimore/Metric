@@ -25,6 +25,14 @@ import { UnitsScreen } from '@/features/admin/pages/UnitsScreen';
 import { SpecialtiesScreen } from '@/features/admin/pages/SpecialtiesScreen';
 import { ProfessionalRegisterScreen } from '@/features/admin/pages/ProfessionalRegisterScreen';
 import { ProfessionalVerificationScreen } from '@/features/admin/pages/ProfessionalVerificationScreen';
+import { ApprovalListScreen } from '@/features/admin/pages/ApprovalListScreen';
+import { RegisterProfessionalStep2 } from '@/features/auth/pages/RegisterProfessionalStep2';
+import { RegisterPendingScreen } from '@/features/auth/pages/RegisterPendingScreen';
+import { NotificationCenterScreen } from '@/features/admin/pages/NotificationCenterScreen';
+import { ProfessionalDataScreen } from '@/features/profile/pages/ProfessionalDataScreen';
+import { AssessmentHistoryScreen } from '@/features/profile/pages/AssessmentHistoryScreen';
+import { AssessmentDetailScreen } from '@/features/profile/pages/AssessmentDetailScreen';
+import { AppointmentDetailScreen } from '@/features/dashboard/pages/AppointmentDetailScreen';
 
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -50,6 +58,8 @@ function App() {
             <Route path="/login" element={<LoginScreen />} />
             <Route path="/register" element={<RegisterScreen />} />
             <Route path="/register-step-2" element={<RegisterStep2 />} />
+            <Route path="/register-professional-step-2" element={<RegisterProfessionalStep2 />} />
+            <Route path="/register-pending" element={<RegisterPendingScreen />} />
             <Route path="/register-success" element={<RegistrationSuccess />} />
             <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
 
@@ -115,6 +125,24 @@ function App() {
               </PrivateRoute>
             } />
 
+            <Route path="/profile/professional-data" element={
+              <PrivateRoute>
+                <ProfessionalDataScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/profile/history" element={
+              <PrivateRoute>
+                <AssessmentHistoryScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/profile/history/:id" element={
+              <PrivateRoute>
+                <AssessmentDetailScreen />
+              </PrivateRoute>
+            } />
+
             <Route path="/admin" element={
               <PrivateRoute>
                 <AdminScreen />
@@ -127,6 +155,11 @@ function App() {
               </PrivateRoute>
             } />
 
+            <Route path="/admin/registrations/approvals" element={
+              <PrivateRoute>
+                <ApprovalListScreen />
+              </PrivateRoute>
+            } />
             <Route path="/admin/registrations/professionals" element={
               <PrivateRoute>
                 <ProfessionalsScreen />
@@ -154,6 +187,24 @@ function App() {
             <Route path="/admin/professionals/verify/:id" element={
               <PrivateRoute>
                 <ProfessionalVerificationScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/notifications" element={
+              <PrivateRoute>
+                <NotificationCenterScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/admin/notifications" element={
+              <PrivateRoute>
+                <NotificationCenterScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/appointment/:id" element={
+              <PrivateRoute>
+                <AppointmentDetailScreen />
               </PrivateRoute>
             } />
 

@@ -12,13 +12,23 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
 import { Toast } from '@/components/ui/Toast';
+import { fetchAddressByCEP } from '@/utils/cep';
+import { cn } from '@/lib/utils';
 
 export const UnitsScreen: React.FC = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [units, setUnits] = useState<any[]>([]);
     const [showForm, setShowForm] = useState(false);
-    const [newUnit, setNewUnit] = useState({ name: '', address: '' });
+    const [fetchingCep, setFetchingCep] = useState(false);
+    const [newUnit, setNewUnit] = useState({
+        name: '',
+        address_zip: '',
+        address_street: '',
+        address_number: '',
+        address_neighborhood: '',
+        address_city: ''
+    });
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
@@ -41,16 +51,41 @@ export const UnitsScreen: React.FC = () => {
         }
     };
 
+    const handleCepLookup = async (cep: string) => {
+        const cleanCep = cep.replace(/\D/g, '');
+        if (cleanCep.length === 8) {
+            setFetchingCep(true);
+            const data = await fetchAddressByCEP(cleanCep);
+            if (data) {
+                setNewUnit(prev => ({
+                    ...prev,
+                    address_street: data.logradouro,
+                    address_neighborhood: data.bairro,
+                    address_city: data.localidade
+                }));
+            }
+            setFetchingCep(false);
+        }
+    };
+
     const handleSave = async () => {
-        if (!newUnit.name || !newUnit.address) return;
+        if (!newUnit.name || !newUnit.address_zip || !newUnit.address_street) return;
         setSaving(true);
         try {
+            const fullAddress = `${newUnit.address_street}, ${newUnit.address_number} - ${newUnit.address_neighborhood}, ${newUnit.address_city} - CEP: ${newUnit.address_zip}`;
             const { error } = await supabase.from('units').insert([
-                { name: newUnit.name, address: newUnit.address }
+                { name: newUnit.name, address: fullAddress }
             ]);
             if (error) throw error;
 
-            setNewUnit({ name: '', address: '' });
+            setNewUnit({
+                name: '',
+                address_zip: '',
+                address_street: '',
+                address_number: '',
+                address_neighborhood: '',
+                address_city: ''
+            });
             setShowForm(false);
             fetchUnits();
         } catch (error) {
@@ -105,14 +140,57 @@ export const UnitsScreen: React.FC = () => {
                             />
                         </div>
 
-                        <div className="bg-gray-50 rounded-2xl px-4 py-3 border border-gray-100">
-                            <label className="text-[10px] uppercase font-bold text-gray-400 pl-1 block mb-1">Endereço Completo</label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-gray-50 rounded-2xl px-4 py-3 border border-gray-100">
+                                <label className="text-[10px] uppercase font-bold text-gray-400 pl-1 block mb-1">CEP</label>
+                                <input
+                                    className={cn("w-full bg-transparent font-bold text-dark outline-none placeholder:text-gray-300", fetchingCep && "animate-pulse")}
+                                    placeholder="00000-000"
+                                    value={newUnit.address_zip}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        setNewUnit({ ...newUnit, address_zip: val });
+                                        if (val.replace(/\D/g, '').length === 8) handleCepLookup(val);
+                                    }}
+                                />
+                            </div>
+                            <div className="bg-indigo-50/30 rounded-2xl px-4 py-3 border border-indigo-100/50">
+                                <label className="text-[10px] uppercase font-bold text-indigo-400 pl-1 block mb-1">Cidade</label>
+                                <input
+                                    className="w-full bg-transparent font-bold text-indigo-900/40 outline-none"
+                                    value={newUnit.address_city}
+                                    readOnly
+                                />
+                            </div>
+                        </div>
+
+                        <div className="bg-indigo-50/30 rounded-2xl px-4 py-3 border border-indigo-100/50">
+                            <label className="text-[10px] uppercase font-bold text-indigo-400 pl-1 block mb-1">Logradouro</label>
                             <input
-                                className="w-full bg-transparent font-bold text-dark outline-none placeholder:text-gray-300"
-                                placeholder="Rua, Número, Bairro..."
-                                value={newUnit.address}
-                                onChange={(e) => setNewUnit({ ...newUnit, address: e.target.value })}
+                                className="w-full bg-transparent font-bold text-indigo-900/40 outline-none"
+                                value={newUnit.address_street}
+                                readOnly
                             />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-gray-50 rounded-2xl px-4 py-3 border border-gray-100">
+                                <label className="text-[10px] uppercase font-bold text-gray-400 pl-1 block mb-1">Número</label>
+                                <input
+                                    className="w-full bg-transparent font-bold text-dark outline-none placeholder:text-gray-300"
+                                    placeholder="123"
+                                    value={newUnit.address_number}
+                                    onChange={(e) => setNewUnit({ ...newUnit, address_number: e.target.value })}
+                                />
+                            </div>
+                            <div className="bg-indigo-50/30 rounded-2xl px-4 py-3 border border-indigo-100/50">
+                                <label className="text-[10px] uppercase font-bold text-indigo-400 pl-1 block mb-1">Bairro</label>
+                                <input
+                                    className="w-full bg-transparent font-bold text-indigo-900/40 outline-none"
+                                    value={newUnit.address_neighborhood}
+                                    readOnly
+                                />
+                            </div>
                         </div>
 
                         <div className="flex gap-3 pt-2">

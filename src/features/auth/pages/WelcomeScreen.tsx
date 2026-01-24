@@ -33,16 +33,16 @@ export const WelcomeScreen: React.FC = () => {
             <div className="w-full space-y-4 z-10 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
                 <Button
                     variant="primary"
-                    className="w-full h-16 rounded-2xl text-lg font-bold group shadow-neon"
+                    className="w-full h-16 rounded-2xl text-[13px] font-black uppercase tracking-[0.2em] group shadow-neon"
                     onClick={() => navigate('/register')}
                 >
-                    Começar Agora
+                    COMEÇAR AGORA
                     <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
 
                 <Button
                     variant="ghost"
-                    className="w-full h-16 rounded-2xl text-white border border-secondary/30 hover:bg-secondary/10 hover:border-secondary/50 font-bold tracking-widest uppercase transition-all"
+                    className="w-full h-16 rounded-2xl text-white border border-white/10 hover:bg-white/5 font-black tracking-[0.2em] uppercase transition-all text-xs"
                     onClick={() => navigate('/login')}
                 >
                     ENTRAR

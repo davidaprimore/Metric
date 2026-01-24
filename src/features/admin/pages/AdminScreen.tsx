@@ -7,7 +7,8 @@ import {
     Users,
     Building2,
     DollarSign,
-    Settings
+    Settings,
+    Bell
 } from 'lucide-react';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { cn } from '@/lib/utils';
@@ -44,9 +45,16 @@ export const AdminScreen: React.FC = () => {
                 >
                     <ChevronLeft size={20} />
                 </button>
-                <h1 className="text-2xl font-bold text-dark">
+                <h1 className="text-2xl font-bold text-dark flex-1">
                     Administração
                 </h1>
+                <button
+                    onClick={() => navigate('/admin/notifications')}
+                    className="w-11 h-11 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600 relative active:scale-95 transition-transform"
+                >
+                    <Bell size={20} fill="currentColor" />
+                    <div className="absolute top-3.5 right-3.5 w-2.5 h-2.5 bg-secondary rounded-full border-2 border-[#F1F3F5]"></div>
+                </button>
             </header>
 
             <div className="space-y-4">

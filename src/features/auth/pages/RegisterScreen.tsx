@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
-import { Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Toast } from '@/components/ui/Toast';
+import { supabase } from '@/lib/supabase';
+import { isValidCPF } from '@/utils/validation';
+
+type ValidationStatus = 'idle' | 'checking' | 'available' | 'taken' | 'invalid';
 
 export const RegisterScreen: React.FC = () => {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [userType, setUserType] = useState<'patient' | 'professional'>('patient');
+    const [toast, setToast] = useState({ show: false, message: '', type: 'error' as 'error' | 'success' });
 
     // Mock form state
     const [formData, setFormData] = useState({
@@ -19,6 +26,129 @@ export const RegisterScreen: React.FC = () => {
         password: '',
         confirmPassword: ''
     });
+
+    const [cpfStatus, setCpfStatus] = useState<ValidationStatus>('idle');
+    const [emailStatus, setEmailStatus] = useState<ValidationStatus>('idle');
+    const [phoneStatus, setPhoneStatus] = useState<ValidationStatus>('idle');
+
+    React.useEffect(() => {
+        setFormData({
+            name: '',
+            surname: '',
+            cpf: '',
+            phone: '',
+            email: '',
+            password: '',
+            confirmPassword: ''
+        });
+        setCpfStatus('idle');
+        setEmailStatus('idle');
+        setPhoneStatus('idle');
+    }, []);
+
+    React.useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
+    const scrollToField = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+
+    // Real-time validation for CPF
+    React.useEffect(() => {
+        const raw = formData.cpf.replace(/\D/g, '');
+        if (raw.length === 0) {
+            setCpfStatus('idle');
+            return;
+        }
+
+        if (raw.length < 11) {
+            setCpfStatus('idle');
+            return;
+        }
+
+        if (!isValidCPF(formData.cpf)) {
+            setCpfStatus('invalid');
+            return;
+        }
+
+        setCpfStatus('checking');
+        const timer = setTimeout(async () => {
+            try {
+                // Check both formatted and raw to be safe, quoting strings for .or()
+                const { data } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .or(`cpf.eq."${formData.cpf}",cpf.eq."${raw}"`)
+                    .maybeSingle();
+                setCpfStatus(data ? 'taken' : 'available');
+            } catch (err) {
+                console.error('CPF Validation Error:', err);
+                setCpfStatus('idle');
+            }
+        }, 600);
+        return () => clearTimeout(timer);
+    }, [formData.cpf]);
+
+    // Real-time validation for Email
+    React.useEffect(() => {
+        if (!formData.email) {
+            setEmailStatus('idle');
+            return;
+        }
+
+        if (!formData.email.includes('@')) {
+            setEmailStatus('checking'); // Show it's checking/validating format
+            return;
+        }
+
+        setEmailStatus('checking');
+        const timer = setTimeout(async () => {
+            try {
+                // Use .ilike for case-insensitive check
+                const { data } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .ilike('email', formData.email.trim())
+                    .maybeSingle();
+                setEmailStatus(data ? 'taken' : 'available');
+            } catch (err) {
+                console.error('Email Validation Error:', err);
+                setEmailStatus('idle');
+            }
+        }, 600);
+        return () => clearTimeout(timer);
+    }, [formData.email]);
+
+    // Real-time validation for Phone
+    React.useEffect(() => {
+        const raw = formData.phone.replace(/\D/g, '');
+        if (raw.length === 0) {
+            setPhoneStatus('idle');
+            return;
+        }
+
+        if (raw.length < 10) {
+            setPhoneStatus('idle');
+            return;
+        }
+
+        setPhoneStatus('checking');
+        const timer = setTimeout(async () => {
+            try {
+                const { data } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .or(`phone.eq."${formData.phone}",phone.eq."${raw}"`)
+                    .maybeSingle();
+                setPhoneStatus(data ? 'taken' : 'available');
+            } catch (err) {
+                console.error('Phone Validation Error:', err);
+                setPhoneStatus('idle');
+            }
+        }, 600);
+        return () => clearTimeout(timer);
+    }, [formData.phone]);
 
     const formatCPF = (value: string) => {
         const raw = value.replace(/\D/g, '');
@@ -60,14 +190,28 @@ export const RegisterScreen: React.FC = () => {
 
     const passwordsMatch = formData.password.length > 0 && formData.password === formData.confirmPassword;
     const isFormValid = formData.name.length > 2 &&
-        formData.cpf.length === 14 &&
-        formData.phone.length >= 14 &&
-        formData.email.includes('@') &&
+        cpfStatus === 'available' &&
+        phoneStatus === 'available' &&
+        emailStatus === 'available' &&
         requirements.every(r => r.met) &&
         passwordsMatch;
 
+    const StatusIcon = ({ status }: { status: ValidationStatus }) => {
+        if (status === 'checking') return <Loader2 size={22} className="animate-spin text-secondary" />;
+        if (status === 'available') return <CheckCircle2 size={22} className="text-[#16A34A]" strokeWidth={3} />;
+        if (status === 'taken' || status === 'invalid') return <AlertCircle size={22} className="text-[#FF5252]" strokeWidth={3} />;
+        return null;
+    };
+
     return (
         <div className="min-h-screen bg-white flex flex-col font-sans">
+            <Toast
+                isVisible={toast.show}
+                message={toast.message}
+                type={toast.type}
+                onClose={() => setToast({ ...toast, show: false })}
+            />
+
             {/* Step Header */}
             <div className="p-6 border-b border-gray-100">
                 <div className="flex justify-between items-center mb-4">
@@ -80,11 +224,37 @@ export const RegisterScreen: React.FC = () => {
             </div>
 
             <div className="flex-1 p-6 space-y-8 overflow-y-auto">
-                <div className="space-y-2">
+                <div className="space-y-4">
                     <h2 className="text-4xl font-display font-bold text-dark tracking-tight">Criar Conta</h2>
                     <p className="text-gray-500 text-sm">
-                        Comece sua avaliação profissional hoje com <span className="font-bold text-dark">METRIK</span>.
+                        Preencha seus dados para começar sua jornada com a <span className="font-bold text-dark">METRIK</span>.
                     </p>
+                </div>
+
+                {/* Path Selector */}
+                <div className="flex bg-gray-50 p-1.5 rounded-3xl border border-gray-100">
+                    <button
+                        onClick={() => setUserType('patient')}
+                        className={cn(
+                            "flex-1 h-12 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all",
+                            userType === 'patient'
+                                ? "bg-white text-secondary shadow-md border border-gray-100"
+                                : "text-gray-400 opacity-60"
+                        )}
+                    >
+                        Quero ser atendido
+                    </button>
+                    <button
+                        onClick={() => setUserType('professional')}
+                        className={cn(
+                            "flex-1 h-12 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all",
+                            userType === 'professional'
+                                ? "bg-white text-secondary shadow-md border border-gray-100"
+                                : "text-gray-400 opacity-40 hover:opacity-100"
+                        )}
+                    >
+                        Sou Profissional
+                    </button>
                 </div>
 
                 <div className="space-y-4">
@@ -96,6 +266,8 @@ export const RegisterScreen: React.FC = () => {
                             className="w-full h-14 px-4 bg-gray-100 rounded-2xl border-none focus:ring-2 focus:ring-secondary/20 transition-all outline-none text-dark"
                             value={formData.name}
                             onChange={e => setFormData({ ...formData, name: e.target.value })}
+                            onFocus={scrollToField}
+                            autoComplete="off"
                         />
                     </div>
 
@@ -107,42 +279,88 @@ export const RegisterScreen: React.FC = () => {
                             className="w-full h-14 px-4 bg-gray-100 rounded-2xl border-none focus:ring-2 focus:ring-secondary/20 transition-all outline-none text-dark"
                             value={formData.surname}
                             onChange={e => setFormData({ ...formData, surname: e.target.value })}
+                            onFocus={scrollToField}
+                            autoComplete="off"
                         />
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-dark ml-1">CPF</label>
+                        <div className="flex justify-between items-center ml-1">
+                            <label className="text-xs font-bold text-dark">CPF</label>
+                            <StatusIcon status={cpfStatus} />
+                        </div>
                         <input
                             type="text"
                             placeholder="000.000.000-00"
-                            className="w-full h-14 px-4 bg-gray-100 rounded-2xl border-none focus:ring-2 focus:ring-secondary/20 transition-all outline-none text-dark font-mono"
+                            className={cn(
+                                "w-full h-14 px-4 bg-gray-100 rounded-2xl border-none focus:ring-2 transition-all outline-none text-dark font-mono",
+                                (cpfStatus === 'taken' || cpfStatus === 'invalid') ? "ring-2 ring-[#FF5252]/40 bg-red-50" : "focus:ring-secondary/20"
+                            )}
                             value={formData.cpf}
                             onChange={handleCPFChange}
+                            onFocus={scrollToField}
                             maxLength={14}
+                            autoComplete="off"
                         />
+                        {cpfStatus === 'taken' && (
+                            <p className="text-[10px] font-black text-[#FF5252] ml-1 mt-0.5 uppercase tracking-tighter italic">
+                                ATENÇÃO: ESTE CPF JÁ ESTÁ CADASTRADO EM OUTRA CONTA.
+                            </p>
+                        )}
+                        {cpfStatus === 'invalid' && (
+                            <p className="text-[10px] font-black text-[#FF5252] ml-1 mt-0.5 uppercase tracking-tighter italic">
+                                ATENÇÃO: POR FAVOR, INSIRA UM CPF VÁLIDO.
+                            </p>
+                        )}
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-dark ml-1">Telefone</label>
+                        <div className="flex justify-between items-center ml-1">
+                            <label className="text-xs font-bold text-dark font-sans">Telefone</label>
+                            <StatusIcon status={phoneStatus} />
+                        </div>
                         <input
                             type="text"
                             placeholder="(00) 00000-0000"
-                            className="w-full h-14 px-4 bg-gray-100 rounded-2xl border-none focus:ring-2 focus:ring-secondary/20 transition-all outline-none text-dark font-mono"
+                            className={cn(
+                                "w-full h-14 px-4 bg-gray-100 rounded-2xl border-none focus:ring-2 transition-all outline-none text-dark font-mono",
+                                phoneStatus === 'taken' ? "ring-2 ring-[#FF5252]/40 bg-red-50" : "focus:ring-secondary/20"
+                            )}
                             value={formData.phone}
                             onChange={handlePhoneChange}
+                            onFocus={scrollToField}
                             maxLength={15}
+                            autoComplete="off"
                         />
+                        {phoneStatus === 'taken' && (
+                            <p className="text-[10px] font-black text-[#FF5252] ml-1 mt-0.5 uppercase tracking-tighter italic">
+                                ATENÇÃO: ESTE TELEFONE JÁ ESTÁ CADASTRADO EM OUTRA CONTA.
+                            </p>
+                        )}
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-dark ml-1">E-mail</label>
+                        <div className="flex justify-between items-center ml-1">
+                            <label className="text-xs font-bold text-dark">E-mail</label>
+                            <StatusIcon status={emailStatus} />
+                        </div>
                         <input
                             type="email"
                             placeholder="seu@email.com"
-                            className="w-full h-14 px-4 bg-gray-100 rounded-2xl border-none focus:ring-2 focus:ring-secondary/20 transition-all outline-none text-dark"
+                            className={cn(
+                                "w-full h-14 px-4 bg-gray-100 rounded-2xl border-none focus:ring-2 transition-all outline-none text-dark",
+                                emailStatus === 'taken' ? "ring-2 ring-[#FF5252]/40 bg-red-50" : "focus:ring-secondary/20"
+                            )}
                             value={formData.email}
                             onChange={e => setFormData({ ...formData, email: e.target.value })}
+                            onFocus={scrollToField}
+                            autoComplete="off"
                         />
+                        {emailStatus === 'taken' && (
+                            <p className="text-[10px] font-black text-[#FF5252] ml-1 mt-0.5 uppercase tracking-tighter italic">
+                                ATENÇÃO: ESTE E-MAIL JÁ ESTÁ SENDO USADO POR OUTRO CADASTRO.
+                            </p>
+                        )}
                     </div>
 
                     <div className="space-y-1.5">
@@ -154,6 +372,8 @@ export const RegisterScreen: React.FC = () => {
                                 placeholder=""
                                 value={formData.password}
                                 onChange={e => setFormData({ ...formData, password: e.target.value })}
+                                onFocus={scrollToField}
+                                autoComplete="new-password"
                             />
                             <button
                                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
@@ -175,6 +395,8 @@ export const RegisterScreen: React.FC = () => {
                             placeholder=""
                             value={formData.confirmPassword}
                             onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })}
+                            onFocus={scrollToField}
+                            autoComplete="new-password"
                         />
                     </div>
                 </div>
@@ -185,7 +407,7 @@ export const RegisterScreen: React.FC = () => {
                         <div key={i} className="flex items-center gap-2">
                             <div className={cn(
                                 "w-2.5 h-2.5 rounded-full transition-colors",
-                                req.met ? "bg-primary" : "bg-gray-300"
+                                req.met ? "bg-[#C6FF00]" : "bg-gray-300"
                             )} />
                             <span className={cn(
                                 "text-[11px] font-medium transition-colors",
@@ -197,7 +419,7 @@ export const RegisterScreen: React.FC = () => {
                     <div className="flex items-center gap-2">
                         <div className={cn(
                             "w-2.5 h-2.5 rounded-full transition-colors",
-                            passwordsMatch ? "bg-primary" : "bg-gray-300"
+                            passwordsMatch ? "bg-[#C6FF00]" : "bg-gray-300"
                         )} />
                         <span className={cn(
                             "text-[11px] font-medium transition-colors",
@@ -212,10 +434,60 @@ export const RegisterScreen: React.FC = () => {
                         "w-full h-16 rounded-2xl text-lg font-bold text-dark transition-all shadow-none",
                         isFormValid ? "bg-primary hover:bg-primary/90" : "bg-gray-100 text-gray-400 cursor-not-allowed"
                     )}
-                    onClick={() => {
+                    onClick={async () => {
                         if (isFormValid) {
                             setLoading(true);
-                            setTimeout(() => navigate('/register-step-2', { state: { step1: formData } }), 800);
+                            try {
+                                // 1. Check if CPF already exists in profiles
+                                const { data: existingCPF } = await supabase
+                                    .from('profiles')
+                                    .select('id')
+                                    .eq('cpf', formData.cpf)
+                                    .maybeSingle();
+
+                                if (existingCPF) {
+                                    setToast({
+                                        show: true,
+                                        message: 'OPS! Este CPF já está cadastrado. Por favor, utilize outro ou acesse sua conta existente.',
+                                        type: 'error'
+                                    });
+                                    setLoading(false);
+                                    return;
+                                }
+
+                                // 2. Check if Email already exists in profiles
+                                const { data: existingEmail } = await supabase
+                                    .from('profiles')
+                                    .select('id')
+                                    .eq('email', formData.email)
+                                    .maybeSingle();
+
+                                if (existingEmail) {
+                                    setToast({ show: true, message: `O e-mail ${formData.email} já está em uso por outro cadastro.`, type: 'error' });
+                                    setLoading(false);
+                                    return;
+                                }
+
+                                // 3. Check if Phone already exists in profiles
+                                const { data: existingPhone } = await supabase
+                                    .from('profiles')
+                                    .select('id')
+                                    .eq('phone', formData.phone)
+                                    .maybeSingle();
+
+                                if (existingPhone) {
+                                    setToast({ show: true, message: `O telefone ${formData.phone} já está vinculado a outra conta.`, type: 'error' });
+                                    setLoading(false);
+                                    return;
+                                }
+
+                                const path = userType === 'patient' ? '/register-step-2' : '/register-professional-step-2';
+                                setTimeout(() => navigate(path, { state: { step1: formData } }), 800);
+                            } catch (err: any) {
+                                console.error(err);
+                                setToast({ show: true, message: 'Erro ao validar dados: ' + err.message, type: 'error' });
+                                setLoading(false);
+                            }
                         }
                     }}
                     isLoading={loading}

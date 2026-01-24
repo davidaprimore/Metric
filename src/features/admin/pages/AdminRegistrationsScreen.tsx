@@ -6,7 +6,8 @@ import {
     Users,
     Building2,
     DollarSign,
-    Award
+    Award,
+    ShieldCheck
 } from 'lucide-react';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { cn } from '@/lib/utils';
@@ -15,6 +16,13 @@ export const AdminRegistrationsScreen: React.FC = () => {
     const navigate = useNavigate();
 
     const menuItems = [
+        {
+            icon: ShieldCheck,
+            title: 'Aprovações Pendentes',
+            subtitle: 'Novos profissionais aguardando validação',
+            path: '/admin/registrations/approvals',
+            color: 'bg-amber-50 text-amber-500'
+        },
         {
             icon: Building2,
             title: 'Unidades',

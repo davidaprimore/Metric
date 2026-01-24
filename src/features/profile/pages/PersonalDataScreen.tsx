@@ -14,14 +14,18 @@ import { DefaultAvatar } from '@/components/shared/DefaultAvatar';
 import { ImageCropper } from '@/components/shared/ImageCropper';
 import { Toast } from '@/components/ui/Toast';
 import { supabase } from '@/lib/supabase';
+import { masks } from '@/utils/masks';
+import { fetchAddressByCEP } from '@/utils/cep';
+import { cn } from '@/lib/utils';
 
 export const PersonalDataScreen: React.FC = () => {
     const navigate = useNavigate();
-    const { user, refreshProfile } = useAuth();
+    const { user, userProfile, refreshProfile } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
     const [loading, setLoading] = useState(false);
     const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+    const [fetchingCep, setFetchingCep] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' as 'success' | 'error' | 'loading' });
 
     // Form state initialized with user metadata
@@ -33,8 +37,31 @@ export const PersonalDataScreen: React.FC = () => {
         gender: user?.user_metadata?.gender || 'Feminino',
         height: user?.user_metadata?.height || '',
         weight: user?.user_metadata?.weight || '',
-        cpf: user?.user_metadata?.cpf || ''
+        cpf: user?.user_metadata?.cpf || '',
+        phone: user?.user_metadata?.phone || '',
+        address_zip: user?.user_metadata?.address_zip || '',
+        address_street: user?.user_metadata?.address_street || '',
+        address_number: user?.user_metadata?.address_number || '',
+        address_neighborhood: user?.user_metadata?.address_neighborhood || '',
+        address_city: user?.user_metadata?.address_city || ''
     });
+
+    const handleCepLookup = async (cep: string) => {
+        const cleanCep = cep.replace(/\D/g, '');
+        if (cleanCep.length === 8) {
+            setFetchingCep(true);
+            const data = await fetchAddressByCEP(cleanCep);
+            if (data) {
+                setFormData(prev => ({
+                    ...prev,
+                    address_street: data.logradouro,
+                    address_neighborhood: data.bairro,
+                    address_city: data.localidade
+                }));
+            }
+            setFetchingCep(false);
+        }
+    };
 
     const handleSave = async () => {
         if (!user) return;
@@ -49,7 +76,13 @@ export const PersonalDataScreen: React.FC = () => {
                     gender: formData.gender,
                     height: formData.height,
                     weight: formData.weight,
-                    cpf: formData.cpf
+                    cpf: formData.cpf,
+                    phone: formData.phone,
+                    address_zip: formData.address_zip,
+                    address_street: formData.address_street,
+                    address_number: formData.address_number,
+                    address_neighborhood: formData.address_neighborhood,
+                    address_city: formData.address_city
                 }
             });
 
@@ -275,7 +308,7 @@ export const PersonalDataScreen: React.FC = () => {
                     {/* Email & CPF */}
                     <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100/50 space-y-4">
                         <div className="space-y-2 opacity-60">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">E-mail Profissional</label>
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">E-mail</label>
                             <div className="h-14 bg-gray-100/50 rounded-2xl border border-gray-100 px-4 flex items-center">
                                 <input
                                     className="bg-transparent w-full text-sm font-bold text-dark outline-none cursor-not-allowed"
@@ -286,70 +319,162 @@ export const PersonalDataScreen: React.FC = () => {
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">CPF</label>
+                            <div className={cn(
+                                "h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center",
+                                userProfile?.role === 'profissional' && "bg-gray-50/50 opacity-60"
+                            )}>
+                                <input
+                                    className={cn(
+                                        "bg-transparent w-full text-sm font-bold text-dark outline-none",
+                                        userProfile?.role === 'profissional' && "cursor-not-allowed"
+                                    )}
+                                    value={formData.cpf}
+                                    readOnly={userProfile?.role === 'profissional'}
+                                    onChange={(e) => setFormData({ ...formData, cpf: masks.cpf(e.target.value) })}
+                                    placeholder="000.000.000-00"
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Telefone / WhatsApp</label>
                             <div className="h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center">
                                 <input
                                     className="bg-transparent w-full text-sm font-bold text-dark outline-none"
-                                    value={formData.cpf}
-                                    onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
-                                    placeholder="000.000.000-00"
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({ ...formData, phone: masks.phone(e.target.value) })}
+                                    placeholder="(00) 00000-0000"
                                 />
                             </div>
                         </div>
                     </div>
 
-                    {/* Physical Specs */}
+                    {/* Physical Specs (Only for Patients) */}
+                    {userProfile?.role !== 'profissional' && (
+                        <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100/50 space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Nascimento</label>
+                                    <div className="h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center">
+                                        <input
+                                            className="bg-transparent w-full text-sm font-bold text-dark outline-none"
+                                            value={formData.birth_date}
+                                            placeholder="DD/MM/AAAA"
+                                            onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Gênero</label>
+                                    <div className="h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center">
+                                        <select
+                                            className="bg-transparent w-full text-sm font-bold text-dark outline-none appearance-none"
+                                            value={formData.gender}
+                                            onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                                        >
+                                            <option value="Feminino">Feminino</option>
+                                            <option value="Masculino">Masculino</option>
+                                            <option value="Outro">Outro</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Altura (cm)</label>
+                                    <div className="h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center justify-between">
+                                        <input
+                                            type="number"
+                                            className="bg-transparent w-full text-sm font-bold text-dark outline-none"
+                                            value={formData.height}
+                                            onChange={(e) => setFormData({ ...formData, height: e.target.value })}
+                                        />
+                                        <span className="text-[8px] font-black text-gray-300 uppercase shrink-0">CM</span>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Peso (kg)</label>
+                                    <div className="h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center justify-between">
+                                        <input
+                                            type="number"
+                                            className="bg-transparent w-full text-sm font-bold text-dark outline-none"
+                                            value={formData.weight}
+                                            onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                                        />
+                                        <span className="text-[8px] font-black text-gray-300 uppercase shrink-0">KG</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Address Section */}
                     <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100/50 space-y-4">
+                        <div className="flex justify-between items-center px-2 mb-2">
+                            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Endereço</h3>
+                            {fetchingCep && <Loader2 className="w-4 h-4 animate-spin text-secondary" />}
+                        </div>
+
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Nascimento</label>
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">CEP</label>
                                 <div className="h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center">
                                     <input
                                         className="bg-transparent w-full text-sm font-bold text-dark outline-none"
-                                        value={formData.birth_date}
-                                        placeholder="DD/MM/AAAA"
-                                        onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
+                                        placeholder="00000-000"
+                                        value={formData.address_zip}
+                                        onChange={(e) => {
+                                            const val = masks.cep(e.target.value);
+                                            setFormData({ ...formData, address_zip: val });
+                                            if (val.replace(/\D/g, '').length === 8) handleCepLookup(val);
+                                        }}
+                                        maxLength={9}
                                     />
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Gênero</label>
-                                <div className="h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center">
-                                    <select
-                                        className="bg-transparent w-full text-sm font-bold text-dark outline-none appearance-none"
-                                        value={formData.gender}
-                                        onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                                    >
-                                        <option value="Feminino">Feminino</option>
-                                        <option value="Masculino">Masculino</option>
-                                        <option value="Outro">Outro</option>
-                                    </select>
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Cidade</label>
+                                <div className="h-14 bg-gray-50/50 rounded-2xl border border-gray-100 px-4 flex items-center">
+                                    <input
+                                        className="bg-transparent w-full text-sm font-bold text-gray-400 outline-none"
+                                        value={formData.address_city}
+                                        readOnly
+                                    />
                                 </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Logradouro</label>
+                            <div className="h-14 bg-gray-50/50 rounded-2xl border border-gray-100 px-4 flex items-center">
+                                <input
+                                    className="bg-transparent w-full text-sm font-bold text-gray-400 outline-none"
+                                    value={formData.address_street}
+                                    readOnly
+                                />
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Altura (cm)</label>
-                                <div className="h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center justify-between">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Número</label>
+                                <div className="h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center">
                                     <input
-                                        type="number"
                                         className="bg-transparent w-full text-sm font-bold text-dark outline-none"
-                                        value={formData.height}
-                                        onChange={(e) => setFormData({ ...formData, height: e.target.value })}
+                                        placeholder="123"
+                                        value={formData.address_number}
+                                        onChange={(e) => setFormData({ ...formData, address_number: e.target.value })}
                                     />
-                                    <span className="text-[8px] font-black text-gray-300 uppercase shrink-0">CM</span>
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Peso (kg)</label>
-                                <div className="h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center justify-between">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Bairro</label>
+                                <div className="h-14 bg-gray-50/50 rounded-2xl border border-gray-100 px-4 flex items-center">
                                     <input
-                                        type="number"
-                                        className="bg-transparent w-full text-sm font-bold text-dark outline-none"
-                                        value={formData.weight}
-                                        onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                                        className="bg-transparent w-full text-sm font-bold text-gray-400 outline-none"
+                                        value={formData.address_neighborhood}
+                                        readOnly
                                     />
-                                    <span className="text-[8px] font-black text-gray-300 uppercase shrink-0">KG</span>
                                 </div>
                             </div>
                         </div>
