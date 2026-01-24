@@ -93,6 +93,16 @@ export const PersonalDataScreen: React.FC = () => {
                 .from('profiles')
                 .update({
                     full_name: `${formData.first_name} ${formData.last_name}`.trim(),
+                    birth_date: formData.birth_date,
+                    gender: formData.gender.toLowerCase(),
+                    height: formData.height ? parseFloat(formData.height) : null,
+                    weight: formData.weight ? parseFloat(formData.weight) : null,
+                    phone: formData.phone,
+                    address_zip: formData.address_zip,
+                    address_street: formData.address_street,
+                    address_number: formData.address_number,
+                    address_neighborhood: formData.address_neighborhood,
+                    address_city: formData.address_city
                 })
                 .eq('id', user.id);
 

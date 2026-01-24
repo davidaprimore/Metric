@@ -236,7 +236,16 @@ export const AppointmentDetailScreen: React.FC = () => {
                         <div className="w-full grid grid-cols-3 gap-4">
                             <div className="text-center p-4 rounded-3xl bg-white/5 border border-white/5 shadow-inner transition-colors">
                                 <p className="text-[8px] text-slate-400 uppercase font-bold tracking-widest mb-1">Idade</p>
-                                <p className="text-lg font-bold text-white">{patientData.birth_date ? (new Date().getFullYear() - new Date(patientData.birth_date).getFullYear()) : '?'}</p>
+                                <p className="text-lg font-bold text-white">
+                                    {patientData.birth_date ? (() => {
+                                        const birth = new Date(patientData.birth_date);
+                                        const today = new Date();
+                                        let age = today.getFullYear() - birth.getFullYear();
+                                        const m = today.getMonth() - birth.getMonth();
+                                        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+                                        return age;
+                                    })() : '?'}
+                                </p>
                             </div>
                             <div className="text-center p-4 rounded-3xl bg-white/5 border border-white/5 shadow-inner transition-colors">
                                 <p className="text-[8px] text-slate-400 uppercase font-bold tracking-widest mb-1">Peso</p>
@@ -244,7 +253,7 @@ export const AppointmentDetailScreen: React.FC = () => {
                             </div>
                             <div className="text-center p-4 rounded-3xl bg-white/5 border border-white/5 shadow-inner transition-colors">
                                 <p className="text-[8px] text-slate-400 uppercase font-bold tracking-widest mb-1">Altura</p>
-                                <p className="text-lg font-bold text-white">{patientData.height || '?'}<span className="text-[10px] text-slate-500 ml-1">m</span></p>
+                                <p className="text-lg font-bold text-white">{patientData.height || '?'}<span className="text-[10px] text-slate-500 ml-1">cm</span></p>
                             </div>
                         </div>
                     </div>

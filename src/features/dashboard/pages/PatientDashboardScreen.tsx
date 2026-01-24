@@ -47,6 +47,8 @@ export const PatientDashboardScreen: React.FC = () => {
   const [profileIncomplete, setProfileIncomplete] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [assessments, setAssessments] = useState<any[]>([]);
 
   useEffect(() => {
@@ -72,17 +74,27 @@ export const PatientDashboardScreen: React.FC = () => {
       setMissingFields(missing);
       setProfileIncomplete(missing.length > 0);
 
-      // 3. Fetch (future) Appointments
+      // 3. Fetch (future) Appointments - Fixed: ASC to show the SOONEST
       const { data: appts } = await supabase
         .from('appointments')
         .select('*')
         .eq('patient_id', user.id)
-        .eq('status', 'confirmed') // Show only confirmed ones
+        .eq('status', 'confirmed')
         .gte('start_time', new Date().toISOString())
         .order('start_time', { ascending: true })
         .limit(1);
 
       if (appts) setUpcomingAppointments(appts);
+
+      // 4. Fetch Notifications
+      const { data: notifs } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('read', false)
+        .order('created_at', { ascending: false });
+
+      if (notifs) setNotifications(notifs);
       setAssessments([]); // Still mocked/empty until we have real assessments
     };
 
@@ -171,15 +183,35 @@ export const PatientDashboardScreen: React.FC = () => {
               <span className="text-[10px] font-extrabold text-[#39FF14] uppercase tracking-[0.1em] group-hover:underline drop-shadow-[0_0_5px_rgba(57,255,20,0.5)]">Ver Perfil</span>
             </div>
           </div>
-          <button
-            onClick={() => navigate('/notifications')}
-            className="w-11 h-11 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white relative active:scale-95 transition-transform hover:bg-white/10 shadow-lg backdrop-blur-md"
-          >
-            <Bell size={20} fill="currentColor" className="text-white opacity-80" />
-            {(upcomingAppointments.length > 0 || pendingAnamnesis || profileIncomplete) && (
-              <div className="absolute top-2.5 right-3 w-2 h-2 bg-[#FBBF24] rounded-full border border-black shadow-[0_0_8px_#FBBF24]"></div>
+
+          <div className="relative">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="w-11 h-11 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white relative active:scale-95 transition-transform hover:bg-white/10 shadow-lg backdrop-blur-md"
+            >
+              <Bell size={20} fill={notifications.length > 0 ? "white" : "none"} className={cn("text-white opacity-80", notifications.length > 0 && "text-[#39FF14]")} />
+              {notifications.length > 0 && (
+                <div className="absolute top-2.5 right-3 w-2 h-2 bg-[#FBBF24] rounded-full border border-black shadow-[0_0_8px_#FBBF24]"></div>
+              )}
+            </button>
+
+            {/* Notifications Popover */}
+            {showNotifications && (
+              <div className="absolute right-0 top-full mt-2 w-80 bg-[#111] border border-[#39FF14]/20 rounded-2xl shadow-2xl p-4 z-50 animate-in fade-in slide-in-from-top-2 backdrop-blur-xl">
+                <h3 className="text-xs font-bold text-white mb-3 px-2 uppercase tracking-widest">Avisos</h3>
+                <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                  {notifications.length > 0 ? notifications.map(n => (
+                    <div key={n.id} className="p-3 bg-white/5 rounded-xl border border-white/5 hover:border-[#39FF14]/30 transition-colors">
+                      <p className="text-xs font-bold text-white">{n.title}</p>
+                      <p className="text-[10px] text-slate-400 mt-1">{n.message}</p>
+                    </div>
+                  )) : (
+                    <p className="text-[10px] text-slate-500 text-center py-4 uppercase font-bold">Nenhuma novidade.</p>
+                  )}
+                </div>
+              </div>
             )}
-          </button>
+          </div>
         </header>
 
         {/* COMPROMISSOS & PENDING TASKS SECTION */}
