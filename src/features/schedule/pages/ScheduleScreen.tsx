@@ -46,25 +46,31 @@ export const ScheduleScreen: React.FC = () => {
     if (wizardStep === 'schedule' && !selectedProfessional) {
       const loadAlex = async () => {
         setLoading(true);
+        console.log('Searching for Alex Maromba...');
         const { data, error } = await supabase.from('profiles')
           .select('*')
-          .eq('role', 'professional')
+          .eq('role', 'profissional') // MATCHING DATABASE: 'profissional'
           .eq('approval_status', 'approved')
           .ilike('full_name', '%Alex%')
           .limit(1)
           .maybeSingle();
 
         if (data) {
+          console.log('Alex found:', data.full_name);
           setSelectedProfessional(data);
         } else {
+          console.log('Alex not found, falling back. Error:', error);
           // Fallback to any professional if Alex not found
           const { data: fallback } = await supabase.from('profiles')
             .select('*')
-            .eq('role', 'professional')
+            .eq('role', 'profissional') // MATCHING DATABASE: 'profissional'
             .eq('approval_status', 'approved')
             .limit(1)
             .maybeSingle();
-          if (fallback) setSelectedProfessional(fallback);
+          if (fallback) {
+            console.log('Fallback professional found:', fallback.full_name);
+            setSelectedProfessional(fallback);
+          }
         }
         setLoading(false);
       };
