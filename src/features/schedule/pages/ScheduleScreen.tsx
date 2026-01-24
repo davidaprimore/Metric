@@ -123,7 +123,7 @@ export const ScheduleScreen: React.FC = () => {
 
       const now = new Date();
       const busyTimes = busySlots?.filter(s => {
-        if (s.status === 'confirmed') return true;
+        if (s.status === 'confirmed' || s.status === 'blocked') return true;
         if (s.status === 'pending' && s.expires_at && new Date(s.expires_at) > now) return true;
         return false;
       }).map(s => format(new Date(s.start_time), 'HH:mm')) || [];
@@ -143,9 +143,15 @@ export const ScheduleScreen: React.FC = () => {
       const end = new Date(selectedDate);
       end.setHours(endHour, parseInt(endSplit[1] || '0'), 0, 0);
 
+      const LUNCH_START = 12;
+      const LUNCH_END = 13;
+
       while (current < end) {
         const timeStr = format(current, 'HH:mm');
-        if (!busyTimes.includes(timeStr)) {
+        const currentHour = current.getHours();
+        const isLunch = currentHour >= LUNCH_START && currentHour < LUNCH_END;
+
+        if (!busyTimes.includes(timeStr) && !isLunch) {
           slots.push(timeStr);
         }
         current = new Date(current.getTime() + interval * 60000);

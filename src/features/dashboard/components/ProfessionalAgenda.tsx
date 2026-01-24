@@ -32,11 +32,10 @@ export const ProfessionalAgenda: React.FC = () => {
 
     // Modals
     const [showConfig, setShowConfig] = useState(false);
-    const [confirmBlock, setConfirmBlock] = useState<{ show: boolean, hour: number | null }>({ show: false, hour: null });
+    const [confirmBlock, setConfirmBlock] = useState<{ show: boolean, time: string | null }>({ show: false, time: null });
     const [delayModal, setDelayModal] = useState<{ show: boolean, hour: number | null }>({ show: false, hour: null });
 
     // Data
-    const [blockedSlots, setBlockedSlots] = useState<number[]>([]);
     const [availability, setAvailability] = useState<any[]>([]);
     const [appointments, setAppointments] = useState<any[]>([]);
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' as 'success' | 'error' | 'info' });
@@ -111,7 +110,7 @@ export const ProfessionalAgenda: React.FC = () => {
                 .from('appointments')
                 .select('id, start_time, end_time, status, notes, patient_id')
                 .eq('professional_id', session.user.id)
-                .eq('status', 'confirmed')
+                .in('status', ['confirmed', 'blocked'])
                 .gte('start_time', dayStart.toISOString())
                 .lte('start_time', dayEnd.toISOString());
 
@@ -171,11 +170,35 @@ export const ProfessionalAgenda: React.FC = () => {
     };
 
 
-    const handleBlockSlot = () => {
-        if (confirmBlock.hour !== null) {
-            setBlockedSlots([...blockedSlots, confirmBlock.hour]);
-            setConfirmBlock({ show: false, hour: null });
-            setToast({ show: true, message: `Horário das ${confirmBlock.hour}:00 bloqueado.`, type: 'info' });
+    const handleBlockSlot = async () => {
+        if (confirmBlock.time !== null && session?.user.id) {
+            setLoading(true);
+            try {
+                const [h, m] = confirmBlock.time.split(':').map(Number);
+                const start = new Date(selectedDate);
+                start.setHours(h, m, 0, 0);
+
+                const end = new Date(start.getTime() + 15 * 60000);
+
+                const { error } = await supabase.from('appointments').insert({
+                    professional_id: session.user.id,
+                    start_time: start.toISOString(),
+                    end_time: end.toISOString(),
+                    status: 'blocked',
+                    notes: 'Horário bloqueado manualmente pelo profissional'
+                });
+
+                if (error) throw error;
+
+                setToast({ show: true, message: `Horário das ${confirmBlock.time} bloqueado com sucesso.`, type: 'info' });
+                setConfirmBlock({ show: false, time: null });
+                fetchAppointments(); // Refresh
+            } catch (error) {
+                console.error(error);
+                setToast({ show: true, message: 'Erro ao bloquear horário.', type: 'error' });
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
@@ -398,7 +421,10 @@ export const ProfessionalAgenda: React.FC = () => {
                     // Check availability from Config
                     const dayConfig = availability.find(a => a.day_of_week === dayOfWeek && a.is_active);
                     const isLunch = hour === 12;
-                    const isUserBlocked = blockedSlots.includes(hour);
+
+                    // Matching Logic for Manual Blocks in UI
+                    const dbBlocked = appointments.find(a => a.status === 'blocked' && format(new Date(a.start_time), 'HH:mm') === timeString);
+                    const isUserBlocked = !!dbBlocked;
 
                     let isOpen = false;
                     if (dayConfig) {
@@ -436,6 +462,19 @@ export const ProfessionalAgenda: React.FC = () => {
                                     <div className="h-full min-h-[3rem] rounded-2xl border border-red-900/20 bg-red-900/5 flex items-center px-6 gap-3 relative overflow-hidden group/blocked">
                                         <Lock size={12} className="text-red-900/50" />
                                         <span className="text-[9px] font-bold text-red-900/50 uppercase tracking-widest">Bloqueado</span>
+                                        <button
+                                            onClick={async (e) => {
+                                                e.stopPropagation();
+                                                const record = appointments.find(a => a.status === 'blocked' && format(new Date(a.start_time), 'HH:mm') === timeString);
+                                                if (record) {
+                                                    await supabase.from('appointments').delete().eq('id', record.id);
+                                                    fetchAppointments();
+                                                }
+                                            }}
+                                            className="ml-auto w-6 h-6 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 opacity-0 group-hover/blocked:opacity-100 transition-opacity"
+                                        >
+                                            <X size={12} />
+                                        </button>
                                     </div>
                                 ) : slotBookings.length > 0 ? (
                                     slotBookings.map(booked => (
@@ -472,7 +511,7 @@ export const ProfessionalAgenda: React.FC = () => {
                                     ))
                                 ) : (
                                     <div
-                                        onClick={() => setConfirmBlock({ show: true, hour })}
+                                        onClick={() => setConfirmBlock({ show: true, time: timeString })}
                                         className="h-full min-h-[3rem] rounded-2xl border border-dashed border-white/5 hover:border-[#39FF14]/30 bg-transparent hover:bg-[#39FF14]/5 transition-all cursor-pointer flex items-center justify-between px-6 group/available"
                                     >
                                         <span className="text-[9px] font-bold text-slate-700 uppercase tracking-widest group-hover/available:text-[#39FF14]/50 transition-colors">Horário Livre</span>
@@ -528,11 +567,11 @@ export const ProfessionalAgenda: React.FC = () => {
                         </div>
                         <h3 className="text-xl font-bold text-white text-center mb-2">Bloquear Horário?</h3>
                         <p className="text-center text-slate-400 text-sm mb-8 leading-relaxed">
-                            Você está prestes a bloquear o horário das <span className="text-white font-bold">{confirmBlock.hour?.toString().padStart(2, '0')}:00</span>. Nenhum paciente poderá agendar.
+                            Você está prestes a bloquear o horário de <span className="text-white font-bold">{confirmBlock.time}</span>. Nenhum paciente poderá agendar.
                         </p>
                         <div className="flex gap-3">
                             <button
-                                onClick={() => setConfirmBlock({ show: false, hour: null })}
+                                onClick={() => setConfirmBlock({ show: false, time: null })}
                                 className="flex-1 py-4 rounded-xl bg-white/5 text-white font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-colors"
                             >
                                 Cancelar
