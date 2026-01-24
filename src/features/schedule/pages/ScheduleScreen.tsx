@@ -41,10 +41,34 @@ export const ScheduleScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' as 'success' | 'error' | 'info' });
 
-  // Auto-select Professional
+  // Auto-select Professional (Priority: Alex)
   useEffect(() => {
     if (wizardStep === 'schedule' && !selectedProfessional) {
-      fetchProfessionals();
+      const loadAlex = async () => {
+        setLoading(true);
+        const { data, error } = await supabase.from('profiles')
+          .select('*')
+          .eq('role', 'professional')
+          .eq('approval_status', 'approved')
+          .ilike('full_name', '%Alex%')
+          .limit(1)
+          .maybeSingle();
+
+        if (data) {
+          setSelectedProfessional(data);
+        } else {
+          // Fallback to any professional if Alex not found
+          const { data: fallback } = await supabase.from('profiles')
+            .select('*')
+            .eq('role', 'professional')
+            .eq('approval_status', 'approved')
+            .limit(1)
+            .maybeSingle();
+          if (fallback) setSelectedProfessional(fallback);
+        }
+        setLoading(false);
+      };
+      loadAlex();
     }
   }, [wizardStep]);
 
@@ -52,61 +76,61 @@ export const ScheduleScreen: React.FC = () => {
     if (selectedProfessional && wizardStep === 'schedule') {
       fetchSlots();
     }
-  }, [selectedProfessional, selectedDate]);
-
-  const fetchProfessionals = async () => {
-    // Try to find "Alex" first, otherwise first available
-    const { data } = await supabase.from('profiles')
-      .select('*')
-      .eq('role', 'professional')
-      .eq('approval_status', 'approved')
-      .ilike('full_name', '%Alex%') // Try to find Alex
-      .limit(1)
-      .single();
-
-    if (data) {
-      setSelectedProfessional(data);
-    } else {
-      // Fallback
-      const { data: fallback } = await supabase.from('profiles').select('*').eq('role', 'professional').eq('approval_status', 'approved').limit(1).single();
-      if (fallback) setSelectedProfessional(fallback);
-    }
-  };
+  }, [selectedProfessional, selectedDate, wizardStep]);
 
   const fetchSlots = async () => {
     if (!selectedProfessional) return;
     setLoading(true);
+    setAvailableSlots([]); // Reset while loading
+
     try {
       const dayOfWeek = selectedDate.getDay();
-      const { data: config } = await supabase
+
+      // FIX: Ensure Sunday (0) is handled if Alex doesn't work Sundays
+      // Mon-Sat is 1-6.
+      const { data: config, error } = await supabase
         .from('professional_availability')
         .select('*')
         .eq('professional_id', selectedProfessional.id)
         .eq('day_of_week', dayOfWeek)
-        .single();
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching availability:', error);
+        return;
+      }
 
       if (!config || !config.is_active) {
         setAvailableSlots([]);
         return;
       }
 
-      const startHour = parseInt(config.start_time.split(':')[0]);
-      const endHour = parseInt(config.end_time.split(':')[0]);
-      const slots = [];
+      // Generate slots based on config times
+      const startSplit = config.start_time.split(':');
+      const endSplit = config.end_time.split(':');
 
-      // Logic: Basic = 15min, Premium = 30min
+      const startHour = parseInt(startSplit[0]);
+      const startMin = parseInt(startSplit[1] || '0');
+      const endHour = parseInt(endSplit[0]);
+      const endMin = parseInt(endSplit[1] || '0');
+
+      const slots = [];
       const interval = selectedPlan === 'basic' ? 15 : 30;
 
-      for (let h = startHour; h < endHour; h++) {
-        for (let m = 0; m < 60; m += interval) {
-          slots.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`);
-        }
+      let current = new Date();
+      current.setHours(startHour, startMin, 0, 0);
+
+      const end = new Date();
+      end.setHours(endHour, endMin, 0, 0);
+
+      while (current < end) {
+        slots.push(format(current, 'HH:mm'));
+        current = new Date(current.getTime() + interval * 60000);
       }
 
       setAvailableSlots(slots);
-    } catch (error) {
-      console.error(error);
-      setAvailableSlots([]);
+    } catch (err) {
+      console.error('Fetch slots failed:', err);
     } finally {
       setLoading(false);
     }
