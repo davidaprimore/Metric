@@ -152,32 +152,32 @@ export const ScheduleScreen: React.FC = () => {
       <div
         onClick={() => setSelectedPlan('basic')}
         className={cn(
-          "p-6 rounded-[2rem] border transition-all cursor-pointer relative overflow-hidden group",
-          selectedPlan === 'basic' ? "bg-white border-white shadow-[0_0_30px_rgba(255,255,255,0.3)] scale-[1.02]" : "bg-[#111] border-white/10 hover:border-white/30"
+          "p-6 rounded-[2rem] border transition-all cursor-pointer relative overflow-hidden group min-h-[160px] flex flex-col justify-between",
+          selectedPlan === 'basic' ? "bg-white border-white shadow-[0_0_40px_rgba(255,255,255,0.2)] scale-[1.02]" : "bg-[#111] border-white/10 hover:border-white/30"
         )}
       >
-        {/* Silver Gradient Background */}
-        <div className={cn(
-          "absolute inset-0 opacity-20 pointer-events-none transition-opacity",
-          selectedPlan === 'basic' ? "bg-gradient-to-br from-gray-100 via-gray-300 to-gray-100 opacity-100" : "bg-transparent"
-        )}></div>
+        {/* Background Image */}
+        <div className="absolute inset-0 opacity-40 group-hover:opacity-60 transition-opacity">
+          <img src="/assets/plan_basic.png" className="w-full h-full object-cover" alt="" />
+          <div className={cn("absolute inset-0", selectedPlan === 'basic' ? "bg-gradient-to-t from-white via-white/80 to-transparent" : "bg-gradient-to-t from-black via-black/60 to-transparent")}></div>
+        </div>
 
         <div className="relative z-10">
-          <div className="flex justify-between items-start mb-4">
+          <div className="flex justify-between items-start mb-2">
             <div className={cn(
-              "w-12 h-12 rounded-2xl flex items-center justify-center border transition-colors",
+              "w-10 h-10 rounded-xl flex items-center justify-center border transition-colors",
               selectedPlan === 'basic' ? "bg-black/10 border-black/10 text-black" : "bg-white/5 border-white/10 text-white"
             )}>
-              <Dumbbell size={24} />
+              <Dumbbell size={20} />
             </div>
             {selectedPlan === 'basic' && <div className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center"><Check size={14} strokeWidth={4} /></div>}
           </div>
-          <h3 className={cn("text-lg font-bold mb-2", selectedPlan === 'basic' ? "text-black" : "text-white")}>Básica</h3>
-          <p className={cn("text-xs mb-6 leading-relaxed font-medium", selectedPlan === 'basic' ? "text-slate-600" : "text-slate-400")}>
-            Realizada por profissional habilitado. Inclui resultados detalhados no App, análise de bioimpedância e programa de treino personalizado base. Ideal para quem busca manutenção.
+          <h3 className={cn("text-xl font-black mb-1", selectedPlan === 'basic' ? "text-black" : "text-white")}>Básica</h3>
+          <p className={cn("text-[11px] mb-4 leading-relaxed font-bold", selectedPlan === 'basic' ? "text-slate-600" : "text-slate-400")}>
+            Avaliação completa por profissional habilitado. Bioimpedância clínica, medidas antropométricas e relatório digital imediato no App. Foco em acompanhamento de progresso.
           </p>
           <div className="flex items-end gap-1">
-            <span className={cn("text-sm font-bold mb-1", selectedPlan === 'basic' ? "text-slate-500" : "text-slate-500")}>R$</span>
+            <span className={cn("text-sm font-bold mb-1", selectedPlan === 'basic' ? "text-slate-500" : "text-slate-400")}>R$</span>
             <span className={cn("text-3xl font-black", selectedPlan === 'basic' ? "text-black" : "text-white")}>39,90</span>
           </div>
         </div>
@@ -187,36 +187,36 @@ export const ScheduleScreen: React.FC = () => {
       <div
         onClick={() => setSelectedPlan('premium')}
         className={cn(
-          "p-6 rounded-[2rem] border transition-all cursor-pointer relative overflow-hidden group",
-          selectedPlan === 'premium' ? "bg-[#FBBF24] border-[#FBBF24] shadow-[0_0_30px_rgba(251,191,36,0.4)] scale-[1.02]" : "bg-[#111] border-white/10 hover:border-[#FBBF24]/30"
+          "p-6 rounded-[2rem] border transition-all cursor-pointer relative overflow-hidden group min-h-[160px] flex flex-col justify-between",
+          selectedPlan === 'premium' ? "bg-[#FBBF24] border-[#FBBF24] shadow-[0_0_40px_rgba(251,191,36,0.3)] scale-[1.02]" : "bg-[#111] border-white/10 hover:border-[#FBBF24]/30"
         )}
       >
-        {/* Gold Gradient Background */}
-        <div className={cn(
-          "absolute inset-0 opacity-20 pointer-events-none transition-opacity",
-          selectedPlan === 'premium' ? "bg-gradient-to-br from-[#FBBF24] via-[#F59E0B] to-[#FBBF24] opacity-100" : "bg-transparent"
-        )}></div>
+        {/* Background Image */}
+        <div className="absolute inset-0 opacity-30 group-hover:opacity-50 transition-opacity">
+          <img src="/assets/plan_premium.png" className="w-full h-full object-cover" alt="" />
+          <div className={cn("absolute inset-0", selectedPlan === 'premium' ? "bg-gradient-to-t from-[#FBBF24] via-[#FBBF24]/80 to-transparent" : "bg-gradient-to-t from-black via-black/80 to-transparent")}></div>
+        </div>
 
-        <div className="absolute top-0 right-0 bg-black text-white text-[10px] font-black px-4 py-1.5 rounded-bl-2xl uppercase tracking-wider z-20">
-          Recomendado
+        <div className="absolute top-0 right-0 bg-black text-[#FBBF24] text-[9px] font-black px-4 py-2 rounded-bl-2xl uppercase tracking-tighter z-20">
+          ELITE PERFORMANCE
         </div>
 
         <div className="relative z-10">
-          <div className="flex justify-between items-start mb-4">
+          <div className="flex justify-between items-start mb-2">
             <div className={cn(
-              "w-12 h-12 rounded-2xl flex items-center justify-center border transition-colors",
-              selectedPlan === 'premium' ? "bg-black/10 border-black/10 text-black" : "bg-[#FBBF24]/20 border-[#FBBF24]/30 text-[#FBBF24]"
+              "w-10 h-10 rounded-xl flex items-center justify-center border transition-colors",
+              selectedPlan === 'premium' ? "bg-black/10 border-black/10 text-black" : "bg-[#FBBF24]/10 border-[#FBBF24]/30 text-[#FBBF24]"
             )}>
-              <Activity size={24} />
+              <Activity size={20} />
             </div>
             {selectedPlan === 'premium' && <div className="w-6 h-6 rounded-full bg-black text-[#FBBF24] flex items-center justify-center"><Check size={14} strokeWidth={4} /></div>}
           </div>
-          <h3 className={cn("text-lg font-bold mb-2", selectedPlan === 'premium' ? "text-black" : "text-white")}>Individualizada</h3>
-          <p className={cn("text-xs mb-6 leading-relaxed font-medium", selectedPlan === 'premium' ? "text-slate-800" : "text-slate-400")}>
-            Exclusiva com <span className="font-extrabold">Alê (Mentor de Evolução)</span>. Especialista em Biomecânica. Inclui plano de treinamento 100% individualizado, ajustes semanais e contato direto via chat.
+          <h3 className={cn("text-xl font-black mb-1", selectedPlan === 'premium' ? "text-black" : "text-white")}>Individualizada</h3>
+          <p className={cn("text-[11px] mb-4 leading-relaxed font-bold", selectedPlan === 'premium' ? "text-slate-900" : "text-slate-400")}>
+            Exclusivo com <span className="font-black">Alê</span>. Mentor de Evolução Física e Especialista em Biomecânica. Treinamento 100% sob medida, suporte via chat 24/7 e ajustes de performance semanais.
           </p>
           <div className="flex items-end gap-1">
-            <span className={cn("text-sm font-bold mb-1", selectedPlan === 'premium' ? "text-slate-800" : "text-slate-500")}>R$</span>
+            <span className={cn("text-sm font-bold mb-1", selectedPlan === 'premium' ? "text-slate-800" : "text-slate-400")}>Investimento</span>
             <span className={cn("text-3xl font-black", selectedPlan === 'premium' ? "text-black" : "text-[#FBBF24]")}>89,90</span>
           </div>
         </div>
