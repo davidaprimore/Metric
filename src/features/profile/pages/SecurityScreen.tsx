@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FluidBackground } from '@/components/layout/FluidBackground';
 import {
     ChevronLeft,
     Eye,
@@ -67,92 +68,98 @@ export const SecurityScreen: React.FC = () => {
         { label: 'Pelo menos um número', met: /[0-9]/.test(passwords.new) }
     ];
 
+    // Glassy, Transparent, Luminous
+    const textureCardClass = "bg-black/40 bg-[radial-gradient(120%_120%_at_50%_0%,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent backdrop-blur-3xl border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] relative overflow-hidden";
+
     return (
-        <div className="min-h-screen bg-[#F1F3F5] pb-32 font-sans px-5">
+        <FluidBackground variant="luminous" className="pb-40 font-sans px-5 relative overflow-hidden min-h-screen">
             <Toast
                 isVisible={toast.show}
                 message={toast.message}
                 type={toast.type}
                 onClose={() => setToast({ ...toast, show: false })}
             />
-            <header className="pt-8 flex items-center mb-8">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm border border-gray-100"
+
+            <div className="relative z-10 text-white">
+                <header className="pt-8 flex items-center mb-8">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 border border-white/10 shadow-sm hover:text-white text-slate-400 active:scale-95 transition-all"
+                    >
+                        <ChevronLeft size={24} />
+                    </button>
+                    <h1 className="ml-4 text-sm font-bold text-white flex items-center gap-1">
+                        Segurança e <span className="text-[#CCFF00]">Senha</span>
+                    </h1>
+                </header>
+
+                <div className="mb-10">
+                    <h2 className="text-[2.5rem] font-black text-white leading-tight tracking-tighter mb-4">Alterar Credenciais</h2>
+                    <p className="text-sm font-medium text-slate-400 leading-relaxed">
+                        Mantenha sua conta METRIK protegida com uma senha forte.
+                    </p>
+                </div>
+
+                <div className="space-y-4 mb-8">
+                    {[
+                        { id: 'current', label: 'SENHA ATUAL' },
+                        { id: 'new', label: 'NOVA SENHA' },
+                        { id: 'confirm', label: 'CONFIRMAR NOVA SENHA' }
+                    ].map((input) => (
+                        <div key={input.id} className={`${textureCardClass} p-6 rounded-[1.5rem] space-y-2`}>
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">{input.label}</label>
+                            <div className="flex items-center justify-between">
+                                <input
+                                    type={showPasswords[input.id as keyof typeof showPasswords] ? 'text' : 'password'}
+                                    className="bg-transparent flex-1 text-lg font-black tracking-widest text-white outline-none py-1 placeholder:text-slate-700"
+                                    placeholder="••••••••"
+                                    value={passwords[input.id as keyof typeof passwords]}
+                                    onChange={(e) => setPasswords({ ...passwords, [input.id]: e.target.value })}
+                                />
+                                <button
+                                    onClick={() => toggleShow(input.id as keyof typeof showPasswords)}
+                                    className="text-slate-500 hover:text-[#CCFF00] p-1 transition-colors"
+                                >
+                                    {showPasswords[input.id as keyof typeof showPasswords] ? <EyeOff size={20} /> : <Eye size={20} />}
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="space-y-4 mb-10">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1 mb-2">Critérios de Segurança</p>
+                    {requirements.map((req, idx) => (
+                        <div key={idx} className="flex items-center gap-3">
+                            <div className={cn(
+                                "w-5 h-5 rounded-full flex items-center justify-center border transition-colors",
+                                req.met ? "bg-[#CCFF00] border-[#CCFF00] text-black" : "bg-transparent border-slate-700 text-transparent"
+                            )}>
+                                <CheckCircle2 size={12} strokeWidth={3} />
+                            </div>
+                            <span className={cn(
+                                "text-xs font-bold transition-colors",
+                                req.met ? "text-white" : "text-slate-500"
+                            )}>{req.label}</span>
+                        </div>
+                    ))}
+                </div>
+
+                <Button
+                    onClick={handleUpdate}
+                    disabled={loading}
+                    className="w-full h-16 rounded-[2rem] bg-[#CCFF00] text-black font-black gap-3 shadow-xl shadow-[#CCFF00]/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 hover:bg-white"
                 >
-                    <ChevronLeft size={24} className="text-dark" />
-                </button>
-                <h1 className="ml-4 text-sm font-bold text-dark flex items-center gap-1">
-                    Segurança e <span className="text-secondary">Senha</span>
-                </h1>
-            </header>
-
-            <div className="mb-10">
-                <h2 className="text-[2.5rem] font-black text-dark leading-tight tracking-tighter mb-4">Alterar Credenciais</h2>
-                <p className="text-sm font-medium text-gray-500 leading-relaxed">
-                    Mantenha sua conta METRIK protegida com uma senha forte.
-                </p>
+                    {loading ? (
+                        <Loader2 className="w-6 h-6 animate-spin text-black" />
+                    ) : (
+                        <CheckCircle2 size={24} strokeWidth={3} />
+                    )}
+                    {loading ? 'ATUALIZANDO...' : 'ATUALIZAR SENHA'}
+                </Button>
             </div>
-
-            <div className="space-y-4 mb-8">
-                {[
-                    { id: 'current', label: 'SENHA ATUAL' },
-                    { id: 'new', label: 'NOVA SENHA' },
-                    { id: 'confirm', label: 'CONFIRMAR NOVA SENHA' }
-                ].map((input) => (
-                    <div key={input.id} className="bg-white p-6 rounded-[1.5rem] border border-gray-50 shadow-sm space-y-2">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">{input.label}</label>
-                        <div className="flex items-center justify-between">
-                            <input
-                                type={showPasswords[input.id as keyof typeof showPasswords] ? 'text' : 'password'}
-                                className="bg-transparent flex-1 text-lg font-black tracking-widest text-dark outline-none py-1"
-                                placeholder="••••••••"
-                                value={passwords[input.id as keyof typeof passwords]}
-                                onChange={(e) => setPasswords({ ...passwords, [input.id]: e.target.value })}
-                            />
-                            <button
-                                onClick={() => toggleShow(input.id as keyof typeof showPasswords)}
-                                className="text-gray-400 hover:text-secondary p-1"
-                            >
-                                {showPasswords[input.id as keyof typeof showPasswords] ? <EyeOff size={20} /> : <Eye size={20} />}
-                            </button>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            <div className="space-y-4 mb-10">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1 mb-2">Critérios de Segurança</p>
-                {requirements.map((req, idx) => (
-                    <div key={idx} className="flex items-center gap-3">
-                        <div className={cn(
-                            "w-5 h-5 rounded-full flex items-center justify-center border transition-colors",
-                            req.met ? "bg-primary border-primary text-dark" : "bg-transparent border-gray-200 text-transparent"
-                        )}>
-                            <CheckCircle2 size={12} strokeWidth={3} />
-                        </div>
-                        <span className={cn(
-                            "text-xs font-bold transition-colors",
-                            req.met ? "text-dark" : "text-gray-400"
-                        )}>{req.label}</span>
-                    </div>
-                ))}
-            </div>
-
-            <Button
-                onClick={handleUpdate}
-                disabled={loading}
-                className="w-full h-16 rounded-[2rem] bg-primary text-dark font-black gap-3 shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
-            >
-                {loading ? (
-                    <Loader2 className="w-6 h-6 animate-spin text-dark" />
-                ) : (
-                    <CheckCircle2 size={24} strokeWidth={3} />
-                )}
-                {loading ? 'ATUALIZANDO...' : 'ATUALIZAR SENHA'}
-            </Button>
 
             <BottomNav />
-        </div>
+        </FluidBackground>
     );
 };

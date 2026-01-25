@@ -22,7 +22,11 @@ import { cn } from '@/lib/utils';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-export const ScheduleScreen: React.FC = () => {
+interface ScheduleScreenProps {
+  embedded?: boolean;
+}
+
+export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
   const { session } = useAuth();
   const navigate = useNavigate();
 
@@ -662,7 +666,7 @@ export const ScheduleScreen: React.FC = () => {
       </div>
 
       <Toast isVisible={toast.show} message={toast.message} type={toast.type} onClose={() => setToast({ ...toast, show: false })} />
-      {!isBookingOpen && <BottomNav />}
+      {!isBookingOpen && !props.embedded && <BottomNav />}
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { FluidBackground } from '@/components/layout/FluidBackground';
 import {
     ChevronLeft,
     TrendingUp,
@@ -102,87 +103,90 @@ export const AssessmentHistoryScreen: React.FC = () => {
         return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).replace('.', '');
     };
 
+    // Glassy, Transparent, Luminous
+    const textureCardClass = "bg-black/40 bg-[radial-gradient(120%_120%_at_50%_0%,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent backdrop-blur-3xl border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] relative overflow-hidden";
+
     return (
-        <div className="min-h-screen bg-[#F1F3F5] pb-32 font-sans overflow-x-hidden">
+        <FluidBackground variant="luminous" className="pb-40 font-sans px-5 relative overflow-hidden min-h-screen">
             {/* Header */}
-            <header className="bg-white px-5 pt-10 pb-6 rounded-b-[2.5rem] shadow-sm border-b border-gray-100 flex items-center justify-between mb-8 sticky top-0 z-20">
+            <header className="relative z-10 pt-10 flex items-center justify-between mb-8">
                 <button
                     onClick={() => navigate(-1)}
-                    className="w-11 h-11 rounded-full flex items-center justify-center bg-gray-50 border border-gray-100 shadow-sm active:scale-90 transition-all"
+                    className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 shadow-sm active:scale-95 hover:bg-white/10 transition-all text-slate-400 hover:text-white"
                 >
-                    <ChevronLeft size={24} className="text-dark" />
+                    <ChevronLeft size={24} />
                 </button>
                 <div className="flex flex-col items-center">
-                    <h1 className="text-lg font-black text-dark uppercase tracking-tight">
-                        Histórico <span className="text-secondary tracking-widest">Metrik</span>
+                    <h1 className="text-lg font-black text-white uppercase tracking-tight">
+                        Histórico <span className="text-[#CCFF00] tracking-widest">Metrik</span>
                     </h1>
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Evolução de Performance</span>
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Evolução de Performance</span>
                 </div>
-                <button className="w-11 h-11 rounded-full flex items-center justify-center bg-gray-50 border border-gray-100 shadow-sm active:scale-90 transition-all">
-                    <Filter size={20} className="text-dark" />
+                <button className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 shadow-sm active:scale-95 hover:bg-white/10 transition-all text-slate-400 hover:text-white">
+                    <Filter size={20} />
                 </button>
             </header>
 
-            <div className="px-5 space-y-6">
+            <div className="relative z-10 space-y-6">
                 {/* Search Bar */}
                 <div className="relative group">
-                    <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-secondary transition-colors">
+                    <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-[#CCFF00] transition-colors">
                         <Search size={18} />
                     </div>
                     <input
                         type="text"
                         placeholder="Buscar por data ou resultado..."
-                        className="w-full h-16 bg-white border border-gray-100 rounded-3xl pl-14 pr-6 text-sm font-bold text-dark outline-none focus:border-secondary shadow-sm transition-all shadow-gray-200/50"
+                        className="w-full h-16 bg-white/5 border border-white/10 rounded-3xl pl-14 pr-6 text-sm font-bold text-white outline-none focus:border-[#CCFF00]/50 shadow-sm transition-all placeholder:text-slate-600"
                     />
                 </div>
 
                 {/* Evolution Summary Chart (Placeholder Visual) */}
-                <div className="bg-dark rounded-[2.5rem] p-8 shadow-xl shadow-gray-300 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-full -mr-10 -mt-10 blur-3xl" />
+                <div className={`${textureCardClass} rounded-[2.5rem] p-8 shadow-xl shadow-black/50 relative overflow-hidden`}>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/10 rounded-full -mr-10 -mt-10 blur-3xl" />
                     <div className="relative z-10 flex justify-between items-start mb-6">
                         <div>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Status da Evolução</p>
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Status da Evolução</p>
                             <h2 className="text-2xl font-black text-white">Excelente Progresso</h2>
                         </div>
-                        <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md">
-                            <TrendingDown className="text-secondary" size={24} />
+                        <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/10">
+                            <TrendingDown className="text-[#CCFF00]" size={24} />
                         </div>
                     </div>
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-4xl font-black text-secondary">-3.9kg</span>
-                        <span className="text-xs font-bold text-white/50 uppercase">desde o início</span>
+                    <div className="flex items-baseline gap-2 relative z-10">
+                        <span className="text-4xl font-black text-[#CCFF00] tracking-tighter">-3.9kg</span>
+                        <span className="text-xs font-bold text-slate-500 uppercase">desde o início</span>
                     </div>
                 </div>
 
                 {/* Timeline Grid */}
                 <div className="space-y-4">
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-2">Timeline de Avaliações</p>
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Timeline de Avaliações</p>
 
                     {loading ? (
                         <div className="py-20 flex flex-col items-center justify-center gap-4">
-                            <div className="w-10 h-10 border-4 border-secondary border-t-transparent rounded-full animate-spin"></div>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Sincronizando Lab...</p>
+                            <div className="w-10 h-10 border-4 border-[#CCFF00] border-t-transparent rounded-full animate-spin"></div>
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Sincronizando Lab...</p>
                         </div>
                     ) : assessments.length > 0 ? (
                         assessments.map((item, idx) => (
                             <div
                                 key={item.id}
                                 onClick={() => navigate(`/profile/history/${item.id}`)}
-                                className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-transparent hover:border-secondary/20 transition-all cursor-pointer active:scale-98 group"
+                                className={`${textureCardClass} rounded-[2.5rem] p-6 shadow-sm border border-white/5 hover:border-[#CCFF00]/30 transition-all cursor-pointer active:scale-98 group`}
                             >
-                                <div className="flex justify-between items-start mb-5">
+                                <div className="flex justify-between items-start mb-5 relative z-10">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-14 h-14 bg-gray-50 rounded-2xl flex flex-col items-center justify-center border border-gray-100 group-hover:bg-secondary/5 group-hover:border-secondary/10 transition-colors">
-                                            <Calendar size={18} className="text-gray-400 group-hover:text-secondary mb-1" />
-                                            <span className="text-[8px] font-black text-dark uppercase">{item.date.split('-')[1]} {item.date.split('-')[2].substring(0, 2)}</span>
+                                        <div className="w-14 h-14 bg-white/5 rounded-2xl flex flex-col items-center justify-center border border-white/5 group-hover:bg-[#CCFF00]/10 group-hover:border-[#CCFF00]/20 transition-colors">
+                                            <Calendar size={18} className="text-slate-400 group-hover:text-[#CCFF00] mb-1" />
+                                            <span className="text-[8px] font-black text-white uppercase">{item.date.split('-')[1]} {item.date.split('-')[2].substring(0, 2)}</span>
                                         </div>
                                         <div>
-                                            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{formatDate(item.date)}</h3>
-                                            <p className="text-sm font-black text-dark leading-tight mt-0.5">{item.client_name}</p>
+                                            <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{formatDate(item.date)}</h3>
+                                            <p className="text-sm font-black text-white leading-tight mt-0.5">{item.client_name}</p>
                                             <div className="flex items-center gap-2 mt-1.5">
                                                 <div className={cn(
-                                                    "px-2 py-0.5 rounded-lg flex items-center gap-1",
-                                                    item.status === 'Elite' ? "bg-secondary text-white" : "bg-gray-100 text-gray-500"
+                                                    "px-2 py-0.5 rounded-lg flex items-center gap-1 border border-white/5",
+                                                    item.status === 'Elite' ? "bg-[#CCFF00]/10 text-[#CCFF00] border-[#CCFF00]/20" : "bg-white/5 text-slate-400"
                                                 )}>
                                                     <Award size={10} />
                                                     <span className="text-[9px] font-black uppercase tracking-tighter">{item.status}</span>
@@ -192,30 +196,30 @@ export const AssessmentHistoryScreen: React.FC = () => {
                                     </div>
                                     <div className="text-right">
                                         <div className="flex items-center gap-1 justify-end">
-                                            <span className="text-lg font-black text-dark tracking-tighter">{item.body_fat}%</span>
-                                            {item.trend === 'down' ? <TrendingDown size={14} className="text-green-500" /> : <TrendingUp size={14} className="text-red-500" />}
+                                            <span className="text-lg font-black text-white tracking-tighter">{item.body_fat}%</span>
+                                            {item.trend === 'down' ? <TrendingDown size={14} className="text-[#CCFF00]" /> : <TrendingUp size={14} className="text-red-500" />}
                                         </div>
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase">Gordura Corp.</p>
+                                        <p className="text-[10px] font-bold text-slate-500 uppercase">Gordura Corp.</p>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-3 gap-3 border-t border-gray-50 pt-5 mt-2">
+                                <div className="grid grid-cols-3 gap-3 border-t border-white/5 pt-5 mt-2 relative z-10">
                                     <div className="text-center">
-                                        <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Peso</p>
-                                        <p className="text-xs font-black text-dark">{item.weight}kg</p>
+                                        <p className="text-[9px] font-black text-slate-500 uppercase mb-1">Peso</p>
+                                        <p className="text-xs font-black text-slate-200">{item.weight}kg</p>
                                     </div>
-                                    <div className="text-center border-x border-gray-100 px-2">
-                                        <p className="text-[9px] font-black text-gray-400 uppercase mb-1">M. Magra</p>
-                                        <p className="text-xs font-black text-dark">{item.lean_mass}kg</p>
+                                    <div className="text-center border-x border-white/5 px-2">
+                                        <p className="text-[9px] font-black text-slate-500 uppercase mb-1">M. Magra</p>
+                                        <p className="text-xs font-black text-slate-200">{item.lean_mass}kg</p>
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Variação</p>
-                                        <p className={cn("text-xs font-black", item.trend === 'down' ? "text-green-500" : "text-dark")}>{item.diff}</p>
+                                        <p className="text-[9px] font-black text-slate-500 uppercase mb-1">Variação</p>
+                                        <p className={cn("text-xs font-black", item.trend === 'down' ? "text-[#CCFF00]" : "text-white")}>{item.diff}</p>
                                     </div>
                                 </div>
 
-                                <div className="mt-5 flex justify-end">
-                                    <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-300 group-hover:bg-secondary group-hover:text-white transition-all">
+                                <div className="mt-5 flex justify-end relative z-10">
+                                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 group-hover:bg-[#CCFF00] group-hover:text-black transition-all border border-white/5">
                                         <ChevronRight size={18} />
                                     </div>
                                 </div>
@@ -223,17 +227,17 @@ export const AssessmentHistoryScreen: React.FC = () => {
                         ))
                     ) : (
                         <div className="py-20 flex flex-col items-center justify-center text-center px-10">
-                            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6 text-gray-200">
+                            <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 text-slate-600 border border-white/5">
                                 <FileBarChart size={40} />
                             </div>
-                            <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-2">Sem Avaliações</h3>
-                            <p className="text-[10px] text-gray-400 font-medium leading-relaxed">Você ainda não realizou avaliações. Comece sua jornada agora!</p>
+                            <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-2">Sem Avaliações</h3>
+                            <p className="text-[10px] text-slate-500 font-medium leading-relaxed">Você ainda não realizou avaliações. Comece sua jornada agora!</p>
                         </div>
                     )}
                 </div>
             </div>
 
             <BottomNav />
-        </div>
+        </FluidBackground>
     );
 };

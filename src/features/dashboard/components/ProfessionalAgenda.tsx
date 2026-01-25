@@ -439,29 +439,37 @@ export const ProfessionalAgenda: React.FC = () => {
                         return appTime === timeString;
                     });
 
+                    // PRINTED STYLE HELPERS
+                    const isHourMark = timeString.endsWith(':00');
+
+
                     return (
-                        <div key={timeString} className="flex group items-stretch min-h-[4rem]">
-                            <div className="w-16 text-right pr-4 py-3 shrink-0 flex flex-col items-end justify-start">
-                                <span className={cn("text-[10px] font-bold tracking-wider", timeString.endsWith(':00') ? "text-white scale-110" : "text-slate-600")}>
+                        <div key={timeString} className={cn("flex group items-stretch relative", isHourMark ? "border-t border-white/10 mt-1 pt-1" : "border-t border-white/5")}>
+                            <div className="w-16 text-right pr-4 py-3 shrink-0 flex flex-col items-end justify-start relative">
+                                {isHourMark && <div className="absolute right-0 top-0 w-2 h-[1px] bg-[#CCFF00]"></div>}
+                                <span className={cn("text-[10px] font-bold tracking-wider font-mono", isHourMark ? "text-white scale-110" : "text-slate-600")}>
                                     {timeString}
                                 </span>
                             </div>
 
-                            <div className="flex-1 relative space-y-1 pb-1">
+                            <div className="flex-1 relative space-y-1 pb-1 min-h-[3.5rem]">
+                                {/* Background Grid Lines */}
+                                <div className="absolute inset-0 border-l border-white/5 pointer-events-none"></div>
+
                                 {!isOpen ? (
-                                    <div className="h-full min-h-[3rem] rounded-2xl border border-white/5 bg-black/20 flex items-center px-6 gap-3 opacity-20 hover:opacity-40 transition-opacity">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-700"></div>
-                                        <span className="text-[9px] font-bold text-slate-700 uppercase tracking-widest">Indisponível</span>
+                                    <div className="h-full w-full bg-[linear-gradient(45deg,rgba(0,0,0,0.5)_25%,transparent_25%,transparent_50%,rgba(0,0,0,0.5)_50%,rgba(0,0,0,0.5)_75%,transparent_75%,transparent)] bg-[length:10px_10px] opacity-20 flex items-center justify-center">
+
                                     </div>
                                 ) : isLunch ? (
-                                    <div className="h-full min-h-[3rem] rounded-2xl border border-white/5 bg-white/5 flex items-center px-6 gap-3 opacity-30">
-                                        <Clock size={12} className="text-slate-400" />
-                                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Pausa</span>
+                                    <div className="h-full w-full bg-white/5 flex items-center px-4 gap-3">
+                                        <Clock size={12} className="text-slate-500" />
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Almoço / Pausa</span>
                                     </div>
                                 ) : isUserBlocked ? (
-                                    <div className="h-full min-h-[3rem] rounded-2xl border border-red-900/20 bg-red-900/5 flex items-center px-6 gap-3 relative overflow-hidden group/blocked">
-                                        <Lock size={12} className="text-red-900/50" />
-                                        <span className="text-[9px] font-bold text-red-900/50 uppercase tracking-widest">Bloqueado</span>
+                                    <div className="h-full w-full bg-red-900/10 border-l-2 border-red-500 flex items-center px-4 gap-3 relative group/blocked">
+                                        <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_5px,rgba(239,68,68,0.05)_5px,rgba(239,68,68,0.05)_10px)] pointer-events-none"></div>
+                                        <Lock size={12} className="text-red-500 opacity-60" />
+                                        <span className="text-[9px] font-bold text-red-500 opacity-60 uppercase tracking-widest">BLOQUEADO</span>
                                         <button
                                             onClick={async (e) => {
                                                 e.stopPropagation();
@@ -471,7 +479,7 @@ export const ProfessionalAgenda: React.FC = () => {
                                                     fetchAppointments();
                                                 }
                                             }}
-                                            className="ml-auto w-6 h-6 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 opacity-0 group-hover/blocked:opacity-100 transition-opacity"
+                                            className="ml-auto w-6 h-6 rounded-md bg-red-500 text-white flex items-center justify-center opacity-0 group-hover/blocked:opacity-100 transition-opacity z-10 hover:bg-red-400"
                                         >
                                             <X size={12} />
                                         </button>
@@ -481,43 +489,37 @@ export const ProfessionalAgenda: React.FC = () => {
                                         <div
                                             key={booked.id}
                                             onClick={() => navigate(`/appointment/${booked.id}`)}
-                                            className="h-full min-h-[3.5rem] rounded-2xl bg-[#0A1F0A] border border-[#39FF14]/20 p-3 pr-4 flex items-center justify-between relative overflow-hidden group/card shadow-lg transition-all hover:bg-[#0F2F0F] cursor-pointer"
+                                            className="h-full w-full bg-[#CCFF00] text-black border-l-4 border-white p-3 flex items-center justify-between relative shadow-lg hover:brightness-110 cursor-pointer transition-all"
                                         >
-                                            <div className="w-1.5 h-full absolute left-0 top-0 bg-[#39FF14]"></div>
-
-                                            <div className="flex items-center gap-3 z-10 pl-2">
-                                                <div className="w-10 h-10 rounded-xl bg-black/40 border border-[#39FF14]/30 p-0.5 relative shrink-0">
+                                            <div className="flex items-center gap-3 z-10">
+                                                <div className="w-8 h-8 rounded-full bg-black/10 border border-black/10 p-0.5 shrink-0 overflow-hidden">
                                                     <img
-                                                        src={booked.patient?.avatar_url || `https://ui-avatars.com/api/?name=${booked.patient?.full_name || 'P'}&background=random`}
-                                                        className="w-full h-full rounded-[0.5rem] object-cover"
+                                                        src={booked.patient?.avatar_url || `https://ui-avatars.com/api/?name=${booked.patient?.full_name || 'P'}&background=random&color=fff`}
+                                                        className="w-full h-full rounded-full object-cover grayscale"
                                                     />
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-bold text-white text-xs leading-tight">
+                                                    <h4 className="font-black text-black text-xs leading-none uppercase tracking-tight">
                                                         {booked.patient?.full_name || 'Paciente'}
                                                     </h4>
-                                                    <p className="text-[8px] text-[#39FF14] font-black uppercase tracking-widest mt-0.5 opacity-90">
-                                                        {booked.notes?.includes('Individualizada') ? 'Assessoria Individual' : 'Avaliação Básica'}
+                                                    <p className="text-[9px] text-black/60 font-bold uppercase tracking-widest mt-0.5">
+                                                        {booked.notes?.includes('Individualizada') ? 'Consultoria' : 'Avaliação'}
                                                     </p>
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center gap-2 z-10">
-                                                <div className="h-8 w-8 rounded-lg bg-[#39FF14] text-black flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-[0_0_10px_rgba(57,255,20,0.3)]">
-                                                    <Activity size={16} strokeWidth={3} />
-                                                </div>
+                                            <div className="flex items-center gap-2 z-10 opacity-70">
+                                                <Activity size={16} strokeWidth={2.5} />
                                             </div>
                                         </div>
                                     ))
                                 ) : (
                                     <div
                                         onClick={() => setConfirmBlock({ show: true, time: timeString })}
-                                        className="h-full min-h-[3rem] rounded-2xl border border-dashed border-white/5 hover:border-[#39FF14]/30 bg-transparent hover:bg-[#39FF14]/5 transition-all cursor-pointer flex items-center justify-between px-6 group/available"
+                                        className="h-full w-full hover:bg-white/5 transition-colors cursor-pointer flex items-center px-4 group/available"
                                     >
-                                        <span className="text-[9px] font-bold text-slate-700 uppercase tracking-widest group-hover/available:text-[#39FF14]/50 transition-colors">Horário Livre</span>
-                                        <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-slate-700 group-hover/available:text-[#39FF14]/50 transition-all">
-                                            <Lock size={12} />
-                                        </div>
+                                        <div className="w-full h-[1px] bg-white/5 group-hover/available:bg-white/10"></div>
+                                        <span className="absolute right-4 text-[8px] font-bold text-slate-700 uppercase tracking-widest opacity-0 group-hover/available:opacity-100 transition-opacity">Disponível</span>
                                     </div>
                                 )}
                             </div>

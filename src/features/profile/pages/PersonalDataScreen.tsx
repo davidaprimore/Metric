@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { FluidBackground } from '@/components/layout/FluidBackground';
 import {
     ChevronLeft,
     MoreVertical,
@@ -189,8 +190,11 @@ export const PersonalDataScreen: React.FC = () => {
         }
     };
 
+    // Glassy, Transparent, Luminous
+    const textureCardClass = "bg-black/40 bg-[radial-gradient(120%_120%_at_50%_0%,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent backdrop-blur-3xl border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] relative overflow-hidden";
+
     return (
-        <div className="min-h-screen bg-[#F1F3F5] pb-32 font-sans">
+        <FluidBackground variant="luminous" className="pb-40 font-sans px-5 relative overflow-hidden min-h-screen">
             <Toast
                 isVisible={toast.show}
                 message={toast.message}
@@ -214,301 +218,304 @@ export const PersonalDataScreen: React.FC = () => {
                 onChange={handleImageChange}
             />
 
-            {/* Header */}
-            <header className="bg-white px-5 pt-8 pb-4 flex justify-between items-center mb-6">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-50 border border-gray-100 shadow-sm active:scale-95"
-                >
-                    <ChevronLeft size={24} className="text-dark" />
-                </button>
-                <div className="flex-1 text-center">
-                    <h1 className="text-lg font-bold text-dark">
-                        Dados <span className="text-secondary">Pessoais</span>
-                    </h1>
-                </div>
-                <button className="w-10 h-10 flex items-center justify-center opacity-30">
-                    <MoreVertical size={24} className="text-dark" />
-                </button>
-            </header>
+            <div className="relative z-10 text-white">
+                {/* Header */}
+                <header className="pt-8 flex justify-between items-center mb-6">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 border border-white/10 shadow-sm active:scale-95 text-slate-400 hover:text-white transition-colors"
+                    >
+                        <ChevronLeft size={24} />
+                    </button>
+                    <div className="flex-1 text-center">
+                        <h1 className="text-lg font-bold text-white uppercase tracking-tight">
+                            Dados <span className="text-[#CCFF00]">Pessoais</span>
+                        </h1>
+                    </div>
+                    <button className="w-10 h-10 flex items-center justify-center opacity-30">
+                        <MoreVertical size={24} className="text-white" />
+                    </button>
+                </header>
 
-            <div className="px-5">
-                {/* Hidden Inputs */}
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept="image/*"
-                    onChange={onSelectFile}
-                />
-                <input
-                    type="file"
-                    ref={cameraInputRef}
-                    className="hidden"
-                    accept="image/*"
-                    capture="environment"
-                    onChange={onSelectFile}
-                />
+                <div className="">
+                    {/* Hidden Inputs */}
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="hidden"
+                        accept="image/*"
+                        onChange={onSelectFile}
+                    />
+                    <input
+                        type="file"
+                        ref={cameraInputRef}
+                        className="hidden"
+                        accept="image/*"
+                        capture="environment"
+                        onChange={onSelectFile}
+                    />
 
-                {/* Avatar Section */}
-                <div className="flex flex-col items-center mb-8">
-                    <div className="relative">
-                        <div className="w-28 h-28 rounded-full border-[3px] border-white p-1 bg-white shadow-xl overflow-hidden">
-                            {user?.user_metadata?.avatar_url && !user.user_metadata.avatar_url.includes('pravatar.cc') ? (
-                                <img
-                                    src={user.user_metadata.avatar_url}
-                                    alt="Avatar"
-                                    className="w-full h-full rounded-full object-cover"
-                                />
-                            ) : (
-                                <DefaultAvatar gender={formData.gender} className="w-full h-full rounded-full" />
-                            )}
+                    {/* Avatar Section */}
+                    <div className="flex flex-col items-center mb-8">
+                        <div className="relative group">
+                            <div className="w-28 h-28 rounded-full border-[3px] border-[#CCFF00] p-1 bg-[#080C09] shadow-xl shadow-[#CCFF00]/10 overflow-hidden">
+                                {user?.user_metadata?.avatar_url && !user.user_metadata.avatar_url.includes('pravatar.cc') ? (
+                                    <img
+                                        src={user.user_metadata.avatar_url}
+                                        alt="Avatar"
+                                        className="w-full h-full rounded-full object-cover"
+                                    />
+                                ) : (
+                                    <DefaultAvatar gender={formData.gender} className="w-full h-full rounded-full" />
+                                )}
+                            </div>
+                            <button
+                                onClick={triggerCamera}
+                                className="absolute bottom-1 right-1 w-9 h-9 bg-[#CCFF00] text-black rounded-full flex items-center justify-center border-2 border-[#122216] shadow-lg active:scale-90 transition-transform hover:scale-110"
+                            >
+                                <Camera size={16} strokeWidth={2.5} />
+                            </button>
                         </div>
                         <button
-                            onClick={triggerCamera}
-                            className="absolute bottom-1 right-1 w-10 h-10 bg-secondary text-white rounded-full flex items-center justify-center border-2 border-white shadow-lg active:scale-90 transition-transform"
+                            onClick={triggerFilePicker}
+                            className="mt-4 text-[10px] font-black text-[#CCFF00] uppercase tracking-[0.2em] hover:underline"
                         >
-                            <Camera size={18} />
+                            Alterar Foto
                         </button>
                     </div>
-                    <button
-                        onClick={triggerFilePicker}
-                        className="mt-4 text-[10px] font-black text-secondary uppercase tracking-[0.2em] hover:underline"
-                    >
-                        Alterar Foto
-                    </button>
-                </div>
 
-                {imageToCrop && (
-                    <ImageCropper
-                        image={imageToCrop}
-                        onCropComplete={handleCropComplete}
-                        onCancel={() => setImageToCrop(null)}
-                    />
-                )}
-
-                {/* Form Sections */}
-                <div className="space-y-6">
-                    {/* Basic Info */}
-                    <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100/50">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Nome</label>
-                                <div className="h-14 bg-gray-50 rounded-2xl border border-primary px-4 flex items-center">
-                                    <input
-                                        className="bg-transparent w-full text-sm font-bold text-dark outline-none"
-                                        value={formData.first_name}
-                                        onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Sobrenome</label>
-                                <div className="h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center shadow-inner">
-                                    <input
-                                        className="bg-transparent w-full text-sm font-bold text-dark outline-none"
-                                        value={formData.last_name}
-                                        onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Email & CPF */}
-                    <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100/50 space-y-4">
-                        <div className="space-y-2 opacity-60">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">E-mail</label>
-                            <div className="h-14 bg-gray-100/50 rounded-2xl border border-gray-100 px-4 flex items-center">
-                                <input
-                                    className="bg-transparent w-full text-sm font-bold text-dark outline-none cursor-not-allowed"
-                                    value={formData.email}
-                                    readOnly
-                                />
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">CPF</label>
-                            <div className={cn(
-                                "h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center",
-                                userProfile?.role === 'profissional' && "bg-gray-50/50 opacity-60"
-                            )}>
-                                <input
-                                    className={cn(
-                                        "bg-transparent w-full text-sm font-bold text-dark outline-none",
-                                        userProfile?.role === 'profissional' && "cursor-not-allowed"
-                                    )}
-                                    value={formData.cpf}
-                                    readOnly={userProfile?.role === 'profissional'}
-                                    onChange={(e) => setFormData({ ...formData, cpf: masks.cpf(e.target.value) })}
-                                    placeholder="000.000.000-00"
-                                />
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Telefone / WhatsApp</label>
-                            <div className="h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center">
-                                <input
-                                    className="bg-transparent w-full text-sm font-bold text-dark outline-none"
-                                    value={formData.phone}
-                                    onChange={(e) => setFormData({ ...formData, phone: masks.phone(e.target.value) })}
-                                    placeholder="(00) 00000-0000"
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Physical Specs (Only for Patients) */}
-                    {userProfile?.role !== 'profissional' && (
-                        <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100/50 space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Nascimento</label>
-                                    <div className="h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center">
-                                        <input
-                                            className="bg-transparent w-full text-sm font-bold text-dark outline-none"
-                                            value={formData.birth_date}
-                                            placeholder="DD/MM/AAAA"
-                                            onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Gênero</label>
-                                    <div className="h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center">
-                                        <select
-                                            className="bg-transparent w-full text-sm font-bold text-dark outline-none appearance-none"
-                                            value={formData.gender}
-                                            onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                                        >
-                                            <option value="Feminino">Feminino</option>
-                                            <option value="Masculino">Masculino</option>
-                                            <option value="Outro">Outro</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Altura (cm)</label>
-                                    <div className="h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center justify-between">
-                                        <input
-                                            type="number"
-                                            className="bg-transparent w-full text-sm font-bold text-dark outline-none"
-                                            value={formData.height}
-                                            onChange={(e) => setFormData({ ...formData, height: e.target.value })}
-                                        />
-                                        <span className="text-[8px] font-black text-gray-300 uppercase shrink-0">CM</span>
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Peso (kg)</label>
-                                    <div className="h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center justify-between">
-                                        <input
-                                            type="number"
-                                            className="bg-transparent w-full text-sm font-bold text-dark outline-none"
-                                            value={formData.weight}
-                                            onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                                        />
-                                        <span className="text-[8px] font-black text-gray-300 uppercase shrink-0">KG</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    {imageToCrop && (
+                        <ImageCropper
+                            image={imageToCrop}
+                            onCropComplete={handleCropComplete}
+                            onCancel={() => setImageToCrop(null)}
+                        />
                     )}
 
-                    {/* Address Section */}
-                    <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100/50 space-y-4">
-                        <div className="flex justify-between items-center px-2 mb-2">
-                            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Endereço</h3>
-                            {fetchingCep && <Loader2 className="w-4 h-4 animate-spin text-secondary" />}
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">CEP</label>
-                                <div className="h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center">
-                                    <input
-                                        className="bg-transparent w-full text-sm font-bold text-dark outline-none"
-                                        placeholder="00000-000"
-                                        value={formData.address_zip}
-                                        onChange={(e) => {
-                                            const val = masks.cep(e.target.value);
-                                            setFormData({ ...formData, address_zip: val });
-                                            if (val.replace(/\D/g, '').length === 8) handleCepLookup(val);
-                                        }}
-                                        maxLength={9}
-                                    />
+                    {/* Form Sections */}
+                    <div className="space-y-6">
+                        {/* Basic Info */}
+                        <div className={`${textureCardClass} p-6 rounded-[2rem]`}>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider ml-2">Nome</label>
+                                    <div className="h-14 bg-white/5 rounded-2xl border border-white/10 px-4 flex items-center focus-within:border-[#CCFF00]/50 transition-colors">
+                                        <input
+                                            className="bg-transparent w-full text-sm font-bold text-white outline-none placeholder:text-slate-600"
+                                            value={formData.first_name}
+                                            onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider ml-2">Sobrenome</label>
+                                    <div className="h-14 bg-white/5 rounded-2xl border border-white/10 px-4 flex items-center focus-within:border-[#CCFF00]/50 transition-colors">
+                                        <input
+                                            className="bg-transparent w-full text-sm font-bold text-white outline-none placeholder:text-slate-600"
+                                            value={formData.last_name}
+                                            onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Cidade</label>
-                                <div className="h-14 bg-gray-50/50 rounded-2xl border border-gray-100 px-4 flex items-center">
+                        </div>
+
+                        {/* Email & CPF */}
+                        <div className={`${textureCardClass} p-6 rounded-[2rem] space-y-4`}>
+                            <div className="space-y-2 opacity-60">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider ml-2">E-mail</label>
+                                <div className="h-14 bg-white/5 rounded-2xl border border-white/10 px-4 flex items-center">
                                     <input
-                                        className="bg-transparent w-full text-sm font-bold text-gray-400 outline-none"
-                                        value={formData.address_city}
+                                        className="bg-transparent w-full text-sm font-bold text-slate-400 outline-none cursor-not-allowed"
+                                        value={formData.email}
                                         readOnly
                                     />
                                 </div>
                             </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Logradouro</label>
-                            <div className="h-14 bg-gray-50/50 rounded-2xl border border-gray-100 px-4 flex items-center">
-                                <input
-                                    className="bg-transparent w-full text-sm font-bold text-gray-400 outline-none"
-                                    value={formData.address_street}
-                                    readOnly
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Número</label>
-                                <div className="h-14 bg-white rounded-2xl border border-gray-200 px-4 flex items-center">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider ml-2">CPF</label>
+                                <div className={cn(
+                                    "h-14 bg-white/5 rounded-2xl border border-white/10 px-4 flex items-center",
+                                    userProfile?.role === 'profissional' && "opacity-60"
+                                )}>
                                     <input
-                                        className="bg-transparent w-full text-sm font-bold text-dark outline-none"
-                                        placeholder="123"
-                                        value={formData.address_number}
-                                        onChange={(e) => setFormData({ ...formData, address_number: e.target.value })}
+                                        className={cn(
+                                            "bg-transparent w-full text-sm font-bold text-white outline-none placeholder:text-slate-600",
+                                            userProfile?.role === 'profissional' && "cursor-not-allowed text-slate-400"
+                                        )}
+                                        value={formData.cpf}
+                                        readOnly={userProfile?.role === 'profissional'}
+                                        onChange={(e) => setFormData({ ...formData, cpf: masks.cpf(e.target.value) })}
+                                        placeholder="000.000.000-00"
                                     />
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-2">Bairro</label>
-                                <div className="h-14 bg-gray-50/50 rounded-2xl border border-gray-100 px-4 flex items-center">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider ml-2">Telefone / WhatsApp</label>
+                                <div className="h-14 bg-white/5 rounded-2xl border border-white/10 px-4 flex items-center focus-within:border-[#CCFF00]/50 transition-colors">
                                     <input
-                                        className="bg-transparent w-full text-sm font-bold text-gray-400 outline-none"
-                                        value={formData.address_neighborhood}
+                                        className="bg-transparent w-full text-sm font-bold text-white outline-none placeholder:text-slate-600"
+                                        value={formData.phone}
+                                        onChange={(e) => setFormData({ ...formData, phone: masks.phone(e.target.value) })}
+                                        placeholder="(00) 00000-0000"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Physical Specs (Only for Patients) */}
+                        {userProfile?.role !== 'profissional' && (
+                            <div className={`${textureCardClass} p-6 rounded-[2rem] space-y-4`}>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider ml-2">Nascimento</label>
+                                        <div className="h-14 bg-white/5 rounded-2xl border border-white/10 px-4 flex items-center focus-within:border-[#CCFF00]/50 transition-colors">
+                                            <input
+                                                className="bg-transparent w-full text-sm font-bold text-white outline-none placeholder:text-slate-600"
+                                                value={formData.birth_date}
+                                                placeholder="DD/MM/AAAA"
+                                                onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider ml-2">Gênero</label>
+                                        <div className="h-14 bg-white/5 rounded-2xl border border-white/10 px-4 flex items-center focus-within:border-[#CCFF00]/50 transition-colors relative">
+                                            <select
+                                                className="bg-transparent w-full text-sm font-bold text-white outline-none appearance-none [&>option]:text-black"
+                                                value={formData.gender}
+                                                onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                                            >
+                                                <option value="Feminino">Feminino</option>
+                                                <option value="Masculino">Masculino</option>
+                                                <option value="Outro">Outro</option>
+                                            </select>
+                                            <div className="pointer-events-none absolute right-4 text-slate-500"><ChevronLeft className="-rotate-90" size={14} /></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider ml-2">Altura (cm)</label>
+                                        <div className="h-14 bg-white/5 rounded-2xl border border-white/10 px-4 flex items-center justify-between focus-within:border-[#CCFF00]/50 transition-colors">
+                                            <input
+                                                type="number"
+                                                className="bg-transparent w-full text-sm font-bold text-white outline-none placeholder:text-slate-600"
+                                                value={formData.height}
+                                                onChange={(e) => setFormData({ ...formData, height: e.target.value })}
+                                            />
+                                            <span className="text-[8px] font-black text-slate-600 uppercase shrink-0">CM</span>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider ml-2">Peso (kg)</label>
+                                        <div className="h-14 bg-white/5 rounded-2xl border border-white/10 px-4 flex items-center justify-between focus-within:border-[#CCFF00]/50 transition-colors">
+                                            <input
+                                                type="number"
+                                                className="bg-transparent w-full text-sm font-bold text-white outline-none placeholder:text-slate-600"
+                                                value={formData.weight}
+                                                onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                                            />
+                                            <span className="text-[8px] font-black text-slate-600 uppercase shrink-0">KG</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Address Section */}
+                        <div className={`${textureCardClass} p-6 rounded-[2rem] space-y-4`}>
+                            <div className="flex justify-between items-center px-2 mb-2">
+                                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Endereço</h3>
+                                {fetchingCep && <Loader2 className="w-4 h-4 animate-spin text-[#CCFF00]" />}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider ml-2">CEP</label>
+                                    <div className="h-14 bg-white/5 rounded-2xl border border-white/10 px-4 flex items-center focus-within:border-[#CCFF00]/50 transition-colors">
+                                        <input
+                                            className="bg-transparent w-full text-sm font-bold text-white outline-none placeholder:text-slate-600"
+                                            placeholder="00000-000"
+                                            value={formData.address_zip}
+                                            onChange={(e) => {
+                                                const val = masks.cep(e.target.value);
+                                                setFormData({ ...formData, address_zip: val });
+                                                if (val.replace(/\D/g, '').length === 8) handleCepLookup(val);
+                                            }}
+                                            maxLength={9}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider ml-2">Cidade</label>
+                                    <div className="h-14 bg-white/5 rounded-2xl border border-white/10 px-4 flex items-center opacity-60">
+                                        <input
+                                            className="bg-transparent w-full text-sm font-bold text-slate-300 outline-none"
+                                            value={formData.address_city}
+                                            readOnly
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider ml-2">Logradouro</label>
+                                <div className="h-14 bg-white/5 rounded-2xl border border-white/10 px-4 flex items-center opacity-60">
+                                    <input
+                                        className="bg-transparent w-full text-sm font-bold text-slate-300 outline-none"
+                                        value={formData.address_street}
                                         readOnly
                                     />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider ml-2">Número</label>
+                                    <div className="h-14 bg-white/5 rounded-2xl border border-white/10 px-4 flex items-center focus-within:border-[#CCFF00]/50 transition-colors">
+                                        <input
+                                            className="bg-transparent w-full text-sm font-bold text-white outline-none placeholder:text-slate-600"
+                                            placeholder="123"
+                                            value={formData.address_number}
+                                            onChange={(e) => setFormData({ ...formData, address_number: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider ml-2">Bairro</label>
+                                    <div className="h-14 bg-white/5 rounded-2xl border border-white/10 px-4 flex items-center opacity-60">
+                                        <input
+                                            className="bg-transparent w-full text-sm font-bold text-slate-300 outline-none"
+                                            value={formData.address_neighborhood}
+                                            readOnly
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Submit Button */}
-                <div className="mt-8">
-                    <Button
-                        onClick={handleSave}
-                        disabled={loading}
-                        className="w-full h-16 rounded-3xl bg-primary text-dark font-black tracking-tight gap-3 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
-                    >
-                        {loading ? (
-                            <Loader2 className="w-6 h-6 animate-spin text-dark" />
-                        ) : (
-                            <CheckCircle2 size={24} strokeWidth={3} />
-                        )}
-                        {loading ? 'SALVANDO...' : 'SALVAR ALTERAÇÕES'}
-                    </Button>
+                    {/* Submit Button */}
+                    <div className="mt-8">
+                        <Button
+                            onClick={handleSave}
+                            disabled={loading}
+                            className="w-full h-16 rounded-3xl bg-[#CCFF00] text-black font-black tracking-tight gap-3 shadow-lg shadow-[#CCFF00]/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 hover:bg-white"
+                        >
+                            {loading ? (
+                                <Loader2 className="w-6 h-6 animate-spin text-black" />
+                            ) : (
+                                <CheckCircle2 size={24} strokeWidth={3} />
+                            )}
+                            {loading ? 'SALVANDO...' : 'SALVAR ALTERAÇÕES'}
+                        </Button>
+                    </div>
                 </div>
             </div>
 
             <BottomNav />
-        </div>
+        </FluidBackground>
     );
 };

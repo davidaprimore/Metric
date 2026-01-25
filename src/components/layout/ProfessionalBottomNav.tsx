@@ -23,14 +23,14 @@ export const ProfessionalBottomNav: React.FC<ProfessionalBottomNavProps> = ({ ac
     };
 
     return (
-        <div className="fixed bottom-6 left-6 right-6 h-20 bg-black/90 backdrop-blur-xl rounded-full border border-white/10 shadow-2xl flex items-center justify-between px-4 z-50">
+        <div className="fixed bottom-6 left-6 right-6 h-20 bg-[#080C09]/90 backdrop-blur-2xl rounded-[2.5rem] border-t border-white/10 border-b border-black/80 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.8)] flex items-center justify-between px-4 z-50">
             <button
                 onClick={() => handleNavigation('home')}
                 className={cn(
                     "flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all",
                     activeTab === 'home'
-                        ? "bg-[#39FF14]/10 text-[#39FF14] shadow-[0_0_15px_rgba(57,255,20,0.3)]"
-                        : "text-slate-500 hover:text-[#39FF14]"
+                        ? "bg-[#CCFF00]/10 text-[#CCFF00] shadow-[0_0_15px_rgba(204,255,0,0.3)]"
+                        : "text-slate-500 hover:text-[#CCFF00]"
                 )}
             >
                 <Home size={20} strokeWidth={activeTab === 'home' ? 2.5 : 2} />
@@ -40,20 +40,20 @@ export const ProfessionalBottomNav: React.FC<ProfessionalBottomNavProps> = ({ ac
                 onClick={() => handleNavigation('patients')}
                 className={cn(
                     "flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all",
-                    activeTab === 'patients' ? "text-[#39FF14]" : "text-slate-500 hover:text-[#39FF14]"
+                    activeTab === 'patients' ? "text-[#CCFF00]" : "text-slate-500 hover:text-[#CCFF00]"
                 )}
             >
                 <Users size={20} />
             </button>
 
-            {/* Calendar - Contained, Gold Accent */}
+            {/* Calendar - Contained, Nano Banana Accent */}
             <button
                 onClick={() => handleNavigation('calendar')}
                 className={cn(
                     "flex flex-col items-center justify-center w-14 h-14 rounded-full transition-all relative group",
                     activeTab === 'calendar'
-                        ? "bg-[#FBBF24] text-black shadow-[0_0_20px_rgba(251,191,36,0.5)] scale-110"
-                        : "bg-white/5 text-slate-400 hover:bg-[#39FF14] hover:text-black hover:scale-105"
+                        ? "bg-[#CCFF00] text-black shadow-[0_0_20px_rgba(204,255,0,0.5)] scale-110" // High Contrast
+                        : "bg-white/5 text-slate-400 hover:bg-[#CCFF00] hover:text-black hover:scale-105"
                 )}
             >
                 <Calendar size={22} strokeWidth={2.5} />
@@ -63,7 +63,7 @@ export const ProfessionalBottomNav: React.FC<ProfessionalBottomNavProps> = ({ ac
                 onClick={() => handleNavigation('financial')}
                 className={cn(
                     "flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all",
-                    activeTab === 'financial' ? "text-[#39FF14]" : "text-slate-500 hover:text-[#39FF14]"
+                    activeTab === 'financial' ? "text-[#CCFF00]" : "text-slate-500 hover:text-[#CCFF00]"
                 )}
             >
                 <DollarSign size={20} />
@@ -73,7 +73,7 @@ export const ProfessionalBottomNav: React.FC<ProfessionalBottomNavProps> = ({ ac
                 onClick={() => handleNavigation('profile')}
                 className={cn(
                     "flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all",
-                    activeTab === 'profile' ? "text-[#39FF14]" : "text-slate-500 hover:text-[#39FF14]"
+                    activeTab === 'profile' ? "text-[#CCFF00]" : "text-slate-500 hover:text-[#CCFF00]"
                 )}
             >
                 <User size={20} />

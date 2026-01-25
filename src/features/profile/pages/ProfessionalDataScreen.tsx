@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { FluidBackground } from '@/components/layout/FluidBackground';
 import {
     ChevronLeft,
     Stethoscope,
@@ -203,11 +204,13 @@ export const ProfessionalDataScreen: React.FC = () => {
         }
     };
 
-    const inputStyle = "w-full h-14 bg-white border border-gray-200 rounded-2xl px-4 text-sm font-bold text-dark outline-none focus:border-secondary transition-all appearance-none";
-    const labelStyle = "text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block";
+    // Glassy, Transparent, Luminous
+    const textureCardClass = "bg-black/40 bg-[radial-gradient(120%_120%_at_50%_0%,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent backdrop-blur-3xl border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] relative overflow-hidden";
+    const inputStyle = "w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-4 text-sm font-bold text-white outline-none focus:border-[#CCFF00]/50 transition-all appearance-none placeholder:text-slate-600";
+    const labelStyle = "text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-2 block";
 
     return (
-        <div className="min-h-screen bg-[#F1F3F5] pb-32 font-sans">
+        <FluidBackground variant="luminous" className="pb-40 font-sans px-5 relative overflow-hidden min-h-screen">
             <Toast
                 isVisible={toast.show}
                 message={toast.message}
@@ -215,27 +218,27 @@ export const ProfessionalDataScreen: React.FC = () => {
                 onClose={() => setToast({ ...toast, show: false })}
             />
 
-            <header className="bg-white px-5 pt-8 pb-4 flex justify-between items-center mb-6">
+            <header className="relative z-10 pt-8 flex justify-between items-center mb-6">
                 <button
                     onClick={() => navigate(-1)}
-                    className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-50 border border-gray-100 shadow-sm active:scale-95"
+                    className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 border border-white/10 shadow-sm hover:text-white text-slate-400 active:scale-95 transition-all"
                 >
-                    <ChevronLeft size={24} className="text-dark" />
+                    <ChevronLeft size={24} />
                 </button>
                 <div className="flex-1 text-center">
-                    <h1 className="text-lg font-bold text-dark">
-                        Dados <span className="text-secondary">Profissionais</span>
+                    <h1 className="text-lg font-bold text-white">
+                        Dados <span className="text-[#CCFF00]">Profissionais</span>
                     </h1>
                 </div>
                 <div className="w-10" />
             </header>
 
-            <div className="px-5 space-y-6">
-                <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100/50 space-y-6">
+            <div className="relative z-10 space-y-6">
+                <div className={`${textureCardClass} p-6 rounded-[2rem] space-y-6`}>
                     <div>
                         <div className="flex items-center gap-2 mb-4">
-                            <ShieldCheck size={18} className="text-secondary" />
-                            <span className="text-xs font-black text-dark uppercase tracking-widest">Documentação e Validação</span>
+                            <ShieldCheck size={18} className="text-[#CCFF00]" />
+                            <span className="text-xs font-black text-white uppercase tracking-widest">Documentação e Validação</span>
                         </div>
 
                         <div className="space-y-4">
@@ -246,17 +249,17 @@ export const ProfessionalDataScreen: React.FC = () => {
                             ].map((docType) => {
                                 const statusDoc = getDocStatus(docType.id);
                                 return (
-                                    <div key={docType.id} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-between">
+                                    <div key={docType.id} className="p-4 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             <div className={cn(
                                                 "w-10 h-10 rounded-xl flex items-center justify-center",
-                                                statusDoc ? getStatusStyle(statusDoc.status) : "bg-white text-gray-300"
+                                                statusDoc ? getStatusStyle(statusDoc.status) : "bg-white/5 text-slate-500 border border-white/5"
                                             )}>
                                                 <FileText size={20} />
                                             </div>
                                             <div>
-                                                <p className="text-[10px] font-black text-dark uppercase tracking-tighter">{docType.label}</p>
-                                                <p className="text-[9px] font-bold text-gray-400">
+                                                <p className="text-[10px] font-black text-white uppercase tracking-tighter">{docType.label}</p>
+                                                <p className="text-[9px] font-bold text-slate-400">
                                                     {statusDoc ? (
                                                         statusDoc.status === 'approved' ? '✓ Validado' :
                                                             statusDoc.status === 'refused' ? '✕ Recusado' : '⌛ Em análise'
@@ -266,7 +269,7 @@ export const ProfessionalDataScreen: React.FC = () => {
                                         </div>
                                         <button
                                             onClick={() => handleUploadClick(docType.id)}
-                                            className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-secondary active:scale-90 transition-transform"
+                                            className="w-8 h-8 rounded-full bg-[#CCFF00] shadow-sm flex items-center justify-center text-black active:scale-90 transition-transform hover:scale-110"
                                         >
                                             <Upload size={16} />
                                         </button>
@@ -279,11 +282,11 @@ export const ProfessionalDataScreen: React.FC = () => {
                 </div>
 
                 {/* identification and location sections as before but lower */}
-                <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100/50 space-y-6">
+                <div className={`${textureCardClass} p-6 rounded-[2rem] space-y-6`}>
                     <div>
                         <div className="flex items-center gap-2 mb-4">
-                            <ShieldCheck size={18} className="text-secondary" />
-                            <span className="text-xs font-black text-dark uppercase tracking-widest">Identificação</span>
+                            <ShieldCheck size={18} className="text-[#CCFF00]" />
+                            <span className="text-xs font-black text-white uppercase tracking-widest">Identificação</span>
                         </div>
                         <div className="space-y-4">
                             <div>
@@ -299,7 +302,7 @@ export const ProfessionalDataScreen: React.FC = () => {
                                 <label className={labelStyle}>Especialidade Principal</label>
                                 <div className="relative">
                                     <select
-                                        className={inputStyle}
+                                        className={inputStyle + " [&>option]:text-black"}
                                         value={formData.specialty_id}
                                         onChange={(e) => setFormData({ ...formData, specialty_id: e.target.value })}
                                         disabled={fetchingDropdowns}
@@ -307,7 +310,7 @@ export const ProfessionalDataScreen: React.FC = () => {
                                         <option value="">Selecione...</option>
                                         {specialties.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                                     </select>
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                                         {fetchingDropdowns ? <Loader2 className="animate-spin w-4 h-4" /> : <Stethoscope size={16} />}
                                     </div>
                                 </div>
@@ -315,16 +318,16 @@ export const ProfessionalDataScreen: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="pt-4 border-t border-gray-50">
+                    <div className="pt-4 border-t border-white/10">
                         <div className="flex items-center gap-2 mb-4">
-                            <Building2 size={18} className="text-secondary" />
-                            <span className="text-xs font-black text-dark uppercase tracking-widest">Local de Atuação</span>
+                            <Building2 size={18} className="text-[#CCFF00]" />
+                            <span className="text-xs font-black text-white uppercase tracking-widest">Local de Atuação</span>
                         </div>
                         <div>
                             <label className={labelStyle}>Unidade Principal</label>
                             <div className="relative">
                                 <select
-                                    className={inputStyle}
+                                    className={inputStyle + " [&>option]:text-black"}
                                     value={formData.unit_id}
                                     onChange={(e) => setFormData({ ...formData, unit_id: e.target.value })}
                                     disabled={fetchingDropdowns}
@@ -337,9 +340,9 @@ export const ProfessionalDataScreen: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-secondary/5 p-5 rounded-[2rem] border border-secondary/10 flex gap-4">
-                    <ShieldCheck className="text-secondary shrink-0" size={20} />
-                    <p className="text-[11px] text-secondary font-medium leading-relaxed">
+                <div className="bg-[#CCFF00]/5 p-5 rounded-[2rem] border border-[#CCFF00]/10 flex gap-4">
+                    <ShieldCheck className="text-[#CCFF00] shrink-0" size={20} />
+                    <p className="text-[11px] text-[#CCFF00] font-medium leading-relaxed">
                         Estas informações são utilizadas para vincular seus atendimentos e prescrições nos relatórios gerados para seus pacientes.
                     </p>
                 </div>
@@ -348,10 +351,10 @@ export const ProfessionalDataScreen: React.FC = () => {
                     <Button
                         onClick={handleSave}
                         disabled={loading || fetchingDropdowns}
-                        className="w-full h-16 rounded-3xl bg-primary text-dark font-black tracking-tight gap-3 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                        className="w-full h-16 rounded-3xl bg-[#CCFF00] text-black font-black tracking-tight gap-3 shadow-lg shadow-[#CCFF00]/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 hover:bg-white"
                     >
                         {loading ? (
-                            <Loader2 className="w-6 h-6 animate-spin text-dark" />
+                            <Loader2 className="w-6 h-6 animate-spin text-black" />
                         ) : (
                             <CheckCircle2 size={24} strokeWidth={3} />
                         )}
@@ -361,6 +364,6 @@ export const ProfessionalDataScreen: React.FC = () => {
             </div>
 
             <BottomNav />
-        </div>
+        </FluidBackground>
     );
 };

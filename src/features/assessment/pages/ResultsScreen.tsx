@@ -3,7 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Share2 } from 'lucide-react';
 
-export const ResultsScreen: React.FC = () => {
+interface ResultsScreenProps {
+  isEmbedded?: boolean;
+}
+
+export const ResultsScreen: React.FC<ResultsScreenProps> = ({ isEmbedded }) => {
   const navigate = useNavigate();
 
   return (

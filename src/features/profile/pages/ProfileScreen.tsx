@@ -1,4 +1,5 @@
 import React from 'react';
+import { FluidBackground } from '@/components/layout/FluidBackground';
 import {
     Bell,
     ChevronRight,
@@ -20,7 +21,11 @@ import { ProfessionalBottomNav } from '@/components/layout/ProfessionalBottomNav
 import { DefaultAvatar } from '@/components/shared/DefaultAvatar';
 import { cn } from '@/lib/utils';
 
-export const ProfileScreen: React.FC = () => {
+interface ProfileScreenProps {
+    embedded?: boolean;
+}
+
+export const ProfileScreen: React.FC<ProfileScreenProps> = (props) => {
     const navigate = useNavigate();
     const { user, signOut, userProfile } = useAuth();
 
@@ -74,23 +79,21 @@ export const ProfileScreen: React.FC = () => {
         }
     ];
 
-    return (
-        <div className="min-h-screen bg-slate-200 text-slate-900 font-sans pb-32 relative overflow-hidden">
-            {/* Deep Silver/Gray Gradient */}
-            <div className="fixed inset-0 pointer-events-none bg-gradient-to-br from-slate-200 via-slate-300 to-slate-400">
-                <div className="absolute top-[-20%] left-[-20%] w-[800px] h-[800px] bg-[#CCFF00]/5 rounded-full blur-[100px] animate-smoke-1 opacity-60"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-500/5 rounded-full blur-[120px] animate-smoke-2 opacity-50"></div>
-            </div>
+    // Glassy, Transparent, Luminous
+    const textureCardClass = "bg-black/40 bg-[radial-gradient(120%_120%_at_50%_0%,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent backdrop-blur-3xl border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] relative overflow-hidden";
 
-            <div className="relative z-10 px-6">
+    // NOTE: ProfessionalBottomNav handles switching via parent state if embedded
+    return (
+        <FluidBackground variant="luminous" className="pb-40 font-sans px-6 relative overflow-hidden min-h-screen">
+            <div className="relative z-10 text-white">
                 {/* Header */}
                 <header className="pt-10 flex justify-between items-center mb-10">
-                    <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">
-                        Meu <span className="text-purple-600">Perfil</span>
+                    <h1 className="text-2xl font-black text-white uppercase tracking-tighter">
+                        Meu <span className="text-[#CCFF00]">Perfil</span>
                     </h1>
                     <button
                         onClick={() => isAdmin ? navigate('/admin/notifications') : navigate('/profile/notifications')}
-                        className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 border border-slate-100 active:scale-95 transition-all shadow-sm"
+                        className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-slate-400 border border-white/10 active:scale-95 transition-all shadow-sm hover:text-[#CCFF00]"
                     >
                         <Bell size={20} />
                     </button>
@@ -99,22 +102,21 @@ export const ProfileScreen: React.FC = () => {
                 {/* Profile Info */}
                 <div className="flex flex-col items-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="relative group">
-                        <div className="w-32 h-32 rounded-[2.5rem] border-4 border-[#CCFF00] p-1.5 bg-white shadow-xl shadow-[#CCFF00]/10 overflow-hidden transition-transform group-hover:scale-105 duration-500">
+                        <div className="w-32 h-32 rounded-full border-4 border-[#CCFF00] p-1.5 bg-[#080C09] shadow-xl shadow-[#CCFF00]/10 overflow-hidden transition-transform group-hover:scale-105 duration-500">
                             {(userProfile?.avatar_url || (user?.user_metadata?.avatar_url && !user.user_metadata.avatar_url.includes('pravatar.cc'))) ? (
                                 <img
                                     src={userProfile?.avatar_url || user?.user_metadata?.avatar_url}
                                     alt="Avatar"
-                                    className="w-full h-full rounded-[2rem] object-cover"
+                                    className="w-full h-full rounded-full object-cover"
                                 />
                             ) : (
-                                <DefaultAvatar gender={userProfile?.gender || user?.user_metadata?.gender} className="w-full h-full rounded-[2rem]" />
+                                <DefaultAvatar gender={userProfile?.gender || user?.user_metadata?.gender} className="w-full h-full rounded-full" />
                             )}
                         </div>
                         <button
                             onClick={triggerCamera}
-                            className="absolute bottom-1 right-1 w-10 h-10 bg-[#CCFF00] text-black rounded-full flex items-center justify-center border-4 border-slate-200 shadow-lg shadow-[#CCFF00]/10 hover:scale-110 transition-transform cursor-pointer"
+                            className="absolute bottom-1 right-1 w-10 h-10 bg-[#CCFF00] text-black rounded-full flex items-center justify-center border-4 border-[#122216] shadow-lg shadow-[#CCFF00]/10 hover:scale-110 transition-transform cursor-pointer"
                         >
-                            <div className="absolute inset-0 bg-purple-600 rounded-full opacity-0 hover:opacity-20 transition-opacity"></div>
                             <Camera size={18} strokeWidth={3} />
                         </button>
                     </div>
@@ -126,15 +128,15 @@ export const ProfileScreen: React.FC = () => {
                         Alterar Foto
                     </button>
 
-                    <h2 className="mt-4 text-2xl font-black text-slate-900 tracking-tighter uppercase">{firstName} {lastName}</h2>
+                    <h2 className="mt-4 text-2xl font-black text-white tracking-tighter uppercase">{firstName} {lastName}</h2>
 
                     {/* Hidden Inputs */}
                     <input type="file" id="gallery-upload" className="hidden" accept="image/*" onChange={handleAvatarUpload} />
                     <input type="file" id="camera-upload" className="hidden" accept="image/*" capture="user" onChange={handleAvatarUpload} />
                     {role === 'profissional' ? (
                         <div className="flex flex-col items-center gap-2 mt-2">
-                            <span className="bg-white/50 backdrop-blur-sm text-slate-900 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border border-[#CCFF00]/20 shadow-sm flex items-center gap-2">
-                                Avaliador Profissional <div className="w-1 h-1 bg-purple-500 rounded-full"></div>
+                            <span className="bg-white/5 backdrop-blur-sm text-slate-200 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border border-white/10 shadow-sm flex items-center gap-2">
+                                Avaliador Profissional <div className="w-1 h-1 bg-[#CCFF00] rounded-full"></div>
                             </span>
                             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">
                                 ID: MET-{user?.id ? user.id.substring(0, 4).toUpperCase() : '0000'}
@@ -153,29 +155,29 @@ export const ProfileScreen: React.FC = () => {
                         <button
                             key={idx}
                             onClick={() => navigate(item.path)}
-                            className="w-full bg-white/70 backdrop-blur-md p-5 rounded-[2rem] flex items-center gap-5 border border-slate-300 hover:border-[#CCFF00] hover:shadow-xl hover:shadow-[#CCFF00]/5 active:scale-[0.98] transition-all duration-300 group shadow-sm"
+                            className={`${textureCardClass} w-full p-5 rounded-[2rem] flex items-center gap-5 hover:border-[#CCFF00] hover:shadow-xl hover:shadow-[#CCFF00]/5 active:scale-[0.98] transition-all duration-300 group`}
                         >
-                            <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center shrink-0 text-slate-400 group-hover:bg-[#CCFF00]/10 group-hover:text-[#CCFF00] transition-colors">
+                            <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center shrink-0 text-slate-400 group-hover:bg-[#CCFF00]/10 group-hover:text-[#CCFF00] transition-colors border border-white/5">
                                 <item.icon size={22} />
                             </div>
                             <div className="flex-1 text-left">
-                                <h3 className="text-sm font-black text-slate-900 leading-tight uppercase tracking-wide group-hover:text-[#CCFF00] transition-colors">{item.title}</h3>
-                                {item.subtitle && <p className="text-[10px] text-slate-400 font-bold mt-0.5 uppercase tracking-widest">{item.subtitle}</p>}
+                                <h3 className="text-sm font-black text-slate-200 leading-tight uppercase tracking-wide group-hover:text-[#CCFF00] transition-colors">{item.title}</h3>
+                                {item.subtitle && <p className="text-[10px] text-slate-500 font-bold mt-0.5 uppercase tracking-widest">{item.subtitle}</p>}
                             </div>
-                            <ChevronRight size={18} className="text-slate-200 group-hover:text-purple-600 transition-colors translate-x-0 group-hover:translate-x-1" />
+                            <ChevronRight size={18} className="text-slate-600 group-hover:text-[#CCFF00] transition-colors translate-x-0 group-hover:translate-x-1" />
                         </button>
                     ))}
 
                     {/* Management Section (Admin/Dev only) */}
                     {isAdmin && (
                         <div className="pt-8 space-y-4">
-                            <p className="text-[10px] font-black text-secondary uppercase tracking-[0.3em] mb-6 pl-2 opacity-70">Management</p>
+                            <p className="text-[10px] font-black text-[#CCFF00] uppercase tracking-[0.3em] mb-6 pl-2 opacity-70">Management</p>
 
                             <button
                                 onClick={() => navigate('/admin')}
-                                className="w-full bg-[#1e293b]/40 backdrop-blur-md p-5 rounded-[2rem] flex items-center gap-5 border border-white/5 hover:border-secondary/30 active:scale-[0.98] transition-all duration-300 group"
+                                className={`${textureCardClass} w-full p-5 rounded-[2rem] flex items-center gap-5 active:scale-[0.98] transition-all duration-300 group`}
                             >
-                                <div className="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center shrink-0 text-secondary">
+                                <div className="w-12 h-12 rounded-2xl bg-[#CCFF00]/10 flex items-center justify-center shrink-0 text-[#CCFF00] border border-[#CCFF00]/20">
                                     <Settings size={22} />
                                 </div>
                                 <div className="flex-1 text-left">
@@ -189,6 +191,7 @@ export const ProfileScreen: React.FC = () => {
                                 <button
                                     onClick={() => navigate('/dev')}
                                     className="w-full bg-rose-500/10 backdrop-blur-md p-5 rounded-[2rem] flex items-center gap-5 border border-rose-500/20 hover:bg-rose-500/20 active:scale-[0.98] transition-all duration-300 group"
+                                    style={{ background: 'rgba(244, 63, 94, 0.1)' }}
                                 >
                                     <div className="w-12 h-12 rounded-2xl bg-rose-500/20 flex items-center justify-center shrink-0 text-rose-400">
                                         <Terminal size={22} />
@@ -206,20 +209,20 @@ export const ProfileScreen: React.FC = () => {
                     {/* Logout Button */}
                     <button
                         onClick={signOut}
-                        className="w-full bg-rose-50 p-5 rounded-[2rem] flex items-center gap-5 border border-rose-100 hover:bg-rose-100 active:scale-[0.98] transition-all duration-300 mt-10 group shadow-sm"
+                        className="w-full bg-red-500/10 p-5 rounded-[2rem] flex items-center gap-5 border border-red-500/20 hover:bg-red-500/20 active:scale-[0.98] transition-all duration-300 mt-10 group shadow-sm"
                     >
-                        <div className="w-12 h-12 rounded-2xl bg-rose-200/50 flex items-center justify-center shrink-0 text-rose-600">
+                        <div className="w-12 h-12 rounded-2xl bg-red-500/20 flex items-center justify-center shrink-0 text-red-500">
                             <LogOut size={22} />
                         </div>
                         <div className="flex-1 text-left">
-                            <h3 className="text-sm font-black text-rose-600 uppercase tracking-widest">Sair da Conta</h3>
+                            <h3 className="text-sm font-black text-red-500 uppercase tracking-widest">Sair da Conta</h3>
                         </div>
                     </button>
                 </div>
             </div>
 
-            {/* Bottom Nav */}
-            <ProfessionalBottomNav activeTab="profile" onTabChange={() => { }} />
-        </div>
+            {/* Bottom Nav Section - Only show if not embedded */}
+            {!props.embedded && <ProfessionalBottomNav activeTab="profile" onTabChange={() => { }} />}
+        </FluidBackground>
     );
 };
