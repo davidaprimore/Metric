@@ -76,8 +76,21 @@ export const PatientDashboardScreen: React.FC = () => {
       setMissingFields(missing);
       setProfileIncomplete(missing.length > 0);
 
-      const { data: appts } = await supabase.from('appointments').select('*').eq('patient_id', user.id).eq('status', 'confirmed').gte('start_time', new Date().toISOString()).order('start_time', { ascending: true }).limit(1);
-      if (appts) setUpcomingAppointments(appts);
+      // 1. Get IDs of appointments that are already assessed (Ghost Check)
+      const { data: assessedIds } = await supabase.from('assessments').select('appointment_id').eq('patient_id', user.id).not('appointment_id', 'is', null);
+      const ignoreIds = assessedIds?.map(a => a.appointment_id) || [];
+
+      const { data: appts } = await supabase.from('appointments')
+        .select('*')
+        .eq('patient_id', user.id)
+        .eq('status', 'confirmed')
+        .gte('start_time', new Date().toISOString())
+        .order('start_time', { ascending: true });
+
+      if (appts) {
+        const valid = appts.filter(a => !ignoreIds.includes(a.id));
+        setUpcomingAppointments(valid.slice(0, 1));
+      }
 
       const { data: notifs } = await supabase.from('notifications').select('*').eq('user_id', user.id).eq('read', false).order('created_at', { ascending: false });
       if (notifs) setNotifications(notifs);
