@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { FluidBackground } from '@/components/layout/FluidBackground';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -310,16 +311,16 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
         onClick={() => setSelectedPlan('premium')}
         className={cn(
           "p-6 rounded-[2rem] border transition-all cursor-pointer relative overflow-hidden group min-h-[160px] flex flex-col justify-between",
-          selectedPlan === 'premium' ? "bg-[#FBBF24] border-[#FBBF24] shadow-[0_0_40px_rgba(251,191,36,0.3)] scale-[1.02]" : "bg-[#111] border-white/10 hover:border-[#FBBF24]/30"
+          selectedPlan === 'premium' ? "bg-[#D4AF37] border-[#D4AF37] shadow-[0_0_40px_rgba(212,175,55,0.3)] scale-[1.02]" : "bg-[#111] border-white/10 hover:border-[#D4AF37]/30"
         )}
       >
         {/* Background Image */}
         <div className="absolute inset-0 opacity-30 group-hover:opacity-50 transition-opacity">
           <img src="/assets/plan_premium.png" className="w-full h-full object-cover" alt="" />
-          <div className={cn("absolute inset-0", selectedPlan === 'premium' ? "bg-gradient-to-t from-[#FBBF24] via-[#FBBF24]/80 to-transparent" : "bg-gradient-to-t from-black via-black/80 to-transparent")}></div>
+          <div className={cn("absolute inset-0", selectedPlan === 'premium' ? "bg-gradient-to-t from-[#D4AF37] via-[#D4AF37]/80 to-transparent" : "bg-gradient-to-t from-black via-black/80 to-transparent")}></div>
         </div>
 
-        <div className="absolute top-0 right-0 bg-black text-[#FBBF24] text-[9px] font-black px-4 py-2 rounded-bl-2xl uppercase tracking-tighter z-20">
+        <div className="absolute top-0 right-0 bg-black text-[#D4AF37] text-[9px] font-black px-4 py-2 rounded-bl-2xl uppercase tracking-tighter z-20">
           ELITE PERFORMANCE
         </div>
 
@@ -327,11 +328,11 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
           <div className="flex justify-between items-start mb-2">
             <div className={cn(
               "w-10 h-10 rounded-xl flex items-center justify-center border transition-colors",
-              selectedPlan === 'premium' ? "bg-black/10 border-black/10 text-black" : "bg-[#FBBF24]/10 border-[#FBBF24]/30 text-[#FBBF24]"
+              selectedPlan === 'premium' ? "bg-black/10 border-black/10 text-black" : "bg-[#D4AF37]/10 border-[#D4AF37]/30 text-[#D4AF37]"
             )}>
               <Activity size={20} />
             </div>
-            {selectedPlan === 'premium' && <div className="w-6 h-6 rounded-full bg-black text-[#FBBF24] flex items-center justify-center"><Check size={14} strokeWidth={4} /></div>}
+            {selectedPlan === 'premium' && <div className="w-6 h-6 rounded-full bg-black text-[#D4AF37] flex items-center justify-center"><Check size={14} strokeWidth={4} /></div>}
           </div>
           <h3 className={cn("text-xl font-black mb-1", selectedPlan === 'premium' ? "text-black" : "text-white")}>Individualizada</h3>
           <p className={cn("text-[11px] mb-4 leading-relaxed font-bold", selectedPlan === 'premium' ? "text-slate-900" : "text-slate-400")}>
@@ -339,7 +340,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
           </p>
           <div className="flex items-end gap-1">
             <span className={cn("text-sm font-bold mb-1", selectedPlan === 'premium' ? "text-slate-800" : "text-slate-400")}>Investimento</span>
-            <span className={cn("text-3xl font-black", selectedPlan === 'premium' ? "text-black" : "text-[#FBBF24]")}>89,90</span>
+            <span className={cn("text-3xl font-black", selectedPlan === 'premium' ? "text-black" : "text-[#D4AF37]")}>89,90</span>
           </div>
         </div>
       </div>
@@ -349,7 +350,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
         onClick={() => setWizardStep('schedule')}
         className={cn(
           "w-full py-4 rounded-xl font-black uppercase tracking-widest text-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed sticky bottom-0",
-          selectedPlan === 'basic' ? "bg-white text-black hover:bg-gray-200" : "bg-[#FBBF24] text-black hover:bg-[#f59e0b] shadow-[0_0_20px_rgba(251,191,36,0.3)]"
+          selectedPlan === 'basic' ? "bg-white text-black hover:bg-gray-200" : "bg-[#D4AF37] text-black hover:bg-[#f0c24b] shadow-[0_0_20px_rgba(212,175,55,0.3)]"
         )}
       >
         Continuar para Agendamento
@@ -382,7 +383,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
             className={cn(
               "h-10 w-full flex items-center justify-center rounded-lg text-sm font-bold cursor-pointer transition-all relative",
               !isCurrentMonth ? "text-slate-800" :
-                isSelected ? "bg-[#39FF14] text-black shadow-[0_0_15px_rgba(57,255,20,0.4)] z-10" : "text-slate-400 hover:bg-white/10 hover:text-white"
+                isSelected ? "bg-[#D4AF37] text-black shadow-[0_0_15px_rgba(212,175,55,0.4)] z-10" : "text-slate-400 hover:bg-white/10 hover:text-white"
             )}
           >
             {formattedDate}
@@ -403,7 +404,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
         <div className="space-y-2">
           <h2 className="text-2xl font-black text-white uppercase tracking-tight">Agendamento</h2>
           <div className="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/5">
-            <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", selectedPlan === 'basic' ? "bg-white text-black" : "bg-[#FBBF24] text-black")}>
+            <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", selectedPlan === 'basic' ? "bg-white text-black" : "bg-[#D4AF37] text-black")}>
               {selectedPlan === 'basic' ? <Dumbbell size={16} /> : <Activity size={16} />}
             </div>
             <div>
@@ -437,7 +438,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
           <h3 className="text-sm font-bold text-slate-400 mb-4 uppercase tracking-widest pl-2">Horários Disponíveis</h3>
           <div className="grid grid-cols-4 gap-3">
             {loading ? (
-              <div className="col-span-4 py-8 flex justify-center"><Loader className="animate-spin text-[#39FF14]" /></div>
+              <div className="col-span-4 py-8 flex justify-center"><Loader className="animate-spin text-[#D4AF37]" /></div>
             ) : availableSlots.length > 0 ? (
               availableSlots.map(slot => (
                 <button
@@ -445,7 +446,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
                   onClick={() => setSelectedSlot(slot)}
                   className={cn(
                     "py-3 rounded-xl border text-xs font-bold transition-all",
-                    selectedSlot === slot ? "bg-[#FBBF24] text-black border-[#FBBF24]" : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"
+                    selectedSlot === slot ? "bg-[#D4AF37] text-black border-[#D4AF37]" : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"
                   )}
                 >
                   {slot}
@@ -463,7 +464,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
         <button
           disabled={!selectedSlot || loading}
           onClick={reserveSlot}
-          className="w-full py-4 rounded-xl bg-[#FBBF24] text-black font-black uppercase tracking-widest text-xs hover:bg-[#f59e0b] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(251,191,36,0.3)] sticky bottom-0 flex items-center justify-center gap-2"
+          className="w-full py-4 rounded-xl bg-[#D4AF37] text-black font-black uppercase tracking-widest text-xs hover:bg-[#f0c24b] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(212,175,55,0.3)] sticky bottom-0 flex items-center justify-center gap-2"
         >
           {loading ? <Loader className="animate-spin" size={16} /> : 'Confirmar Agendamento'}
         </button>
@@ -569,8 +570,8 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
 
   const renderSuccess = () => (
     <div className="flex flex-col items-center justify-center min-h-[60vh] animate-in zoom-in duration-500">
-      <div className="w-24 h-24 rounded-full bg-[#39FF14]/20 flex items-center justify-center mb-8 border border-[#39FF14]/50 shadow-[0_0_40px_rgba(57,255,20,0.3)]">
-        <div className="w-16 h-16 rounded-full bg-[#39FF14] flex items-center justify-center">
+      <div className="w-24 h-24 rounded-full bg-[#D4AF37]/20 flex items-center justify-center mb-8 border border-[#D4AF37]/50 shadow-[0_0_40px_rgba(212,175,55,0.3)]">
+        <div className="w-16 h-16 rounded-full bg-[#D4AF37] flex items-center justify-center">
           <Check size={32} className="text-black" strokeWidth={4} />
         </div>
       </div>
@@ -578,21 +579,21 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
       <h2 className="text-2xl font-black text-white text-center mb-2">Agendamento Confirmado</h2>
       <p className="text-slate-400 text-center text-sm mb-12">Sua reserva foi finalizada com sucesso.</p>
 
-      <div className="w-full bg-white/5 border border-white/10 rounded-[2rem] p-6 mb-8 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-1 h-full bg-[#39FF14]"></div>
+      <div className="w-full bg-[#0A0A0A]/40 backdrop-blur-xl border border-white/5 rounded-[2rem] p-6 mb-8 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-1 h-full bg-[#D4AF37]"></div>
         <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Resumo do Plano</p>
         <h3 className="text-lg font-bold text-white mb-4">{selectedPlan === 'basic' ? 'Individualizada' : 'Individualizada'} com {selectedProfessional?.full_name}</h3>
 
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
-            <CalendarIcon size={16} className="text-[#FBBF24]" />
+            <CalendarIcon size={16} className="text-[#D4AF37]" />
             <span className="text-sm font-bold text-white">{selectedDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}</span>
           </div>
         </div>
       </div>
 
       <div className="w-full bg-white rounded-[2rem] p-8 text-center shadow-2xl">
-        <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
+        <div className="w-12 h-12 bg-[#D4AF37]/10 rounded-full flex items-center justify-center mx-auto mb-4 text-[#D4AF37]">
           <Check size={24} strokeWidth={3} />
         </div>
         <h3 className="text-gray-900 font-bold text-lg mb-1">Pagamento Processado</h3>
@@ -600,7 +601,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
 
         <button
           onClick={() => navigate('/assessment/anamnesis')}
-          className="w-full py-4 rounded-xl bg-[#39FF14] text-black font-black uppercase tracking-widest text-xs hover:bg-[#32d411] transition-all shadow-xl flex items-center justify-center gap-2"
+          className="w-full py-4 rounded-xl bg-[#D4AF37] text-black font-black uppercase tracking-widest text-xs hover:bg-white transition-all shadow-xl flex items-center justify-center gap-2"
         >
           Preencher Anamnese <ChevronRight size={16} />
         </button>
@@ -611,22 +612,18 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
           Voltar ao Início
         </button>
       </div>
-    </div>
+    </div >
   );
 
   return (
-    <div className="min-h-screen bg-[#020502] font-sans text-white pb-24 relative overflow-hidden">
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute inset-0 bg-[#0a100a]"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(57,255,20,0.15),transparent_40%)]"></div>
-      </div>
+    <FluidBackground variant="luminous" className="min-h-screen font-sans text-white pb-24 relative overflow-hidden">
 
       {!isBookingOpen ? (
         <header className="relative z-10 px-6 py-6 flex justify-between items-center">
           <h1 className="text-xl font-bold font-display text-white">Minha Agenda</h1>
           <button
             onClick={() => { setIsBookingOpen(true); setWizardStep('plans'); }}
-            className="bg-[#39FF14] text-black px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wide hover:scale-105 transition-transform shadow-[0_0_15px_rgba(57,255,20,0.3)]"
+            className="bg-[#D4AF37] text-black px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wide hover:scale-105 transition-transform shadow-[0_0_15px_rgba(212,175,55,0.3)]"
           >
             + Novo Agendamento
           </button>
@@ -674,6 +671,6 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
 
       <Toast isVisible={toast.show} message={toast.message} type={toast.type} onClose={() => setToast({ ...toast, show: false })} />
       {!isBookingOpen && !props.embedded && <BottomNav />}
-    </div>
+    </FluidBackground>
   );
 };

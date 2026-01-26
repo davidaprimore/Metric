@@ -28,13 +28,13 @@ import { ProfileScreen } from '@/features/profile/pages/ProfileScreen';
 import { ResultsScreen } from '@/features/assessment/pages/ResultsScreen';
 
 /* 
-  METRIK ORIGINS THEME: "ELITE TEXTURE" (Patient)
-  - Cards: Textured dark backgrounds + Glass styling
-  - Padding: Corrected to prevent Nav overlap (pb-40)
+  METRIK GLASS PRO THEME (Patient)
+  - Cards: Frosted Glass (Black/40) + Gold Accents
+  - Background: Fluid Light Beams (via FluidBackground)
 */
 
-// Glassy, Transparent, Luminous
-const textureCardClass = "bg-black/40 bg-[radial-gradient(120%_120%_at_50%_0%,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent backdrop-blur-3xl border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] relative overflow-hidden";
+// Glassy, Premium, Minimalist
+const textureCardClass = "bg-[#0A0A0A]/40 backdrop-blur-xl border border-white/5 relative overflow-hidden shadow-2xl";
 
 export const PatientDashboardScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -93,8 +93,9 @@ export const PatientDashboardScreen: React.FC = () => {
     <div className="relative z-10 text-white animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <header className="pt-8 flex justify-between items-center mb-6">
-        <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setActiveTab('profile')}>
-          <div className="w-12 h-12 rounded-full border border-white/5 p-0.5 bg-black/60 shadow-lg overflow-hidden group-hover:scale-105 transition-transform backdrop-blur-xl">
+        <div className="flex items-center gap-4 cursor-pointer group" onClick={() => setActiveTab('profile')}>
+          <div className="w-14 h-14 rounded-full border border-[#D4AF37]/30 p-0.5 bg-black/60 shadow-[0_0_15px_rgba(212,175,55,0.2)] overflow-hidden group-hover:scale-105 transition-transform backdrop-blur-xl relative">
+            <div className="absolute inset-0 rounded-full border border-white/10"></div>
             {(userProfile?.avatar_url || (user?.user_metadata?.avatar_url && !user.user_metadata.avatar_url.includes('pravatar.cc'))) ? (
               <img src={userProfile?.avatar_url || user?.user_metadata?.avatar_url} alt="Profile" className="w-full h-full rounded-full object-cover" />
             ) : (
@@ -102,26 +103,29 @@ export const PatientDashboardScreen: React.FC = () => {
             )}
           </div>
           <div className="flex flex-col">
-            <h1 className="text-xl font-bold text-white leading-tight drop-shadow-sm">Olá, {firstName}</h1>
-            <span className="text-[10px] font-extrabold text-[#CCFF00] uppercase tracking-[0.1em] group-hover:underline shadow-[#CCFF00]/50 drop-shadow-sm">Ver Perfil</span>
+            <span className="text-[10px] font-black text-[#D4AF37] uppercase tracking-[0.2em] mb-1">Bem-vindo</span>
+            <h1 className="text-2xl font-bold text-white leading-none drop-shadow-sm">{firstName}</h1>
           </div>
         </div>
 
-        <button onClick={() => setShowNotifications(!showNotifications)} className="w-11 h-11 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-slate-300 relative">
-          <Bell size={20} className={cn("text-slate-400 opacity-80", notifications.length > 0 && "text-[#CCFF00]")} />
-          {notifications.length > 0 && <div className="absolute top-2.5 right-3 w-2 h-2 bg-[#FFC107] rounded-full animate-pulse"></div>}
+        <button onClick={() => setShowNotifications(!showNotifications)} className="w-11 h-11 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-slate-300 relative hover:bg-white/10 transition-colors">
+          <Bell size={20} className={cn("text-slate-400 opacity-80", notifications.length > 0 && "text-[#D4AF37]")} />
+          {notifications.length > 0 && <div className="absolute top-2.5 right-3 w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_red]"></div>}
         </button>
       </header>
 
       {/* HERO SECTION - Texture */}
-      <div className={`${textureCardClass} w-full h-40 rounded-[2rem] mb-8 overflow-hidden flex items-center justify-between px-6 shadow-lg`}>
-        <div className="absolute inset-0 bg-gradient-to-r from-[#CCFF00]/10 to-transparent pointer-events-none"></div>
-        <div className="relative z-10 max-w-[50%]">
-          <h2 className="text-lg font-bold text-white leading-tight mb-1">Seu corpo,<br />sua jornada.</h2>
-          <p className="text-[10px] text-slate-400 font-medium">Vamos medir seu progresso hoje?</p>
+      <div className={`${textureCardClass} w-full h-44 rounded-[2.5rem] mb-8 flex items-center justify-between px-8 relative group`}>
+        {/* Subtle Gold Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/10 via-transparent to-transparent pointer-events-none opacity-50"></div>
+
+        <div className="relative z-10 max-w-[60%]">
+          <div className="w-8 h-1 bg-[#D4AF37] rounded-full mb-3"></div>
+          <h2 className="text-xl font-bold text-white leading-tight mb-2">Seu corpo,<br />sua obra de arte.</h2>
+          <p className="text-[10px] text-slate-400 font-medium tracking-wide">Vamos medir seu progresso hoje?</p>
         </div>
-        <div className="relative z-10 w-32 h-32 -mr-4 animate-in fade-in zoom-in duration-1000">
-          <img src="/assets/3d/tape_measure.png" className="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(204,255,0,0.3)]" alt="Tape Measure Friend" />
+        <div className="relative z-10 w-36 h-36 -mr-6 animate-in fade-in zoom-in duration-1000">
+          <img src="/assets/3d/tape_measure.png" className="w-full h-full object-contain filter drop-shadow-[0_0_25px_rgba(212,175,55,0.2)]" alt="Tape Measure Friend" />
         </div>
       </div>
 
@@ -130,43 +134,43 @@ export const PatientDashboardScreen: React.FC = () => {
         <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Centro de Avisos</p>
 
         {profileIncomplete && (
-          <div className={`${textureCardClass} p-5 rounded-[2rem] flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500 border-[#FFC107]/20`}>
-            <div className="w-12 h-12 rounded-2xl bg-[#FFC107]/20 flex items-center justify-center shrink-0 border border-[#FFC107]/30">
-              <ShieldCheck className="text-[#FFC107]" size={24} />
+          <div className={`${textureCardClass} p-5 rounded-[2rem] flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500 border-red-500/20 bg-red-500/5`}>
+            <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center shrink-0 border border-red-500/20">
+              <ShieldCheck className="text-red-500" size={24} />
             </div>
             <div className="flex-1">
-              <p className="text-xs font-black text-[#FFC107] uppercase tracking-tight">Perfil Incompleto</p>
-              <p className="text-[10px] text-slate-400 font-medium leading-tight mt-0.5">Faltando: <span className="font-bold text-slate-200">{missingFields.join(', ')}</span>.</p>
+              <p className="text-xs font-black text-red-500 uppercase tracking-tight">Perfil Incompleto</p>
+              <p className="text-[10px] text-slate-400 font-medium leading-tight mt-0.5">Faltando: <span className="font-bold text-white">{missingFields.join(', ')}</span>.</p>
             </div>
-            <button onClick={() => navigate('/profile/data')} className="w-10 h-10 bg-[#FFC107] text-black rounded-full flex items-center justify-center shadow-lg"><ArrowRight size={18} /></button>
+            <button onClick={() => navigate('/profile/data')} className="w-10 h-10 bg-red-500/10 text-red-500 border border-red-500/20 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"><ArrowRight size={18} /></button>
           </div>
         )}
 
-        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2 pt-2">Meus Compromissos</p>
+        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2 pt-2">Agenda</p>
 
         {upcomingAppointments.length > 0 ? (
-          <div className={`${textureCardClass} rounded-[2.5rem] p-6 shadow-md transition-all duration-300 group`}>
+          <div className={`${textureCardClass} rounded-[2.5rem] p-6 shadow-md transition-all duration-300 group hover:border-[#D4AF37]/30`}>
             <div className="flex justify-between items-start mb-4">
-              <span className="bg-[#CCFF00]/10 text-[#CCFF00] text-[10px] font-extrabold px-3 py-1 rounded-lg uppercase tracking-wider border border-[#CCFF00]/20 shadow-sm">Próximo Agendamento</span>
-              <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-2xl flex items-center justify-center"><CalendarIcon className="text-[#CCFF00]" size={20} /></div>
+              <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-[9px] font-black px-3 py-1.5 rounded-lg uppercase tracking-wider border border-[#D4AF37]/20 shadow-sm">Próximo</span>
+              <div className="w-10 h-10 bg-[#D4AF37]/10 rounded-2xl flex items-center justify-center border border-[#D4AF37]/5"><CalendarIcon className="text-[#D4AF37]" size={20} /></div>
             </div>
-            <h3 className="text-lg font-bold text-white mb-4">Consulta Agendada</h3>
+            <h3 className="text-lg font-bold text-white mb-4">Consulta Confirmada</h3>
             <div className="flex items-center gap-4 mb-6">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center border border-white/10"><Clock className="text-[#CCFF00]" size={14} /></div>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/5"><Clock className="text-[#D4AF37]" size={14} /></div>
                 <div>
-                  <p className="text-sm font-bold text-slate-200 leading-none">{new Date(upcomingAppointments[0].start_time).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</p>
-                  <p className="text-[10px] text-slate-500 font-medium">às {new Date(upcomingAppointments[0].start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
+                  <p className="text-sm font-bold text-white leading-none">{new Date(upcomingAppointments[0].start_time).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</p>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase mt-0.5">As {new Date(upcomingAppointments[0].start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
               </div>
             </div>
-            <Button onClick={() => setActiveTab('schedule')} className="w-full h-12 rounded-xl bg-white text-black font-bold text-xs hover:bg-slate-200 transition-colors shadow-lg">Ver Detalhes</Button>
+            <Button onClick={() => setActiveTab('schedule')} className="w-full h-12 rounded-xl bg-white text-black font-black text-xs hover:bg-[#D4AF37] hover:text-black transition-all shadow-lg tracking-widest uppercase">Ver Detalhes</Button>
           </div>
         ) : (
           <div className={`${textureCardClass} rounded-[2rem] p-6 shadow-sm flex items-center gap-4`}>
             <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center shrink-0 border border-white/5"><CalendarDays className="text-slate-600" size={20} /></div>
             <div className="flex-1"><p className="text-xs font-bold text-slate-500">Nenhum agendamento futuro.</p></div>
-            <button onClick={() => setActiveTab('schedule')} className="text-[10px] font-bold text-[#FFC107] uppercase tracking-wider hover:underline">Agendar</button>
+            <button onClick={() => setActiveTab('schedule')} className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-wider hover:text-white transition-colors">Agendar Agora</button>
           </div>
         )}
       </div>
@@ -175,15 +179,15 @@ export const PatientDashboardScreen: React.FC = () => {
       <div className="mb-8 relative">
         <div className="grid grid-cols-2 gap-4">
           {metrics.map((item, idx) => (
-            <div key={idx} className={`${textureCardClass} rounded-[2rem] p-5 shadow-sm group`}>
+            <div key={idx} className={`${textureCardClass} rounded-[2rem] p-5 shadow-sm group hover:bg-white/5 transition-colors`}>
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tight mb-2 relative z-10">{item.label}</p>
               {item.icon && <div className="absolute -bottom-4 -right-4 w-20 h-20 opacity-20 group-hover:opacity-40 transition-opacity grayscale group-hover:grayscale-0 contrast-125"><img src={item.icon} className="w-full h-full object-contain" /></div>}
               <div className="flex items-baseline gap-1 relative z-10">
                 <span className="text-2xl font-black text-white tracking-tighter drop-shadow-sm">{item.value}</span>
-                <span className="text-xs font-bold text-slate-500">{item.unit}</span>
+                <span className="text-xs font-bold text-[#D4AF37]">{item.unit}</span>
               </div>
               {item.trend && (
-                <div className={cn("flex items-center gap-1 mt-2 text-[10px] font-bold relative z-10", item.up ? "text-[#FFC107]" : "text-[#CCFF00]")}>
+                <div className={cn("flex items-center gap-1 mt-2 text-[10px] font-bold relative z-10", item.up ? "text-red-400" : "text-green-400")}>
                   {item.up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                   {item.trend}
                 </div>
@@ -191,31 +195,31 @@ export const PatientDashboardScreen: React.FC = () => {
             </div>
           ))}
         </div>
-        {assessmentCount === 0 && <div className="mt-4 px-2"><p className="text-[10px] text-slate-600 font-bold italic leading-relaxed">* Os dados de avaliação serão exibidos automaticamente após a sua <span className="text-[#CCFF00] font-black">primeira consulta</span>.</p></div>}
+        {assessmentCount === 0 && <div className="mt-4 px-2"><p className="text-[10px] text-slate-600 font-bold italic leading-relaxed">* Os dados serão atualizados após a sua <span className="text-[#D4AF37] font-black">primeira consulta</span>.</p></div>}
       </div>
 
       <div className={`${textureCardClass} rounded-[2.5rem] p-6 shadow-md mb-8`}>
         <div className="flex justify-between items-center mb-6"><h3 className="text-lg font-bold text-white">Minha Evolução</h3></div>
         <div className="py-12 flex flex-col items-center text-center px-4">
           <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4 text-slate-500 border border-white/5"><TrendingUp size={32} strokeWidth={1.5} /></div>
-          <p className="text-sm font-bold text-slate-500 leading-tight">{assessmentCount === 0 ? "Aguardando seu primeiro resultado para gerar gráficos." : "A Minha Evolução será exibida assim que você realizar a segunda avaliação."}</p>
+          <p className="text-sm font-bold text-slate-500 leading-tight">{assessmentCount === 0 ? "Aguardando seu primeiro resultado." : "Gráficos de evolução em breve."}</p>
         </div>
       </div>
 
       {/* Floating CTA */}
-      <Button variant="primary" className="w-full h-16 rounded-[2rem] bg-[#CCFF00] text-black font-black text-xs gap-3 shadow-xl hover:shadow-2xl transition-all sticky bottom-8 z-30 tracking-widest uppercase hover:bg-white" onClick={() => setActiveTab('schedule')}>
+      <Button variant="primary" className="w-full h-16 rounded-[2rem] bg-[#D4AF37] text-black font-black text-xs gap-3 shadow-[0_0_30px_rgba(212,175,55,0.3)] hover:shadow-2xl transition-all sticky bottom-8 z-30 tracking-widest uppercase hover:bg-white hover:scale-[1.02]" onClick={() => setActiveTab('schedule')}>
         <Plus size={24} strokeWidth={3} />Novo Agendamento
       </Button>
 
       {/* Footer */}
       <footer className="mt-8 mb-16 flex justify-between items-center py-6 border-t border-white/5">
         <div className="flex items-center gap-2.5 opacity-80">
-          <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center shadow-sm border border-white/10"><span className="text-[#CCFF00] font-black text-sm text-shadow">M</span></div>
-          <div><p className="text-[10px] font-black text-slate-400 tracking-[0.15em] leading-none mb-0.5">METRIK</p><p className="text-[7px] font-bold text-[#CCFF00] tracking-[0.2em] uppercase opacity-60">Precision Lab</p></div>
+          <div className="w-9 h-9 bg-white/5 rounded-lg flex items-center justify-center shadow-sm border border-white/10"><span className="text-[#D4AF37] font-black text-sm text-shadow">M</span></div>
+          <div><p className="text-[10px] font-black text-slate-400 tracking-[0.15em] leading-none mb-0.5">METRIK</p><p className="text-[7px] font-bold text-[#D4AF37] tracking-[0.2em] uppercase opacity-60">Gold Standard</p></div>
         </div>
         <div className="flex flex-col items-end gap-1.5 text-right">
           <p className="text-[9px] text-slate-600 font-bold tracking-tight opacity-60">@METRIK.oficial</p>
-          <div className="flex items-center gap-1.5 bg-[#CCFF00]/10 px-2.5 py-1 rounded-lg border border-[#CCFF00]/10"><ShieldCheck size={11} className="text-[#CCFF00]" /><span className="text-[8px] font-extrabold text-[#CCFF00] uppercase tracking-wider">Avaliação Certificada</span></div>
+          <div className="flex items-center gap-1.5 bg-[#D4AF37]/10 px-2.5 py-1 rounded-lg border border-[#D4AF37]/10"><ShieldCheck size={11} className="text-[#D4AF37]" /><span className="text-[8px] font-extrabold text-[#D4AF37] uppercase tracking-wider">Verificado</span></div>
         </div>
       </footer>
     </div>
