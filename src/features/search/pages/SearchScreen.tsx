@@ -179,12 +179,12 @@ id, full_name, nickname, avatar_url,
     };
 
     return (
-        <div className="min-h-screen bg-[#F7F7F7] text-[#222222] font-sans pb-32 overflow-x-hidden">
+        <div className="min-h-screen bg-[#F7F7F7] text-[#222222] font-sans pb-32 w-full max-w-[100vw] overflow-x-hidden">
             {/* Mobile Layout Constraint - Strictly Enforced */}
             <div className="max-w-md mx-auto w-full relative min-h-screen bg-white shadow-xl shadow-black/5 overflow-hidden">
 
                 {/* Header */}
-                <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md pt-6 pb-2 px-5 border-b border-gray-100">
+                <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md pt-6 pb-2 px-5 border-b border-gray-100 max-w-full overflow-hidden">
                     <div className="flex items-center gap-3 mb-6">
                         <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-[#222222] hover:bg-gray-100 transition-all">
                             <ChevronLeft size={24} strokeWidth={2.5} />
