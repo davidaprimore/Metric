@@ -79,38 +79,48 @@ export const ResultsScreen: React.FC = () => {
       const diff = Number(currVal) - Number(prevVal);
       const isGood = isReverse ? diff < 0 : diff > 0;
       return (
-        <div className="bg-white/40 backdrop-blur-xl rounded-2xl p-4 border border-white/20 shadow-sm">
-          <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest text-center mb-3">{label}</p>
-          <div className="flex items-center justify-between gap-2">
+        <div className="bg-white/60 backdrop-blur-2xl rounded-[2rem] p-6 border border-white/40 shadow-xl overflow-hidden relative group">
+          {/* Subtle Accent Glow */}
+          <div className={cn(
+            "absolute -right-4 -top-4 w-24 h-24 blur-3xl opacity-20 transition-opacity group-hover:opacity-40",
+            isGood ? "bg-green-400" : "bg-red-400"
+          )} />
+
+          <p className="text-[10px] font-black text-slate-900/40 uppercase tracking-[0.2em] text-center mb-5">{label}</p>
+
+          <div className="flex items-center justify-between gap-4">
             {/* Previous */}
-            <div className="flex-1 text-center">
-              <div className="flex items-baseline justify-center gap-0.5">
-                <span className="text-xl font-black text-slate-700">{prevVal}</span>
-                <span className="text-[8px] font-bold text-slate-400">{unit}</span>
+            <div className="flex-1 flex flex-col items-center">
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-3xl font-black text-slate-800 tracking-tighter">{prevVal}</span>
+                <span className="text-[10px] font-bold text-slate-400">{unit}</span>
               </div>
-              <p className="text-[7px] font-black text-slate-400 uppercase tracking-tighter mt-0.5">Anterior</p>
+              <p className="text-[8px] font-black text-slate-400/80 uppercase tracking-tighter mt-1">Anterior</p>
             </div>
 
-            {/* Indicator */}
-            <div className="flex flex-col items-center justify-center px-2">
+            {/* Indicator Central */}
+            <div className="flex flex-col items-center justify-center px-4 border-x border-slate-900/5">
               <div className={cn(
-                "w-6 h-6 rounded-full flex items-center justify-center",
-                diff === 0 ? "bg-slate-200 text-slate-400" : isGood ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"
+                "w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 duration-500",
+                diff === 0 ? "bg-slate-100 text-slate-400" : isGood ? "bg-green-500 text-white" : "bg-red-500 text-white"
               )}>
-                {diff === 0 ? <div className="w-2 h-0.5 bg-current" /> : diff > 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                {diff === 0 ? <div className="w-3 h-0.5 bg-current" /> : diff > 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
               </div>
-              <span className={cn("text-[9px] font-black mt-1", diff === 0 ? "text-slate-400" : isGood ? "text-green-600" : "text-red-500")}>
+              <span className={cn(
+                "text-xs font-black mt-2 tabular-nums",
+                diff === 0 ? "text-slate-400" : isGood ? "text-green-600" : "text-red-500"
+              )}>
                 {diff > 0 ? '+' : ''}{diff.toFixed(1)}
               </span>
             </div>
 
             {/* Current */}
-            <div className="flex-1 text-center">
-              <div className="flex items-baseline justify-center gap-0.5">
-                <span className="text-xl font-black text-black">{currVal}</span>
-                <span className="text-[8px] font-bold text-[#D4AF37]">{unit}</span>
+            <div className="flex-1 flex flex-col items-center">
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-4xl font-black text-black tracking-tighter">{currVal}</span>
+                <span className="text-[10px] font-bold text-[#D4AF37]">{unit}</span>
               </div>
-              <p className="text-[7px] font-black text-[#D4AF37] uppercase tracking-tighter mt-0.5">Atual</p>
+              <p className="text-[8px] font-black text-[#D4AF37] uppercase tracking-tighter mt-1">Atual</p>
             </div>
           </div>
         </div>
@@ -125,52 +135,60 @@ export const ResultsScreen: React.FC = () => {
     const currLeanMass = (assessment.weight * (1 - currFatPct / 100)).toFixed(1);
 
     return (
-      <div className="flex flex-col h-full relative overflow-hidden">
-        {/* Premium Natural Background */}
+      <div className="flex flex-col h-full relative overflow-hidden bg-white">
+        {/* Premium Natural Background with Enhanced Vignette */}
         <div className="absolute inset-0 z-0">
           <img
-            src="/assets/dashboard-bgs/motivation_bg.png"
-            className="w-full h-full object-cover"
+            src="/assets/dashboard-bgs/natural_premium_bg.png"
+            className="w-full h-full object-cover scale-105 animate-subtle-zoom"
             alt="Natural Background"
           />
-          {/* Lighter overlay for natural look */}
-          <div className="absolute inset-0 bg-white/20 backdrop-blur-[2px]"></div>
-          <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-black/20"></div>
+          {/* Multi-layered overlays for readability */}
+          <div className="absolute inset-0 bg-white/30 backdrop-blur-[1px]"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-white via-white/10 to-transparent h-48"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
         </div>
 
-        <div className="relative z-10 flex flex-col h-full p-6 pt-12">
-          <div className="mb-6 text-center animate-in fade-in slide-in-from-top-4 duration-700">
+        <div className="relative z-10 flex flex-col h-full p-6 pt-16">
+          <div className="mb-8 text-center animate-in fade-in slide-in-from-top-4 duration-700">
             <div className="inline-block relative">
-              <span className="px-5 py-2 rounded-xl backdrop-blur-md border border-white/50 bg-white/30 text-slate-800 text-[10px] font-black uppercase tracking-[0.3em]">Resumo de Progresso</span>
+              <span className="px-6 py-2 rounded-full backdrop-blur-xl border border-white/60 bg-white/40 text-slate-900 text-[11px] font-black uppercase tracking-[0.4em] shadow-sm">
+                Relatório de Evolução
+              </span>
             </div>
 
-            <h1 className="text-4xl font-black text-slate-900 mt-6 leading-tight tracking-tighter uppercase italic drop-shadow-sm">
-              Minha evolução em<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#B8860B] to-[#D4AF37] drop-shadow-md">
-                {dayDiff} dias
+            <h1 className="text-[42px] font-black text-slate-900 mt-8 leading-[0.9] tracking-tighter uppercase italic drop-shadow-sm">
+              Minha obra<br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#8B6E0F] via-[#D4AF37] to-[#8B6E0F] bg-[length:200%_auto] animate-gradient-slow drop-shadow-md">
+                em {dayDiff} dias
               </span>
             </h1>
-            <p className="text-slate-500 text-[9px] font-bold uppercase tracking-[0.2em] mt-2">
-              {prevDate?.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })} • {currDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
-            </p>
+
+            <div className="flex items-center justify-center gap-3 mt-4">
+              <div className="h-px w-8 bg-slate-300"></div>
+              <p className="text-slate-600 text-[10px] font-bold uppercase tracking-[0.2em]">
+                {prevDate?.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })} — {currDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+              </p>
+              <div className="h-px w-8 bg-slate-300"></div>
+            </div>
           </div>
 
-          <div className="flex-1 space-y-3 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300 overflow-y-auto scrollbar-hide py-2">
+          <div className="flex-1 space-y-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300 overflow-y-auto scrollbar-hide py-4 px-1">
             <ComparisonRow
-              label="Peso Total"
+              label="Peso Corporal"
               unit="kg"
               prevVal={prevAssessment?.weight || "0.0"}
               currVal={assessment.weight}
             />
             <ComparisonRow
-              label="Percentual de Gordura"
+              label="Taxa de Gordura"
               unit="%"
               prevVal={prevFatPct.toFixed(1)}
               currVal={currFatPct.toFixed(1)}
               isReverse
             />
             <ComparisonRow
-              label="Massa Magra (Músculo)"
+              label="Massa Magra"
               unit="kg"
               prevVal={prevLeanMass}
               currVal={currLeanMass}
@@ -184,16 +202,21 @@ export const ResultsScreen: React.FC = () => {
             />
           </div>
 
-          {/* Brand Footer Small */}
-          <div className="mt-4 pt-4 border-t border-black/5 flex justify-between items-center opacity-80">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-black/5 rounded-lg border border-black/5 flex items-center justify-center font-black text-[#D4AF37] text-sm">M</div>
+          {/* Optimized PRO BOLD Branding Footer */}
+          <div className="mt-6 p-4 rounded-[2rem] bg-black shadow-2xl flex justify-between items-center border border-white/10">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#D4AF37] to-[#B8860B] rounded-xl flex items-center justify-center shadow-lg">
+                <span className="font-black text-black text-lg">M</span>
+              </div>
               <div className="flex flex-col">
-                <span className="text-[9px] font-black text-slate-800 tracking-tighter">METRIK</span>
+                <span className="text-sm font-black text-white tracking-widest leading-none">METRIK</span>
+                <span className="text-[8px] font-bold text-[#D4AF37] uppercase tracking-[0.2em] mt-1">Personal Pro v2.5</span>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-[10px] font-black text-[#B8860B] italic opacity-60">#SuaObraDeArte</p>
+              <p className="text-xs font-black text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#F5E5A4] italic uppercase tracking-tighter">
+                #SuaObraDeArte
+              </p>
             </div>
           </div>
         </div>
