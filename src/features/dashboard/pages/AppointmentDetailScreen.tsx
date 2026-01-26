@@ -95,22 +95,38 @@ export const AppointmentDetailScreen: React.FC = () => {
 
             // 3. Fetch History (Assessments)
             try {
-                const { data: history } = await supabase
+                const { data: { user } } = await supabase.auth.getUser();
+
+                let query = supabase
                     .from('assessments')
                     .select('id, created_at, fat_percentage, weight')
                     .eq('patient_id', app.patient_id)
                     .order('created_at', { ascending: false });
 
+                // If user is professional, filter by their ID to show only their assessments
+                // Assuming 'professional' role or just filtering by creator if that's the requirement.
+                // The prompt asked to "list all assessments made by the professional".
+                if (user) {
+                    query = query.eq('professional_id', user.id);
+                }
+
+                const { data: history } = await query;
+
                 if (history && history.length > 0) {
                     setAssessments(history);
                 } else if (assessments.length === 0) {
                     // Inject mock if real history empty (for demo)
-                    setAssessments([
-                        { id: '1', created_at: '2025-10-15', weight: 80, fat_percentage: 25 },
-                        { id: '2', created_at: '2025-11-15', weight: 78, fat_percentage: 24 },
-                        { id: '3', created_at: '2025-12-15', weight: 76, fat_percentage: 22 },
-                        { id: '4', created_at: '2026-01-15', weight: 75.5, fat_percentage: 20 }
-                    ]);
+                    // ONLY INJECT MOCK IF NO REAL DATA AND FETCH FAILED/EMPTY (Start with empty to avoid confusion if it really is empty)
+                    if (!history) {
+                        setAssessments([
+                            { id: '1', created_at: '2025-10-15', weight: 80, fat_percentage: 25 },
+                            { id: '2', created_at: '2025-11-15', weight: 78, fat_percentage: 24 },
+                            { id: '3', created_at: '2025-12-15', weight: 76, fat_percentage: 22 },
+                            { id: '4', created_at: '2026-01-15', weight: 75.5, fat_percentage: 20 }
+                        ]);
+                    } else {
+                        setAssessments([]); // Real empty state
+                    }
                 }
             } catch (err) {
                 console.warn("Assessments table fetch failed", err);
@@ -273,26 +289,33 @@ export const AppointmentDetailScreen: React.FC = () => {
                     <div>
                         <div className="flex items-center justify-between mb-4 px-2">
                             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Histórico de Avaliações</h3>
+                            <span className="text-[10px] font-bold text-slate-600 bg-white/5 px-2 py-0.5 rounded-full">{assessments.length}</span>
                         </div>
 
-                        <div className="space-y-3">
-                            {assessments.slice(0, 3).map((assessment, i) => ( // limit to 3
-                                <div key={assessment.id} className="bg-[#111]/30 p-5 rounded-2xl border border-white/5 flex items-center justify-between hover:border-[#D4AF37]/30 transition-all cursor-pointer group active:scale-[0.98]" onClick={() => navigate(`/profile/history/${assessment.id}`)}>
-                                    <div className="flex items-center gap-5">
-                                        <div className={cn(
-                                            "w-12 h-12 rounded-full flex items-center justify-center font-black text-xs border border-white/5",
-                                            i === 0 ? "bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]/30 shadow-[0_0_15px_rgba(212,175,55,0.1)]" : "bg-white/5 text-slate-500"
-                                        )}>
-                                            {assessment.fat_percentage ? Math.round(assessment.fat_percentage) : '?'}%
+                        <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                            {assessments.length > 0 ? (
+                                assessments.map((assessment, i) => (
+                                    <div key={assessment.id} className="bg-[#111]/30 p-5 rounded-2xl border border-white/5 flex items-center justify-between hover:border-[#D4AF37]/30 transition-all cursor-pointer group active:scale-[0.98]" onClick={() => navigate(`/profile/history/${assessment.id}`)}>
+                                        <div className="flex items-center gap-5">
+                                            <div className={cn(
+                                                "w-12 h-12 rounded-full flex items-center justify-center font-black text-xs border border-white/5",
+                                                i === 0 ? "bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]/30 shadow-[0_0_15px_rgba(212,175,55,0.1)]" : "bg-white/5 text-slate-500"
+                                            )}>
+                                                {assessment.fat_percentage ? Math.round(assessment.fat_percentage) : '?'}%
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-white group-hover:text-[#D4AF37] transition-colors">{new Date(assessment.created_at).toLocaleDateString('pt-BR')}</p>
+                                                <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mt-0.5">{assessment.weight} KG</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-white group-hover:text-[#D4AF37] transition-colors">{new Date(assessment.created_at).toLocaleDateString('pt-BR')}</p>
-                                            <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mt-0.5">{assessment.weight} KG</p>
-                                        </div>
+                                        <ChevronRight size={16} className="text-slate-600 group-hover:text-white transition-colors" />
                                     </div>
-                                    <ChevronRight size={16} className="text-slate-600 group-hover:text-white transition-colors" />
+                                ))
+                            ) : (
+                                <div className="text-center py-8 opacity-50">
+                                    <p className="text-xs text-slate-500">Nenhuma avaliação encontrada.</p>
                                 </div>
-                            ))}
+                            )}
                         </div>
                     </div>
 

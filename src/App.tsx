@@ -34,6 +34,7 @@ import { ProfessionalDataScreen } from '@/features/profile/pages/ProfessionalDat
 import { AssessmentHistoryScreen } from '@/features/profile/pages/AssessmentHistoryScreen';
 import { AssessmentDetailScreen } from '@/features/profile/pages/AssessmentDetailScreen';
 import { AppointmentDetailScreen } from '@/features/dashboard/pages/AppointmentDetailScreen';
+import { PatientDetailScreen } from '@/features/dashboard/pages/PatientDetailScreen';
 
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -212,6 +213,12 @@ function App() {
             <Route path="/assessment/start" element={
               <PrivateRoute>
                 <AssessmentWizardScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/profile/:id" element={
+              <PrivateRoute>
+                <PatientDetailScreen />
               </PrivateRoute>
             } />
 

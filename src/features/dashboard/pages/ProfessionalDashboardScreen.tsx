@@ -18,6 +18,10 @@ import { cn } from '../../../lib/utils';
 import { ProfessionalBottomNav } from '../../../components/layout/ProfessionalBottomNav';
 import { Toast } from '../../../components/ui/Toast';
 import { ProfessionalAgenda } from '../components/ProfessionalAgenda';
+import { PatientsList } from '../components/PatientsList';
+import { ProfessionalReviews } from '../components/ProfessionalReviews';
+import { FinancialOverview } from '../components/FinancialOverview';
+import { ProfessionalSettings } from '../components/ProfessionalSettings';
 import { FluidBackground } from '@/components/layout/FluidBackground';
 import { format } from 'date-fns';
 import { ProfileScreen } from '@/features/profile/pages/ProfileScreen';
@@ -192,7 +196,9 @@ const ProfessionalDashboardScreen = () => {
                                 </div>
                             </div>
 
-                            <div className={`${bentoItemClass} hover:bg-gradient-to-br hover:from-[#3D3A2C] hover:to-[#1F2937] transition-all border-white/5 hover:border-[#D4AF37]/30 group/eval group`}>
+                            <div
+                                onClick={() => handleNavigation('reviews')}
+                                className={`${bentoItemClass} hover:bg-gradient-to-br hover:from-[#3D3A2C] hover:to-[#1F2937] transition-all border-white/5 hover:border-[#D4AF37]/30 group/eval group`}>
                                 {/* Background Image Overlay */}
                                 <div className="absolute inset-0 z-0 opacity-20 group-hover:opacity-30 transition-opacity">
                                     <img
@@ -230,7 +236,9 @@ const ProfessionalDashboardScreen = () => {
                                 </div>
                             </div>
 
-                            <div className={`${bentoItemClass} hover:bg-[#1F2937]/60 transition-all group relative`}>
+                            <div
+                                onClick={() => handleNavigation('settings')}
+                                className={`${bentoItemClass} hover:bg-[#1F2937]/60 transition-all group relative`}>
                                 {/* Background Image Overlay */}
                                 <div className="absolute inset-0 z-0 opacity-10 group-hover:opacity-20 transition-opacity">
                                     <img
@@ -264,6 +272,30 @@ const ProfessionalDashboardScreen = () => {
                 {activeTab === 'calendar' && (
                     <div className="px-6 h-full pb-20 animate-in slide-in-from-right-4 duration-500">
                         <ProfessionalAgenda />
+                    </div>
+                )}
+
+                {activeTab === 'patients' && (
+                    <div className="px-6 h-full pb-20">
+                        <PatientsList />
+                    </div>
+                )}
+
+                {activeTab === 'reviews' && (
+                    <div className="px-6 h-full pb-20">
+                        <ProfessionalReviews />
+                    </div>
+                )}
+
+                {activeTab === 'financial' && (
+                    <div className="px-6 h-full pb-20">
+                        <FinancialOverview />
+                    </div>
+                )}
+
+                {activeTab === 'settings' && (
+                    <div className="px-6 h-full pb-20">
+                        <ProfessionalSettings />
                     </div>
                 )}
 
