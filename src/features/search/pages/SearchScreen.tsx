@@ -145,17 +145,15 @@ export const SearchScreen: React.FC = () => {
 
     const searchProfessionals = async () => {
         setLoading(true);
-        try {
+
+        // Helper to build the query chain
+        const buildQuery = (selectString: string) => {
             let query = supabase
                 .from('profiles')
-                .select(`
-id, full_name, nickname, avatar_url,
-    rating, review_count, specialties(name),
-    address_city, address_state, bio, nano_bio
-        `)
+                .select(selectString)
                 .eq('role', 'profissional');
 
-            // Text Search (Name, Nickname, ID)
+            // Text Search
             if (debouncedSearch) {
                 query = query.or(`full_name.ilike.%${debouncedSearch}%,nickname.ilike.%${debouncedSearch}%,professional_code.eq.${debouncedSearch}`);
             }
@@ -164,45 +162,71 @@ id, full_name, nickname, avatar_url,
             if (filterCity) query = query.ilike('address_city', `%${filterCity}%`);
             if (filterState) query = query.ilike('address_state', `%${filterState}%`);
 
-            const { data, error } = await query;
-            if (error) throw error;
+            return query;
+        };
 
-            let results = data || [];
+        try {
+            // 1. Try fetching with NEW columns (bio, nano_bio)
+            const { data, error } = await buildQuery(`
+                id, full_name, nickname, avatar_url,
+                rating, review_count, specialties(name),
+                address_city, address_state, bio, nano_bio
+            `);
 
-            // 1. Filter by Specialty / Favorites
-            if (activeFilter !== 'all') {
-                if (activeFilter === 'favorites') {
-                    // Show ONLY favorites
-                    results = results.filter(p => favorites.has(p.id));
-                } else {
-                    // Filter by Specialty Name
-                    results = results.filter(p =>
-                        p.specialties?.[0]?.name?.toLowerCase().includes(activeFilter === 'personal' ? 'personal' : activeFilter)
-                    );
+            if (error) throw error; // If this fails (e.g. column missing), go to catch
+            processResults(data || []);
+
+        } catch (err) {
+            console.warn('Rich query failed (likely missing columns), falling back to basic:', err);
+
+            try {
+                // 2. Fallback to BASIC columns (Safe Mode)
+                const { data, error } = await buildQuery(`
+                    id, full_name, nickname, avatar_url,
+                    specialties(name),
+                    address_city, address_state
+                `);
+
+                if (error) {
+                    console.error('Basic query also failed:', error);
+                    return;
                 }
+                processResults(data || []);
+            } catch (fatalErr) {
+                console.error('Fatal search error:', fatalErr);
             }
-
-            // 2. Sort Logic
-            results.sort((a, b) => {
-                // Priority #1: Favorites always first (unless filtered by favorite, then they are all favorites)
-                const aFav = favorites.has(a.id);
-                const bFav = favorites.has(b.id);
-                if (aFav && !bFav) return -1;
-                if (!aFav && bFav) return 1;
-
-                // Priority #2: User selected sort
-                if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
-                // if (sortBy === 'price') return (a.price || 0) - (b.price || 0); // Price not in profile yet
-
-                return 0; // Default order
-            });
-
-            setProfessionals(results);
-        } catch (error) {
-            console.error('Search error:', error);
         } finally {
             setLoading(false);
         }
+    };
+
+    const processResults = (data: any[]) => {
+        let results = data || [];
+
+        // 1. Filter by Specialty / Favorites
+        if (activeFilter !== 'all') {
+            if (activeFilter === 'favorites') {
+                results = results.filter(p => favorites.has(p.id));
+            } else {
+                results = results.filter(p =>
+                    p.specialties?.[0]?.name?.toLowerCase().includes(activeFilter === 'personal' ? 'personal' : activeFilter)
+                );
+            }
+        }
+
+        // 2. Sort Logic
+        results.sort((a, b) => {
+            const aFav = favorites.has(a.id);
+            const bFav = favorites.has(b.id);
+            if (aFav && !bFav) return -1;
+            if (!aFav && bFav) return 1;
+
+            if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
+
+            return 0;
+        });
+
+        setProfessionals(results);
     };
 
     const toggleFavorite = async (proId: string, e: React.MouseEvent) => {
