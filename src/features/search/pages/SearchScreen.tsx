@@ -1,4 +1,4 @@
-```javascript
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -80,12 +80,12 @@ id, full_name, nickname, avatar_url,
 
             // Text Search (Name, Nickname, ID)
             if (debouncedSearch) {
-                query = query.or(`full_name.ilike.% ${ debouncedSearch }%, nickname.ilike.% ${ debouncedSearch }%, professional_code.eq.${ debouncedSearch } `);
+                query = query.or(`full_name.ilike.% ${debouncedSearch}%, nickname.ilike.% ${debouncedSearch}%, professional_code.eq.${debouncedSearch} `);
             }
 
             // Location Filters
-            if (filterCity) query = query.ilike('address_city', `% ${ filterCity }% `);
-            if (filterState) query = query.ilike('address_state', `% ${ filterState }% `);
+            if (filterCity) query = query.ilike('address_city', `% ${filterCity}% `);
+            if (filterState) query = query.ilike('address_state', `% ${filterState}% `);
 
             const { data, error } = await query;
             if (error) throw error;
@@ -160,7 +160,7 @@ id, full_name, nickname, avatar_url,
                 {/* Header */}
                 <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md pt-6 pb-2 px-5 border-b border-gray-100">
                     <div className="flex items-center gap-3 mb-6">
-                         <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-[#222222] hover:bg-gray-100 transition-all">
+                        <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-[#222222] hover:bg-gray-100 transition-all">
                             <ChevronLeft size={24} strokeWidth={2.5} />
                         </button>
 
@@ -276,7 +276,7 @@ id, full_name, nickname, avatar_url,
                                             <Star size={12} className={sortBy === 'rating' ? "fill-white" : ""} />
                                             Melhor Avaliação
                                         </button>
-                                         <button
+                                        <button
                                             onClick={() => setSortBy(sortBy === 'price' ? 'none' : 'price')}
                                             className={cn(
                                                 "px-4 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-2",
@@ -311,8 +311,8 @@ id, full_name, nickname, avatar_url,
                 {/* Results List */}
                 <div className="p-5 space-y-4">
                     {loading ? (
-                         <div className="space-y-4 pt-10 text-center">
-                            <div className="w-12 h-12 border-4 border-[#FF385C] border-t-transparent rounded-full animate-spin mx-auto"/>
+                        <div className="space-y-4 pt-10 text-center">
+                            <div className="w-12 h-12 border-4 border-[#FF385C] border-t-transparent rounded-full animate-spin mx-auto" />
                             <p className="text-xs text-gray-400 font-bold tracking-widest uppercase">Buscando...</p>
                         </div>
                     ) : professionals.length > 0 ? (
@@ -323,7 +323,7 @@ id, full_name, nickname, avatar_url,
                             return (
                                 <div
                                     key={pro.id}
-                                    onClick={() => navigate(`/ profile / ${ pro.id } `)}
+                                    onClick={() => navigate(`/ profile / ${pro.id} `)}
                                     className={cn(
                                         "group rounded-[2rem] p-4 flex gap-4 active:scale-[0.98] transition-all cursor-pointer border border-transparent hover:border-gray-100 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]",
                                         getCardColor(pro.specialties?.name),
@@ -334,12 +334,12 @@ id, full_name, nickname, avatar_url,
                                     <div className="w-20 h-20 rounded-full overflow-hidden bg-white shadow-sm border-2 border-white relative shrink-0">
                                         <img
                                             src={pro.avatar_url || `https://ui-avatars.com/api/?name=${pro.full_name}&background=f3f4f6&color=000`}
-className = "w-full h-full object-cover"
-    />
+                                            className="w-full h-full object-cover"
+                                        />
                                     </div >
 
-    {/* Info */ }
-    < div className = "flex-1 py-0.5 flex flex-col justify-between relative" >
+                                    {/* Info */}
+                                    < div className="flex-1 py-0.5 flex flex-col justify-between relative" >
                                         <div>
                                             <div className="flex justify-between items-start">
                                                 <h3 className="text-[#222222] font-bold text-lg leading-tight pr-8">
@@ -377,40 +377,40 @@ className = "w-full h-full object-cover"
                                             </div>
                                         </div>
 
-{/* Favorite Heart */ }
-<button
-    onClick={(e) => toggleFavorite(pro.id, e)}
-    className="absolute top-0 right-0 w-8 h-8 rounded-full flex items-center justify-center -mr-2 -mt-2 active:scale-90 transition-transform bg-white/50 hover:bg-white"
->
-    <Heart
-        size={18}
-        fill={isFav ? "#FF385C" : "rgba(0,0,0,0.05)"}
-        className={isFav ? "text-[#FF385C]" : "text-gray-400"}
-    />
-</button>
+                                        {/* Favorite Heart */}
+                                        <button
+                                            onClick={(e) => toggleFavorite(pro.id, e)}
+                                            className="absolute top-0 right-0 w-8 h-8 rounded-full flex items-center justify-center -mr-2 -mt-2 active:scale-90 transition-transform bg-white/50 hover:bg-white"
+                                        >
+                                            <Heart
+                                                size={18}
+                                                fill={isFav ? "#FF385C" : "rgba(0,0,0,0.05)"}
+                                                className={isFav ? "text-[#FF385C]" : "text-gray-400"}
+                                            />
+                                        </button>
                                     </div >
                                 </div >
                             );
                         })
                     ) : (
-    <div className="text-center py-16 opacity-60">
-        <Search size={40} className="mx-auto mb-3 text-gray-300" />
-        <p className="text-sm font-medium text-gray-900">Nenhum profissional encontrado</p>
-        <p className="text-xs text-gray-400 mt-1">Tento ajustar seus filtros de cidade/estado</p>
-        {(filterCity || filterState) && (
-            <button
-                onClick={() => { setFilterCity(''); setFilterState(''); }}
-                className="mt-4 text-xs font-bold text-[#FF385C] underline"
-            >
-                Limpar filtros de local
-            </button>
-        )}
-    </div>
-)}
+                        <div className="text-center py-16 opacity-60">
+                            <Search size={40} className="mx-auto mb-3 text-gray-300" />
+                            <p className="text-sm font-medium text-gray-900">Nenhum profissional encontrado</p>
+                            <p className="text-xs text-gray-400 mt-1">Tento ajustar seus filtros de cidade/estado</p>
+                            {(filterCity || filterState) && (
+                                <button
+                                    onClick={() => { setFilterCity(''); setFilterState(''); }}
+                                    className="mt-4 text-xs font-bold text-[#FF385C] underline"
+                                >
+                                    Limpar filtros de local
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div >
             </div >
 
-    <BottomNav activeTab="search" />
+            <BottomNav activeTab="search" />
         </div >
     );
 };
