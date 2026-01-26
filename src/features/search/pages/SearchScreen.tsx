@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -13,7 +12,6 @@ import {
     Stethoscope,
     SlidersHorizontal,
     X,
-    Check,
     ArrowUpDown
 } from 'lucide-react';
 import { BottomNav } from '@/components/layout/BottomNav';
@@ -48,7 +46,26 @@ export const SearchScreen: React.FC = () => {
     const [filterState, setFilterState] = useState('');
     const [sortBy, setSortBy] = useState<'rating' | 'price' | 'none'>('none');
 
+    // UI States
+    const [showNav, setShowNav] = useState(false); // Initially hidden as requested ("oculta até que role")
+
     const debouncedSearch = useDebounce(searchTerm, 500);
+
+    // Scroll Listener for BottomNav
+    useEffect(() => {
+        const handleScroll = () => {
+            // User requested: "oculta até que role o app para baixo"
+            // Interpreting as: Hidden at Y=0, Shows when Y > 50
+            if (window.scrollY > 50) {
+                setShowNav(true);
+            } else {
+                setShowNav(false);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     useEffect(() => {
         fetchFavorites();
@@ -145,17 +162,22 @@ id, full_name, nickname, avatar_url,
     };
 
     const getCardColor = (specialtyName?: string) => {
-        if (!specialtyName) return 'bg-white';
+        if (!specialtyName) return 'bg-gray-50/80 border-gray-100'; // Default Grayish for "Others"
         const lower = specialtyName.toLowerCase();
-        if (lower.includes('personal')) return 'bg-blue-50/50 hover:bg-blue-50';
-        if (lower.includes('nutri')) return 'bg-emerald-50/50 hover:bg-emerald-50';
-        if (lower.includes('fisio')) return 'bg-teal-50/50 hover:bg-teal-50';
-        return 'bg-white hover:bg-gray-50';
+
+        // Pastel colors for specific categories
+        if (lower.includes('personal')) return 'bg-blue-50/50 border-blue-100 hover:bg-blue-50';
+        if (lower.includes('nutri')) return 'bg-emerald-50/50 border-emerald-100 hover:bg-emerald-50';
+        if (lower.includes('fisio')) return 'bg-teal-50/50 border-teal-100 hover:bg-teal-50';
+        if (lower.includes('avalia')) return 'bg-rose-50/50 border-rose-100 hover:bg-rose-50';
+
+        return 'bg-gray-50/80 border-gray-100/50 hover:bg-gray-100'; // Fallback Gray
     };
 
     return (
-        <div className="min-h-screen bg-[#F7F7F7] text-[#222222] font-sans pb-32">
-            <div className="max-w-md mx-auto w-full relative min-h-screen bg-white shadow-xl shadow-black/5">
+        <div className="min-h-screen bg-[#F7F7F7] text-[#222222] font-sans pb-32 overflow-x-hidden">
+            {/* Mobile Layout Constraint - Strictly Enforced */}
+            <div className="max-w-md mx-auto w-full relative min-h-screen bg-white shadow-xl shadow-black/5 overflow-hidden">
 
                 {/* Header */}
                 <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md pt-6 pb-2 px-5 border-b border-gray-100">
@@ -165,11 +187,11 @@ id, full_name, nickname, avatar_url,
                         </button>
 
                         <div className="flex-1 h-12 bg-white rounded-full flex items-center px-2 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.1)] border border-gray-100">
-                            <div className="w-9 h-9 rounded-full bg-[#FF385C] flex items-center justify-center shadow-sm">
+                            <div className="w-9 h-9 rounded-full bg-[#FF385C] flex items-center justify-center shadow-sm shrink-0">
                                 <Search size={16} className="text-white" strokeWidth={3} />
                             </div>
-                            <div className="flex-1 px-3">
-                                <span className="block text-[10px] font-bold text-gray-400 leading-none mb-0.5">Encontre seu pro</span>
+                            <div className="flex-1 px-3 min-w-0">
+                                <span className="block text-[10px] font-bold text-gray-400 leading-none mb-0.5 truncate">Encontre seu profissional</span>
                                 <input
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -180,7 +202,7 @@ id, full_name, nickname, avatar_url,
                             <button
                                 onClick={() => setShowFilters(true)}
                                 className={cn(
-                                    "w-9 h-9 rounded-full flex items-center justify-center transition-colors relative",
+                                    "w-9 h-9 rounded-full flex items-center justify-center transition-colors relative shrink-0",
                                     (filterCity || filterState || sortBy !== 'none') ? "bg-[#222222] text-white" : "hover:bg-gray-50 text-gray-400"
                                 )}
                             >
@@ -206,13 +228,13 @@ id, full_name, nickname, avatar_url,
                                         isActive ? "opacity-100 scale-105" : "opacity-60 hover:opacity-90"
                                     )}
                                 >
+                                    {/* Icon Container with Flex Center to prevent cut-off */}
                                     <div className={cn(
                                         "w-16 h-12 rounded-xl flex items-center justify-center shadow-md transition-all bg-gradient-to-br",
                                         cat.gradient,
                                         isActive ? "shadow-lg ring-2 ring-offset-2 ring-gray-900/10" : ""
                                     )}>
-                                        {/* Filled White Icon for Picture-Button Look */}
-                                        <Icon size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />
+                                        <Icon size={20} className="text-white drop-shadow-sm" strokeWidth={2.5} />
                                     </div>
                                     <span className={cn(
                                         "text-[10px] font-bold transition-colors",
@@ -323,11 +345,11 @@ id, full_name, nickname, avatar_url,
                             return (
                                 <div
                                     key={pro.id}
-                                    onClick={() => navigate(`/ profile / ${pro.id} `)}
+                                    onClick={() => navigate(`/profile/${pro.id}`)}
                                     className={cn(
-                                        "group rounded-[2rem] p-4 flex gap-4 active:scale-[0.98] transition-all cursor-pointer border border-transparent hover:border-gray-100 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]",
+                                        "group rounded-[2rem] p-4 flex gap-4 active:scale-[0.98] transition-all cursor-pointer border shadow-sm",
                                         getCardColor(pro.specialties?.[0]?.name),
-                                        isFav ? "ring-1 ring-[#FF385C]/20 bg-[#fff5f7]" : "" // Subtle highlight for favs
+                                        isFav ? "ring-1 ring-[#FF385C]/20" : "shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]"
                                     )}
                                 >
                                     {/* Photo */}
@@ -396,13 +418,13 @@ id, full_name, nickname, avatar_url,
                         <div className="text-center py-16 opacity-60">
                             <Search size={40} className="mx-auto mb-3 text-gray-300" />
                             <p className="text-sm font-medium text-gray-900">Nenhum profissional encontrado</p>
-                            <p className="text-xs text-gray-400 mt-1">Tento ajustar seus filtros de cidade/estado</p>
+                            <p className="text-xs text-gray-400 mt-1">Tente ajustar seus filtros</p>
                             {(filterCity || filterState) && (
                                 <button
                                     onClick={() => { setFilterCity(''); setFilterState(''); }}
                                     className="mt-4 text-xs font-bold text-[#FF385C] underline"
                                 >
-                                    Limpar filtros de local
+                                    Limpar filtros
                                 </button>
                             )}
                         </div>
@@ -410,7 +432,13 @@ id, full_name, nickname, avatar_url,
                 </div>
             </div>
 
-            <BottomNav activeTab="search" />
+            {/* Smart Scroll BottomNav */}
+            <div className={cn(
+                "fixed bottom-0 left-0 right-0 transition-transform duration-300 z-40 max-w-md mx-auto",
+                showNav ? "translate-y-0" : "translate-y-full"
+            )}>
+                <BottomNav activeTab="search" />
+            </div>
         </div>
     );
 };
