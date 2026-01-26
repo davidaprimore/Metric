@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter as Router } from 'react-router-dom';
+import { MemoryRouter as Router } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { OfflineQueueProvider } from '@/contexts/OfflineQueueContext';
 import { AppRoutes } from '@/AppRoutes';
