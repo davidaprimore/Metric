@@ -509,20 +509,20 @@ export const ProfessionalAgenda: React.FC = () => {
     const renderConfigScreen = () => (
         <div className="fixed inset-0 z-40 bg-[#0B1221]/25 backdrop-blur-sm overflow-y-auto pb-32 animate-in fade-in duration-300">
             {/* Header - Gradient Blue */}
-            <div className="sticky top-0 z-40 px-6 py-4 flex items-center justify-between">
+            <div className="sticky top-0 z-40 px-4 py-3 sm:px-6 sm:py-4 flex items-center justify-between">
                 <div>
                     <button
                         onClick={() => setShowConfig(false)}
                         className="flex items-center gap-2 text-slate-400 hover:text-[#D4AF37] transition-colors mb-1 group"
                     >
                         <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] group-hover:text-[#D4AF37] transition-colors">Voltar para Agenda</span>
+                        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] group-hover:text-[#D4AF37] transition-colors">Voltar para Agenda</span>
                     </button>
-                    <h2 className="text-xl font-bold text-white uppercase tracking-tight leading-none">Minha Disponibilidade</h2>
+                    <h2 className="text-lg sm:text-xl font-bold text-white uppercase tracking-tight leading-none">Minha Disponibilidade</h2>
                 </div>
             </div>
 
-            <div className="max-w-3xl mx-auto p-6 space-y-8">
+            <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8">
                 {/* Tabs */}
                 <div className="flex gap-8 border-b border-[#222] px-2">
                     <button
@@ -560,8 +560,8 @@ export const ProfessionalAgenda: React.FC = () => {
                                     isActive ? "bg-black/40 border-white/10 shadow-xl" : "bg-black/20 border-white/5 opacity-60 hover:opacity-100"
                                 )}>
                                     {/* Card Header */}
-                                    <div className="px-6 py-5 flex items-center justify-between bg-black/20 border-b border-white/5">
-                                        <div className="flex items-center gap-4">
+                                    <div className="px-4 py-4 sm:px-6 sm:py-5 flex items-center justify-between bg-black/20 border-b border-white/5">
+                                        <div className="flex items-center gap-3 sm:gap-4">
                                             <div className={cn("w-2 h-2 rounded-full transition-all duration-500", isActive ? "bg-[#D4AF37] shadow-[0_0_10px_#D4AF37]" : "bg-[#666]")}></div>
                                             <span className={cn("text-base font-black uppercase tracking-widest", isActive ? "text-white" : "text-[#666]")}>
                                                 {day === 'DOM' ? 'Domingo' : day === 'SEG' ? 'Segunda-feira' : day === 'TER' ? 'Terça-feira' : day === 'QUA' ? 'Quarta-feira' : day === 'QUI' ? 'Quinta-feira' : day === 'SEX' ? 'Sexta-feira' : 'Sábado'}
@@ -572,19 +572,19 @@ export const ProfessionalAgenda: React.FC = () => {
 
                                     {/* Card Content */}
                                     {isActive && (
-                                        <div className="px-6 pb-6 pt-2 space-y-4 animate-in slide-in-from-top-2 duration-300">
+                                        <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-2 space-y-4 animate-in slide-in-from-top-2 duration-300">
                                             {daySlots.map((slot, slotIdx) => (
-                                                <div key={slotIdx} className="flex items-center gap-3">
-                                                    <div className="flex-1 flex items-center gap-2">
+                                                <div key={slotIdx} className="flex items-center gap-2 sm:gap-3">
+                                                    <div className="flex-1 flex items-center gap-1 sm:gap-2">
                                                         <div className="relative flex-1">
                                                             <input
                                                                 type="time"
                                                                 value={slot.start_time?.slice(0, 5) || '08:00'}
                                                                 onChange={(e) => updateSlotTime(slot, 'start_time', e.target.value, idx)}
                                                                 onBlur={(e) => updateSlotTime(slot, 'start_time', roundTime(e.target.value), idx)}
-                                                                className="w-full bg-[#080808] border border-[#222] rounded-xl pl-10 pr-3 py-2 text-left text-[#D4AF37] font-bold text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-colors"
+                                                                className="w-full bg-[#080808] border border-[#222] rounded-xl pl-8 sm:pl-10 pr-1 sm:pr-3 py-2 text-left text-[#D4AF37] font-bold text-xs sm:text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-colors"
                                                             />
-                                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-600 font-black uppercase pointer-events-none">DE</span>
+                                                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[8px] sm:text-[9px] text-slate-600 font-black uppercase pointer-events-none">DE</span>
                                                         </div>
                                                         <span className="text-slate-600 font-bold">-</span>
                                                         <div className="relative flex-1">
@@ -593,15 +593,15 @@ export const ProfessionalAgenda: React.FC = () => {
                                                                 value={slot.end_time?.slice(0, 5) || '18:00'}
                                                                 onChange={(e) => updateSlotTime(slot, 'end_time', e.target.value, idx)}
                                                                 onBlur={(e) => updateSlotTime(slot, 'end_time', roundTime(e.target.value), idx)}
-                                                                className="w-full bg-[#080808] border border-[#222] rounded-xl pl-10 pr-3 py-2 text-left text-[#D4AF37] font-bold text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-colors"
+                                                                className="w-full bg-[#080808] border border-[#222] rounded-xl pl-8 sm:pl-10 pr-1 sm:pr-3 py-2 text-left text-[#D4AF37] font-bold text-xs sm:text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-colors"
                                                             />
-                                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-600 font-black uppercase pointer-events-none">ATÉ</span>
+                                                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[8px] sm:text-[9px] text-slate-600 font-black uppercase pointer-events-none">ATÉ</span>
                                                         </div>
                                                     </div>
 
                                                     <button
                                                         onClick={() => removeInterval(slotIdx, idx)}
-                                                        className="w-10 h-10 rounded-xl bg-[#1A1A1A] text-[#444] hover:text-red-500 hover:bg-[#222] hover:scale-105 flex items-center justify-center transition-all"
+                                                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#1A1A1A] text-[#444] hover:text-red-500 hover:bg-[#222] hover:scale-105 flex items-center justify-center transition-all shrink-0"
                                                         title="Remover"
                                                     >
                                                         <Trash2 size={14} />
