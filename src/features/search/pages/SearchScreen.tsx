@@ -23,6 +23,13 @@ import { useDebounce } from '@/hooks/useDebounce';
 // Rich Categories with "Artistic" Image Backgrounds
 const CATEGORIES = [
     {
+        id: 'favorites', // NEW - First Item
+        label: 'Favoritos',
+        icon: Heart,
+        image: 'https://images.unsplash.com/photo-1516617442634-75371039cb0a?q=80&w=800&auto=format&fit=crop', // Warm/Love/Care
+        color: 'from-rose-500/80 to-rose-600/90'
+    },
+    {
         id: 'all',
         label: 'Tudo',
         icon: Search,
@@ -72,7 +79,7 @@ export const SearchScreen: React.FC = () => {
 
     // Search States
     const [searchTerm, setSearchTerm] = useState('');
-    const [activeFilter, setActiveFilter] = useState('all');
+    const [activeFilter, setActiveFilter] = useState('all'); // Default 'all'
     const [professionals, setProfessionals] = useState<any[]>([]);
     const [favorites, setFavorites] = useState<Set<string>>(new Set());
     const [loading, setLoading] = useState(false);
@@ -146,16 +153,22 @@ id, full_name, nickname, avatar_url,
 
             let results = data || [];
 
-            // 1. Filter by Specialty Client-side (if not 'all')
+            // 1. Filter by Specialty / Favorites
             if (activeFilter !== 'all') {
-                results = results.filter(p =>
-                    p.specialties?.[0]?.name?.toLowerCase().includes(activeFilter === 'personal' ? 'personal' : activeFilter)
-                );
+                if (activeFilter === 'favorites') {
+                    // Show ONLY favorites
+                    results = results.filter(p => favorites.has(p.id));
+                } else {
+                    // Filter by Specialty Name
+                    results = results.filter(p =>
+                        p.specialties?.[0]?.name?.toLowerCase().includes(activeFilter === 'personal' ? 'personal' : activeFilter)
+                    );
+                }
             }
 
             // 2. Sort Logic
             results.sort((a, b) => {
-                // Priority #1: Favorites always first
+                // Priority #1: Favorites always first (unless filtered by favorite, then they are all favorites)
                 const aFav = favorites.has(a.id);
                 const bFav = favorites.has(b.id);
                 if (aFav && !bFav) return -1;
@@ -256,13 +269,12 @@ id, full_name, nickname, avatar_url,
                 {/* Main Content */}
                 <div className="p-5 flex-1 relative">
                     {!hasActiveSearch ? (
-                        // HERO GRID MODE
+                        // HERO GRID MODE -- Updated Title Layout
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <h1 className="text-2xl font-black text-[#222222] mb-1 leading-tight">
-                                Escolha o seu<br />
-                                <span className="text-[#FF385C]">Especialista</span>
+                            {/* Single Line Title */}
+                            <h1 className="text-xl font-black text-[#222222] mb-4 leading-tight flex flex-wrap items-baseline gap-1.5">
+                                Escolha o seu <span className="text-[#FF385C]">Especialista</span>
                             </h1>
-                            <p className="text-sm text-gray-400 mb-6 font-medium">Explore as categorias disponíveis</p>
 
                             <div className="grid grid-cols-2 gap-4">
                                 {CATEGORIES.filter(c => c.id !== 'all').map((cat) => {

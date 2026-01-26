@@ -51,7 +51,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab: propActiveTab, 
     };
 
     return (
-        <div className="fixed bottom-4 left-4 right-4 h-20 bg-black/60 backdrop-blur-xl rounded-[2rem] border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] flex items-center justify-between px-2 z-50 max-w-md mx-auto">
+        <div className="fixed bottom-4 left-4 right-4 h-20 bg-white/90 backdrop-blur-xl rounded-[2rem] border border-white/40 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] flex items-center justify-between px-2 z-50 max-w-md mx-auto">
             {navItems.map((item) => {
                 const isActive = isTabActive(item);
                 const Icon = item.icon;
@@ -64,8 +64,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab: propActiveTab, 
                             className={cn(
                                 "flex flex-col items-center justify-center w-14 h-14 rounded-full transition-all relative group -mt-6 shadow-xl",
                                 isActive
-                                    ? "bg-[#CCFF00] text-black shadow-[0_0_20px_rgba(204,255,0,0.6)] scale-110 ring-4 ring-black/50"
-                                    : "bg-white text-black hover:scale-105 hover:bg-[#CCFF00] shadow-white/20"
+                                    ? "bg-[#CCFF00] text-black shadow-[0_0_20px_rgba(204,255,0,0.6)] scale-110 ring-4 ring-white"
+                                    : "bg-[#222222] text-white hover:scale-105 hover:bg-[#CCFF00] hover:text-black shadow-black/20"
                             )}
                         >
                             <Icon size={24} strokeWidth={3} />
@@ -80,12 +80,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab: propActiveTab, 
                         className={cn(
                             "flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all relative",
                             isActive
-                                ? "text-[#CCFF00] bg-white/5"
-                                : "text-gray-400 hover:text-white"
+                                ? "text-black bg-black/5"
+                                : "text-gray-400 hover:text-black hover:bg-black/5"
                         )}
                     >
-                        <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-                        {isActive && <div className="absolute -bottom-1 w-1 h-1 bg-[#CCFF00] rounded-full" />}
+                        <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+                        {isActive && <div className="absolute -bottom-1 w-1 h-1 bg-black rounded-full" />}
                     </button>
                 );
             })}
