@@ -15,11 +15,13 @@ import {
   Clock,
   ShieldCheck,
   Dumbbell,
-  Activity
+  Activity,
+  WifiOff
 } from 'lucide-react';
 import { Toast } from '@/components/ui/Toast';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useOfflineQueue } from '@/contexts/OfflineQueueContext';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, isBefore, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -29,6 +31,7 @@ interface ScheduleScreenProps {
 
 export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
   const { session } = useAuth();
+  const { isOnline } = useOfflineQueue();
   const navigate = useNavigate();
 
   // Wizard State
@@ -690,7 +693,11 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
           <h1 className="text-xl font-bold font-display text-white">Minha Agenda</h1>
           <button
             onClick={() => { setIsBookingOpen(true); setWizardStep('plans'); }}
-            className="bg-[#D4AF37] text-black px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wide hover:scale-105 transition-transform shadow-[0_0_15px_rgba(212,175,55,0.3)]"
+            disabled={!isOnline}
+            className={cn(
+              "bg-[#D4AF37] text-black px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wide hover:scale-105 transition-transform shadow-[0_0_15px_rgba(212,175,55,0.3)]",
+              !isOnline && "opacity-50 grayscale cursor-not-allowed pointer-events-none shadow-none"
+            )}
           >
             + Novo Agendamento
           </button>
@@ -721,6 +728,19 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
       )}
 
       <div className="relative z-10 px-6">
+        {/* Offline Guard Banner */}
+        {!isOnline && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-4 animate-in fade-in slide-in-from-top-4">
+            <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
+              <WifiOff className="text-red-500" size={20} />
+            </div>
+            <div>
+              <h3 className="text-white font-bold text-sm">Você está Offline</h3>
+              <p className="text-slate-400 text-xs mt-0.5">O agendamento requer conexão com a internet para evitar conflitos.</p>
+            </div>
+          </div>
+        )}
+
         {!isBookingOpen ? (
           <div className="flex flex-col items-center justify-center py-20 opacity-50">
             <CalendarIcon size={48} className="text-slate-600 mb-4" />
