@@ -23,11 +23,11 @@ import { useDebounce } from '@/hooks/useDebounce';
 // Rich Categories with "Artistic" Image Backgrounds
 const CATEGORIES = [
     {
-        id: 'favorites', // NEW - First Item
+        id: 'favorites', // Vibrant, "Alive" Favorites Card
         label: 'Favoritos',
         icon: Heart,
-        image: 'https://images.unsplash.com/photo-1516617442634-75371039cb0a?q=80&w=800&auto=format&fit=crop', // Warm/Love/Care
-        color: 'from-rose-500/80 to-rose-600/90'
+        image: '', // No image, pure gradient power
+        color: 'bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-rose-400 via-fuchsia-500 to-indigo-500 animate-gradient-slow'
     },
     {
         id: 'all',
@@ -90,26 +90,28 @@ export const SearchScreen: React.FC = () => {
     const [filterState, setFilterState] = useState('');
     const [sortBy, setSortBy] = useState<'rating' | 'price' | 'none'>('none');
 
-    // UI States
-    const [showNav, setShowNav] = useState(false); // Initially hidden as requested ("oculta até que role")
+    // Scroll / Nav Logic
+    const [showNav, setShowNav] = useState(true);
+    const [lastScrollY, setLastScrollY] = useState(0);
 
     const debouncedSearch = useDebounce(searchTerm, 500);
 
-    // Scroll Listener for BottomNav
+    // Smart Scroll: Hide on Down, Show on Up
     useEffect(() => {
         const handleScroll = () => {
-            // User requested: "oculta até que role o app para baixo"
-            // Interpreting as: Hidden at Y=0, Shows when Y > 50
-            if (window.scrollY > 50) {
-                setShowNav(true);
+            const currentScrollY = window.scrollY;
+
+            if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                setShowNav(false); // Scrolling DOWN -> Hide
             } else {
-                setShowNav(false);
+                setShowNav(true); // Scrolling UP -> Show
             }
+            setLastScrollY(currentScrollY);
         };
 
-        window.addEventListener('scroll', handleScroll);
+        window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+    }, [lastScrollY]);
 
     useEffect(() => {
         fetchFavorites();
@@ -279,35 +281,48 @@ id, full_name, nickname, avatar_url,
                             <div className="grid grid-cols-2 gap-4">
                                 {CATEGORIES.filter(c => c.id !== 'all').map((cat) => {
                                     const Icon = cat.icon;
+                                    const isFavorites = cat.id === 'favorites'; // Special check
+
                                     return (
                                         <button
                                             key={cat.id}
                                             onClick={() => setActiveFilter(cat.id)}
-                                            className="group relative h-40 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all active:scale-[0.98] w-full text-left"
+                                            className={cn(
+                                                "group relative h-40 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all active:scale-[0.98] w-full text-left",
+                                                isFavorites ? "ring-2 ring-white/50" : ""
+                                            )}
                                         >
-                                            {/* Background Image */}
-                                            <div className="absolute inset-0">
-                                                <img
-                                                    src={cat.image}
-                                                    alt={cat.label}
-                                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                                />
-                                                {/* Gradient Overlay for Text Readability */}
-                                                <div className={cn(
-                                                    "absolute inset-0 bg-gradient-to-t opacity-90 transition-opacity",
-                                                    cat.color
-                                                )} />
-                                            </div>
+                                            {/* Background: Image or Pure Animation for Favorites */}
+                                            {isFavorites ? (
+                                                <div className={cn("absolute inset-0 transition-opacity", cat.color)}>
+                                                    {/* Pulse Heart Animation */}
+                                                    <div className="absolute inset-0 flex items-center justify-center opacity-30">
+                                                        <Heart size={80} className="animate-pulse text-white" fill="currentColor" />
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="absolute inset-0">
+                                                    <img
+                                                        src={cat.image}
+                                                        alt={cat.label}
+                                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                    />
+                                                    <div className={cn("absolute inset-0 bg-gradient-to-t opacity-90 transition-opacity", cat.color)} />
+                                                </div>
+                                            )}
 
                                             {/* Content */}
                                             <div className="absolute inset-0 p-5 flex flex-col justify-between z-10">
-                                                <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/10">
-                                                    <Icon size={20} className="text-white" strokeWidth={2.5} />
+                                                <div className={cn(
+                                                    "w-10 h-10 rounded-full flex items-center justify-center border",
+                                                    isFavorites ? "bg-white text-[#FF385C] border-white shadow-lg" : "bg-white/20 backdrop-blur-md border-white/10 text-white"
+                                                )}>
+                                                    <Icon size={20} className={isFavorites ? "fill-[#FF385C]" : ""} strokeWidth={2.5} />
                                                 </div>
 
                                                 <div>
                                                     <h3 className="text-white font-extrabold text-lg leading-none mb-1 shadow-black/50 drop-shadow-md">{cat.label}</h3>
-                                                    <span className="text-white/90 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                                                    <span className="text-white/90 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 opacity-80 group-hover:opacity-100">
                                                         Ver <ChevronLeft size={10} className="rotate-180" />
                                                     </span>
                                                 </div>
