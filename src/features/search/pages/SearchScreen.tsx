@@ -20,56 +20,70 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/useDebounce';
 
-// Rich Categories with "Artistic" Image Backgrounds
+// Categories: Soft Pastels & Wireframe Aesthetics
 const CATEGORIES = [
     {
-        id: 'favorites', // Vibrant, "Alive" Favorites Card
+        id: 'favorites',
         label: 'Favoritos',
         icon: Heart,
-        image: '', // No image, pure gradient power
-        color: 'bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-rose-400 via-fuchsia-500 to-indigo-500 animate-gradient-slow'
+        // Gradient: Soft Rose
+        gradient: 'bg-gradient-to-br from-[#FFF0F5] to-[#FFE4E1]',
+        border: 'border-[#FFB6C1]',
+        iconColor: 'text-[#DB7093]'
     },
     {
         id: 'all',
         label: 'Tudo',
         icon: Search,
-        image: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop', // Abstract Dark
-        color: 'from-gray-900/90 to-black/90'
+        // Gradient: Soft Gray
+        gradient: 'bg-gradient-to-br from-gray-50 to-gray-100',
+        border: 'border-gray-200',
+        iconColor: 'text-gray-400'
     },
     {
         id: 'personal',
         label: 'Personal',
         icon: Dumbbell,
-        image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop', // Gym Aesthetic
-        color: 'from-blue-900/80 to-blue-950/90'
+        // Gradient: Soft Blue
+        gradient: 'bg-gradient-to-br from-blue-50 to-blue-100',
+        border: 'border-blue-200',
+        iconColor: 'text-blue-400'
     },
     {
         id: 'nutri',
         label: 'Nutri',
         icon: Salad,
-        image: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=800&auto=format&fit=crop', // Avocados/Food Art
-        color: 'from-emerald-900/80 to-emerald-950/90'
+        // Gradient: Soft Emerald
+        gradient: 'bg-gradient-to-br from-emerald-50 to-emerald-100',
+        border: 'border-emerald-200',
+        iconColor: 'text-emerald-500' // slightly darker for visibility
     },
     {
-        id: 'fisioterapeuta', // Renamed from 'fisio'
+        id: 'fisioterapeuta',
         label: 'Fisioterapeuta',
         icon: Stethoscope,
-        image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=800&auto=format&fit=crop', // Medical Abstract
-        color: 'from-teal-900/80 to-teal-950/90'
+        // Gradient: Soft Teal
+        gradient: 'bg-gradient-to-br from-teal-50 to-teal-100',
+        border: 'border-teal-200',
+        iconColor: 'text-teal-500'
     },
     {
-        id: 'consultoria', // NEW
+        id: 'consultoria',
         label: 'Consultoria',
         icon: Activity,
-        image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800&auto=format&fit=crop', // Strategy/Meeting
-        color: 'from-violet-900/80 to-violet-950/90'
+        // Gradient: Soft Violet
+        gradient: 'bg-gradient-to-br from-violet-50 to-violet-100',
+        border: 'border-violet-200',
+        iconColor: 'text-violet-500'
     },
     {
-        id: 'endocrino', // NEW
+        id: 'endocrino',
         label: 'Endócrino',
         icon: Activity,
-        image: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=800&auto=format&fit=crop', // DNA/Science
-        color: 'from-rose-900/80 to-rose-950/90'
+        // Gradient: Soft Orange
+        gradient: 'bg-gradient-to-br from-orange-50 to-orange-100',
+        border: 'border-orange-200',
+        iconColor: 'text-orange-500'
     }
 ];
 
@@ -215,19 +229,19 @@ id, full_name, nickname, avatar_url,
 
     const getCardColor = (specialtyName?: string) => {
         // Base glass + border classes
-        const base = "backdrop-blur-sm shadow-sm";
+        const base = "backdrop-blur-sm shadow-sm transition-all";
 
-        if (!specialtyName) return `${base} bg-gray-100/80 border-gray-300 hover:bg-gray-200/50`; // Default stronger gray glass
+        if (!specialtyName) return `${base} bg-gray-50 border-gray-200 hover:border-gray-300`; // Default stronger gray glass
 
         const lower = specialtyName.toLowerCase();
 
         // Glassy Pastels
-        if (lower.includes('personal')) return `${base} bg-blue-50/60 border-blue-200 hover:bg-blue-100/50`;
-        if (lower.includes('nutri')) return `${base} bg-emerald-50/60 border-emerald-200 hover:bg-emerald-100/50`;
-        if (lower.includes('fisio')) return `${base} bg-teal-50/60 border-teal-200 hover:bg-teal-100/50`;
-        if (lower.includes('avalia')) return `${base} bg-orange-50/60 border-orange-200 hover:bg-orange-100/50`;
+        if (lower.includes('personal')) return `${base} bg-blue-50/50 border-blue-100 hover:border-blue-200`;
+        if (lower.includes('nutri')) return `${base} bg-emerald-50/50 border-emerald-100 hover:border-emerald-200`;
+        if (lower.includes('fisio')) return `${base} bg-teal-50/50 border-teal-100 hover:border-teal-200`;
+        if (lower.includes('avalia')) return `${base} bg-orange-50/50 border-orange-100 hover:border-orange-200`;
 
-        return `${base} bg-gray-100/80 border-gray-300 hover:bg-gray-200/50`; // Fallback Gray
+        return `${base} bg-gray-50/80 border-gray-100 hover:bg-gray-100`; // Fallback Gray
     };
 
     const hasActiveSearch = searchTerm.length > 0 || activeFilter !== 'all' || filterCity || filterState;
@@ -281,48 +295,43 @@ id, full_name, nickname, avatar_url,
                             <div className="grid grid-cols-2 gap-4">
                                 {CATEGORIES.filter(c => c.id !== 'all').map((cat) => {
                                     const Icon = cat.icon;
-                                    const isFavorites = cat.id === 'favorites'; // Special check
+                                    const isFavorites = cat.id === 'favorites';
 
                                     return (
                                         <button
                                             key={cat.id}
                                             onClick={() => setActiveFilter(cat.id)}
                                             className={cn(
-                                                "group relative h-40 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all active:scale-[0.98] w-full text-left",
-                                                isFavorites ? "ring-2 ring-white/50" : ""
+                                                "group relative h-40 rounded-[2rem] overflow-hidden shadow-[0_10px_30px_-10px_rgba(0,0,0,0.08)] hover:shadow-[0_15px_35px_-10px_rgba(0,0,0,0.12)] transition-all active:scale-[0.98] w-full text-left border",
+                                                cat.gradient, cat.border
                                             )}
                                         >
-                                            {/* Background: Image or Pure Animation for Favorites */}
-                                            {isFavorites ? (
-                                                <div className={cn("absolute inset-0 transition-opacity", cat.color)}>
-                                                    {/* Pulse Heart Animation */}
-                                                    <div className="absolute inset-0 flex items-center justify-center opacity-30">
-                                                        <Heart size={80} className="animate-pulse text-white" fill="currentColor" />
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div className="absolute inset-0">
-                                                    <img
-                                                        src={cat.image}
-                                                        alt={cat.label}
-                                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                                    />
-                                                    <div className={cn("absolute inset-0 bg-gradient-to-t opacity-90 transition-opacity", cat.color)} />
-                                                </div>
-                                            )}
+                                            {/* 'Wireframe' Large Symbol - Watermark Effect */}
+                                            <Icon
+                                                size={100}
+                                                strokeWidth={0.5}
+                                                className={cn(
+                                                    "absolute -bottom-4 -right-4 transition-transform duration-700 group-hover:scale-110 group-hover:-rotate-12 opacity-20",
+                                                    isFavorites ? "text-rose-500 fill-rose-200" : cat.iconColor // Use color, not white
+                                                )}
+                                            />
 
                                             {/* Content */}
                                             <div className="absolute inset-0 p-5 flex flex-col justify-between z-10">
                                                 <div className={cn(
-                                                    "w-10 h-10 rounded-full flex items-center justify-center border",
-                                                    isFavorites ? "bg-white text-[#FF385C] border-white shadow-lg" : "bg-white/20 backdrop-blur-md border-white/10 text-white"
+                                                    "w-10 h-10 rounded-full flex items-center justify-center border shadow-sm transition-colors",
+                                                    "bg-white/60 backdrop-blur-md border-white/50",
+                                                    cat.iconColor
                                                 )}>
-                                                    <Icon size={20} className={isFavorites ? "fill-[#FF385C]" : ""} strokeWidth={2.5} />
+                                                    <Icon size={20} strokeWidth={2.5} />
                                                 </div>
 
                                                 <div>
-                                                    <h3 className="text-white font-extrabold text-lg leading-none mb-1 shadow-black/50 drop-shadow-md">{cat.label}</h3>
-                                                    <span className="text-white/90 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 opacity-80 group-hover:opacity-100">
+                                                    <h3 className="text-[#222222] font-extrabold text-lg leading-none mb-1">{cat.label}</h3>
+                                                    <span className={cn(
+                                                        "text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity",
+                                                        cat.iconColor
+                                                    )}>
                                                         Ver <ChevronLeft size={10} className="rotate-180" />
                                                     </span>
                                                 </div>
