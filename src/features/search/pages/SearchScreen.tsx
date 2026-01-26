@@ -162,16 +162,20 @@ id, full_name, nickname, avatar_url,
     };
 
     const getCardColor = (specialtyName?: string) => {
-        if (!specialtyName) return 'bg-gray-50/80 border-gray-100'; // Default Grayish for "Others"
+        // Base glass + border classes
+        const base = "backdrop-blur-sm shadow-sm";
+
+        if (!specialtyName) return `${base} bg-gray-100/80 border-gray-300 hover:bg-gray-200/50`; // Default stronger gray glass
+
         const lower = specialtyName.toLowerCase();
 
-        // Pastel colors for specific categories
-        if (lower.includes('personal')) return 'bg-blue-50/50 border-blue-100 hover:bg-blue-50';
-        if (lower.includes('nutri')) return 'bg-emerald-50/50 border-emerald-100 hover:bg-emerald-50';
-        if (lower.includes('fisio')) return 'bg-teal-50/50 border-teal-100 hover:bg-teal-50';
-        if (lower.includes('avalia')) return 'bg-rose-50/50 border-rose-100 hover:bg-rose-50';
+        // Glassy Pastels
+        if (lower.includes('personal')) return `${base} bg-blue-50/60 border-blue-200 hover:bg-blue-100/50`;
+        if (lower.includes('nutri')) return `${base} bg-emerald-50/60 border-emerald-200 hover:bg-emerald-100/50`;
+        if (lower.includes('fisio')) return `${base} bg-teal-50/60 border-teal-200 hover:bg-teal-100/50`;
+        if (lower.includes('avalia')) return `${base} bg-orange-50/60 border-orange-200 hover:bg-orange-100/50`;
 
-        return 'bg-gray-50/80 border-gray-100/50 hover:bg-gray-100'; // Fallback Gray
+        return `${base} bg-gray-100/80 border-gray-300 hover:bg-gray-200/50`; // Fallback Gray
     };
 
     return (
@@ -347,9 +351,11 @@ id, full_name, nickname, avatar_url,
                                     key={pro.id}
                                     onClick={() => navigate(`/profile/${pro.id}`)}
                                     className={cn(
-                                        "group rounded-[2rem] p-4 flex gap-4 active:scale-[0.98] transition-all cursor-pointer border shadow-sm",
-                                        getCardColor(pro.specialties?.[0]?.name),
-                                        isFav ? "ring-1 ring-[#FF385C]/20" : "shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]"
+                                        "group rounded-[2rem] p-4 flex gap-4 active:scale-[0.98] transition-all cursor-pointer border",
+                                        // Dynamic Style: Fav vs Regular Glass
+                                        isFav
+                                            ? "bg-rose-50/90 border-rose-200 ring-1 ring-rose-300/50 backdrop-blur-md shadow-rose-100/50"
+                                            : getCardColor(pro.specialties?.[0]?.name)
                                     )}
                                 >
                                     {/* Photo */}
