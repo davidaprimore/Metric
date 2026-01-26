@@ -20,13 +20,50 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/useDebounce';
 
-// Rich Categories - Simulating "Image Icons" with Gradients
+// Rich Categories with "Artistic" Image Backgrounds
 const CATEGORIES = [
-    { id: 'all', label: 'Tudo', icon: Search, gradient: 'from-gray-700 to-gray-900', shadow: 'shadow-gray-200' },
-    { id: 'personal', label: 'Personal', icon: Dumbbell, gradient: 'from-blue-500 to-blue-600', shadow: 'shadow-blue-200' },
-    { id: 'nutri', label: 'Nutri', icon: Salad, gradient: 'from-emerald-500 to-emerald-600', shadow: 'shadow-emerald-200' },
-    { id: 'avaliador', label: 'Avaliação', icon: Activity, gradient: 'from-rose-500 to-rose-600', shadow: 'shadow-rose-200' },
-    { id: 'fisioterapeuta', label: 'Fisio', icon: Stethoscope, gradient: 'from-teal-500 to-teal-600', shadow: 'shadow-teal-200' }
+    {
+        id: 'all',
+        label: 'Tudo',
+        icon: Search,
+        image: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop', // Abstract Dark
+        color: 'from-gray-900/90 to-black/90'
+    },
+    {
+        id: 'personal',
+        label: 'Personal',
+        icon: Dumbbell,
+        image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop', // Gym Aesthetic
+        color: 'from-blue-900/80 to-blue-950/90'
+    },
+    {
+        id: 'nutri',
+        label: 'Nutri',
+        icon: Salad,
+        image: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=800&auto=format&fit=crop', // Avocados/Food Art
+        color: 'from-emerald-900/80 to-emerald-950/90'
+    },
+    {
+        id: 'fisioterapeuta', // Renamed from 'fisio'
+        label: 'Fisioterapeuta',
+        icon: Stethoscope,
+        image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=800&auto=format&fit=crop', // Medical Abstract
+        color: 'from-teal-900/80 to-teal-950/90'
+    },
+    {
+        id: 'consultoria', // NEW
+        label: 'Consultoria',
+        icon: Activity,
+        image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800&auto=format&fit=crop', // Strategy/Meeting
+        color: 'from-violet-900/80 to-violet-950/90'
+    },
+    {
+        id: 'endocrino', // NEW
+        label: 'Endócrino',
+        icon: Activity,
+        image: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=800&auto=format&fit=crop', // DNA/Science
+        color: 'from-rose-900/80 to-rose-950/90'
+    }
 ];
 
 export const SearchScreen: React.FC = () => {
@@ -234,34 +271,35 @@ id, full_name, nickname, avatar_url,
                                         <button
                                             key={cat.id}
                                             onClick={() => setActiveFilter(cat.id)}
-                                            className="group relative h-40 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-xl transition-all active:scale-[0.98] w-full text-left"
+                                            className="group relative h-40 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all active:scale-[0.98] w-full text-left"
                                         >
-                                            {/* Artistic Background Gradient */}
-                                            <div className={cn(
-                                                "absolute inset-0 bg-gradient-to-br opacity-90 transition-opacity group-hover:opacity-100",
-                                                cat.gradient
-                                            )} />
+                                            {/* Background Image */}
+                                            <div className="absolute inset-0">
+                                                <img
+                                                    src={cat.image}
+                                                    alt={cat.label}
+                                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                />
+                                                {/* Gradient Overlay for Text Readability */}
+                                                <div className={cn(
+                                                    "absolute inset-0 bg-gradient-to-t opacity-90 transition-opacity",
+                                                    cat.color
+                                                )} />
+                                            </div>
 
                                             {/* Content */}
-                                            <div className="absolute inset-0 p-5 flex flex-col justify-between">
-                                                <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
+                                            <div className="absolute inset-0 p-5 flex flex-col justify-between z-10">
+                                                <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/10">
                                                     <Icon size={20} className="text-white" strokeWidth={2.5} />
                                                 </div>
 
                                                 <div>
-                                                    <h3 className="text-white font-extrabold text-xl leading-none mb-1">{cat.label}</h3>
-                                                    <span className="text-white/80 text-[10px] font-bold uppercase tracking-wider bg-white/10 px-2 py-1 rounded-lg backdrop-blur-sm inline-block">
-                                                        Ver Profissionais
+                                                    <h3 className="text-white font-extrabold text-lg leading-none mb-1 shadow-black/50 drop-shadow-md">{cat.label}</h3>
+                                                    <span className="text-white/90 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                                                        Ver <ChevronLeft size={10} className="rotate-180" />
                                                     </span>
                                                 </div>
                                             </div>
-
-                                            {/* Decorative Large Icon */}
-                                            <Icon
-                                                size={120}
-                                                className="absolute -bottom-4 -right-4 text-white/10 rotate-[-15deg] group-hover:scale-110 group-hover:rotate-0 transition-transform duration-500"
-                                                strokeWidth={1}
-                                            />
                                         </button>
                                     );
                                 })}
