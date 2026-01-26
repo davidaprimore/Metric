@@ -13,7 +13,11 @@ import {
   TrendingUp,
   ExternalLink,
   ShieldCheck,
-  CalendarDays
+  CalendarDays,
+  Dumbbell,
+  Layers,
+  Weight,
+  Activity
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -275,9 +279,14 @@ export const PatientDashboardScreen: React.FC = () => {
       <div className="mb-8 relative">
         <div className="grid grid-cols-2 gap-4">
           {metrics.map((item, idx) => (
-            <div key={idx} className={`${textureCardClass} rounded-[2rem] p-5 shadow-sm group hover:bg-white/5 transition-colors`}>
+            <div key={idx} className={`${textureCardClass} rounded-[2rem] p-5 shadow-sm group hover:bg-white/5 transition-colors overflow-hidden`}>
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tight mb-2 relative z-10">{item.label}</p>
-              {item.icon && <div className="absolute -bottom-4 -right-4 w-20 h-20 opacity-20 group-hover:opacity-40 transition-opacity grayscale group-hover:grayscale-0 contrast-125"><img src={item.icon} className="w-full h-full object-contain" /></div>}
+
+              {/* Dynamic Icon */}
+              <div className="absolute -bottom-4 -right-4 w-20 h-20 opacity-10 group-hover:opacity-20 transition-opacity text-white flex items-center justify-center rotate-[-15deg]">
+                <item.Icon size={80} strokeWidth={1} />
+              </div>
+
               <div className="flex items-baseline gap-1 relative z-10">
                 <span className="text-2xl font-black text-white tracking-tighter drop-shadow-sm">{item.value}</span>
                 <span className="text-xs font-bold text-[#D4AF37]">{item.unit}</span>
@@ -301,10 +310,10 @@ export const PatientDashboardScreen: React.FC = () => {
             {(() => {
               const dataPoints = assessments.slice(-5);
               if (dataPoints.length < 2) return (
-                <div className="w-full h-full flex flex-col items-center justify-center text-slate-500">
-                  <TrendingUp size={24} className="mb-2 opacity-50 text-[#D4AF37]" />
-                  <p className="text-xs font-bold">1ª Avaliação Registrada!</p>
-                  <p className="text-[10px] opacity-60 mt-1">O gráfico aparecerá na próxima consulta.</p>
+                <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
+                  <TrendingUp size={24} className="mb-3 opacity-80 text-[#D4AF37]" />
+                  <p className="text-sm font-black text-[#D4AF37] uppercase tracking-wider mb-1">1ª Avaliação!</p>
+                  <p className="text-xs text-slate-300 font-medium opacity-80 mt-1">O gráfico aparecerá na próxima.</p>
                 </div>
               );
 
