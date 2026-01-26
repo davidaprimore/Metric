@@ -20,70 +20,97 @@ export const FluidBackground: React.FC<FluidBackgroundProps> = ({
 
     const themes = {
         professional: {
-            bg: 'bg-[#122216]', // Richer Green Base
-            noise: 'opacity-[0.06]'
+            bg: 'bg-[#0A1A2F]',
+            noise: 'opacity-[0.03]'
         },
         patient: {
-            bg: 'bg-[#122216]',
-            noise: 'opacity-[0.06]'
+            bg: 'bg-[#0A1A2F]',
+            noise: 'opacity-[0.03]'
         },
         auth: {
-            bg: 'bg-[#122216]',
-            noise: 'opacity-[0.06]'
+            bg: 'bg-[#0A1A2F]',
+            noise: 'opacity-[0.03]'
         },
         luminous: {
-            bg: 'bg-[#122216]',
-            noise: 'opacity-[0.06]'
+            bg: 'bg-[#0A1A2F]',
+            noise: 'opacity-[0.03]'
         }
     };
 
     const theme = themes[variant];
 
     return (
-        <div className={`relative min-h-screen w-full overflow-hidden transition-colors duration-700 bg-[#122216] ${className}`}>
+        <div className={`relative min-h-screen w-full transition-colors duration-700 ${className}`}>
 
-            {/* 0. Global Smoke Styles */}
-            <style>{`
-                @keyframes smokeMove {
-                    0% { transform: translate(0, 0) rotate(0deg) scale(1.0); opacity: 0.3; }
-                    25% { transform: translate(10%, -5%) rotate(5deg) scale(1.1); opacity: 0.2; }
-                    50% { transform: translate(20%, 0) rotate(0deg) scale(1.2); opacity: 0.3; }
-                    75% { transform: translate(10%, 5%) rotate(-5deg) scale(1.1); opacity: 0.4; }
-                    100% { transform: translate(0, 0) rotate(0deg) scale(1.0); opacity: 0.3; }
-                }
+            {/* 1. FIXED Background Layer (Does not scroll) */}
+            <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0 bg-[#0A1A2F]">
+                {/* Background Base - Deep Navy */}
+                <div className="absolute inset-0 bg-[#0A1A2F]"></div>
 
-                .smoke-blob {
-                    position: absolute;
-                    border-radius: 50%;
-                    filter: blur(80px);
-                    mix-blend-mode: color-dodge;
-                    animation: smokeMove 20s infinite ease-in-out alternate;
-                    pointer-events: none;
-                }
-                
-                .smoke-1 { width: 60vw; height: 60vh; background: rgba(57, 255, 20, 0.10); top: -20%; right: -10%; animation-duration: 25s; } /* Neon Green */
-                .smoke-2 { width: 70vw; height: 70vh; background: rgba(204, 255, 0, 0.08); bottom: -10%; left: -20%; animation-duration: 30s; animation-delay: -5s; } /* Chemical Yellow */
-                .smoke-3 { width: 50vw; height: 50vh; background: rgba(10, 30, 10, 0.6); top: 30%; left: 30%; animation-duration: 40s; animation-delay: -10s; mix-blend-mode: overlay; } /* Dark Deep Fog */
+                {/* --- GEOMETRIC BANDS (Sharp Base) --- */}
+                {/* Band 1 - Deep Blue/Gray */}
+                <div
+                    className="absolute top-0 left-0 w-[150%] h-[150%] bg-[#0F172A]"
+                    style={{ clipPath: 'polygon(0 0, 35% 0, 0 85%)' }}
+                ></div>
 
-            `}</style>
+                {/* Band 2 - Dark Bronze */}
+                <div
+                    className="absolute top-0 left-0 w-[150%] h-[150%] bg-[#3D3A2C]"
+                    style={{ clipPath: 'polygon(37% 0, 42% 0, 0 92%, 0 87%)' }}
+                ></div>
 
-            {/* 1. Base Layer - Rich Green */}
-            <div className={`absolute inset-0 ${theme.bg}`}></div>
+                {/* Band 3 - Aged Gold */}
+                <div
+                    className="absolute top-0 left-0 w-[150%] h-[150%] bg-[#8B7C41]"
+                    style={{ clipPath: 'polygon(44% 0, 49% 0, 0 99%, 0 94%)' }}
+                ></div>
 
-            {/* 2. Atmospheric Flows (Enhanced Smoke) */}
-            <div className={`absolute inset-0 overflow-hidden pointer-events-none`}>
-                <div className="smoke-blob smoke-1"></div>
-                <div className="smoke-blob smoke-2"></div>
-                <div className="smoke-blob smoke-3"></div>
+                {/* Band 4 - Muted Gold */}
+                <div
+                    className="absolute top-0 left-0 w-[150%] h-[150%] bg-[#B5A55D]"
+                    style={{ clipPath: 'polygon(51% 0, 56% 0, 0 106%, 0 101%)' }}
+                ></div>
+
+                {/* Band 5 - Metrik Gold */}
+                <div
+                    className="absolute top-0 left-0 w-[150%] h-[150%] bg-[#D4AF37]"
+                    style={{ clipPath: 'polygon(59% 0, 68% 0, 0 118%, 0 109%)' }}
+                ></div>
+
+                {/* --- FROSTED OVERLAY (Global Blur) --- */}
+                {/* Simulates the 'Availability Modal' background effect */}
+                <div className="absolute inset-0 backdrop-blur-[60px] bg-black/10 pointer-events-none"></div>
+
+                {/* Subtle Globe Logo Overlay (Placeholder effect) */}
+                <div className="absolute bottom-[20%] right-[10%] opacity-10">
+                    <div className="w-64 h-64 border-2 border-[#D4AF37] rounded-full flex items-center justify-center">
+                        <div className="w-48 h-px bg-[#D4AF37]/50 rotate-45 absolute"></div>
+                        <div className="w-48 h-px bg-[#D4AF37]/50 -rotate-45 absolute"></div>
+                    </div>
+                </div>
+
+                {/* 2. Texture Layer (Fixed with background) */}
+                <div className={`absolute inset-0 ${theme.noise} pointer-events-none mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]`}></div>
             </div>
 
-            {/* 3. Texture */}
-            <div className={`absolute inset-0 ${theme.noise} pointer-events-none mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]`}></div>
+            {/* 3. Global Styles (Removed Smoke, kept basic necessities) */}
+            <style>{`
+                .bento-grid-item {
+                    border-radius: 2rem;
+                    background: rgba(255, 255, 255, 0.95);
+                    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.15);
+                    color: #1e3a8a;
+                }
+                .bento-grid-item-dark {
+                    border-radius: 2rem;
+                    background: #0A1A2F;
+                    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
+                    color: white;
+                }
+            `}</style>
 
-            {/* 4. Vignette - Heavy edges to focus center */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.6)_100%)] pointer-events-none"></div>
-
-            {/* Content */}
+            {/* Content - Scrolls normally */}
             <div className="relative z-10 w-full h-full">
                 {children}
             </div>

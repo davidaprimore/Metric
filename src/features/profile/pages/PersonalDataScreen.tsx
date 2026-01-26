@@ -179,16 +179,6 @@ export const PersonalDataScreen: React.FC = () => {
         }
     };
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setToast({
-                show: true,
-                message: `Foto "${file.name}" selecionada! O upload para o servidor estará disponível em breve. 📸`,
-                type: 'success'
-            });
-        }
-    };
 
     // Glassy, Transparent, Luminous
     const textureCardClass = "bg-black/40 bg-[radial-gradient(120%_120%_at_50%_0%,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent backdrop-blur-3xl border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] relative overflow-hidden";
@@ -200,22 +190,6 @@ export const PersonalDataScreen: React.FC = () => {
                 message={toast.message}
                 type={toast.type}
                 onClose={() => setToast({ ...toast, show: false })}
-            />
-            {/* Hidden native inputs */}
-            <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleImageChange}
-            />
-            <input
-                type="file"
-                ref={cameraInputRef}
-                className="hidden"
-                accept="image/*"
-                capture="user"
-                onChange={handleImageChange}
             />
 
             <div className="relative z-10 text-white">

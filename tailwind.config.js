@@ -13,8 +13,8 @@ export default {
       },
       colors: {
         primary: {
-          DEFAULT: '#C6FF00', // Neon Lime
-          foreground: '#0F110A',
+          DEFAULT: '#D4AF37', // Gold/Yellow
+          foreground: '#000000',
         },
         secondary: {
           DEFAULT: '#8A7AD0', // Soft Purple

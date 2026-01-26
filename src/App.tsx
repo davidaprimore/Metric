@@ -10,6 +10,7 @@ import { RegistrationSuccess } from '@/features/auth/pages/RegistrationSuccess';
 import { ForgotPasswordScreen } from '@/features/auth/pages/ForgotPasswordScreen';
 import { DashboardScreen } from '@/features/dashboard/pages/DashboardScreen';
 import { AssessmentScreen } from '@/features/assessment/pages/AssessmentScreen';
+import { AssessmentWizardScreen } from '@/features/dashboard/pages/AssessmentWizardScreen';
 import { AnamnesisScreen } from '@/features/assessment/pages/AnamnesisScreen';
 import { ResultsScreen } from '@/features/assessment/pages/ResultsScreen';
 import { ScheduleScreen } from '@/features/schedule/pages/ScheduleScreen';
@@ -39,7 +40,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
 
-  if (loading) return <div className="min-h-screen bg-dark flex items-center justify-center text-primary font-bold animate-pulse">CARREGANDO...</div>;
+  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-[#D4AF37] font-black tracking-widest animate-pulse">CARREGANDO...</div>;
 
   if (!session) {
     return <Navigate to="/welcome" replace />;
@@ -205,6 +206,12 @@ function App() {
             <Route path="/appointment/:id" element={
               <PrivateRoute>
                 <AppointmentDetailScreen />
+              </PrivateRoute>
+            } />
+
+            <Route path="/assessment/start" element={
+              <PrivateRoute>
+                <AssessmentWizardScreen />
               </PrivateRoute>
             } />
 

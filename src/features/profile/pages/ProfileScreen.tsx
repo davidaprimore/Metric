@@ -19,6 +19,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProfessionalBottomNav } from '@/components/layout/ProfessionalBottomNav';
 import { DefaultAvatar } from '@/components/shared/DefaultAvatar';
+import { ImageCropper } from '@/components/shared/ImageCropper';
+import { Toast } from '@/components/ui/Toast';
+import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
 interface ProfileScreenProps {
@@ -27,7 +30,10 @@ interface ProfileScreenProps {
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = (props) => {
     const navigate = useNavigate();
-    const { user, signOut, userProfile } = useAuth();
+    const { user, signOut, userProfile, refreshProfile } = useAuth();
+    const [loading, setLoading] = React.useState(false);
+    const [imageToCrop, setImageToCrop] = React.useState<string | null>(null);
+    const [toast, setToast] = React.useState({ show: false, message: '', type: 'success' as 'success' | 'error' | 'loading' | 'warning' });
 
     const triggerGallery = () => {
         document.getElementById('gallery-upload')?.click();
@@ -37,11 +43,53 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = (props) => {
         document.getElementById('camera-upload')?.click();
     };
 
-    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file || !user) return;
-        // Mock logic for now
-        console.log('Uploading avatar:', file.name);
+    const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const reader = new FileReader();
+            reader.addEventListener('load', () => setImageToCrop(reader.result?.toString() || null));
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    };
+
+    const handleCropComplete = async (croppedBlob: Blob) => {
+        setImageToCrop(null);
+        setLoading(true);
+        setToast({ show: true, message: 'Enviando foto...', type: 'loading' });
+
+        try {
+            const fileName = `avatar_${user?.id}_${Date.now()}.jpg`;
+            const { error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(fileName, croppedBlob, {
+                    contentType: 'image/jpeg',
+                    upsert: true
+                });
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(fileName);
+
+            // 1. Update auth metadata
+            const { error: authError } = await supabase.auth.updateUser({
+                data: { avatar_url: publicUrl }
+            });
+            if (authError) throw authError;
+
+            // 2. Update profiles table
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .update({ avatar_url: publicUrl })
+                .eq('id', user?.id);
+            if (profileError) throw profileError;
+
+            await refreshProfile();
+            setToast({ show: true, message: 'Foto atualizada com sucesso! 📸✨', type: 'success' });
+        } catch (error: any) {
+            console.error('Upload error:', error);
+            setToast({ show: true, message: error.message || 'Erro ao enviar foto', type: 'error' });
+        } finally {
+            setLoading(false);
+        }
     };
 
     const firstName = userProfile?.first_name || user?.user_metadata?.first_name || 'Usuário';
@@ -85,6 +133,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = (props) => {
     // NOTE: ProfessionalBottomNav handles switching via parent state if embedded
     return (
         <FluidBackground variant="luminous" className="pb-40 font-sans px-6 relative overflow-hidden min-h-screen">
+            <Toast
+                isVisible={toast.show}
+                message={toast.message}
+                type={toast.type}
+                onClose={() => setToast({ ...toast, show: false })}
+            />
             <div className="relative z-10 text-white">
                 {/* Header */}
                 <header className="pt-10 flex justify-between items-center mb-10">
@@ -131,8 +185,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = (props) => {
                     <h2 className="mt-4 text-2xl font-black text-white tracking-tighter uppercase">{firstName} {lastName}</h2>
 
                     {/* Hidden Inputs */}
-                    <input type="file" id="gallery-upload" className="hidden" accept="image/*" onChange={handleAvatarUpload} />
-                    <input type="file" id="camera-upload" className="hidden" accept="image/*" capture="user" onChange={handleAvatarUpload} />
+                    <input type="file" id="gallery-upload" className="hidden" accept="image/*" onChange={onSelectFile} />
+                    <input type="file" id="camera-upload" className="hidden" accept="image/*" capture="user" onChange={onSelectFile} />
                     {role === 'profissional' ? (
                         <div className="flex flex-col items-center gap-2 mt-2">
                             <span className="bg-white/5 backdrop-blur-sm text-slate-200 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border border-white/10 shadow-sm flex items-center gap-2">
@@ -146,6 +200,14 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = (props) => {
                         <p className="text-sm font-medium text-slate-500 mt-2">{user?.email}</p>
                     )}
                 </div>
+
+                {imageToCrop && (
+                    <ImageCropper
+                        image={imageToCrop}
+                        onCropComplete={handleCropComplete}
+                        onCancel={() => setImageToCrop(null)}
+                    />
+                )}
 
                 {/* Configurations Section */}
                 <div className="space-y-4">
