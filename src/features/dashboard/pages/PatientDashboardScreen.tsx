@@ -38,7 +38,22 @@ const textureCardClass = "bg-[#0A0A0A]/40 backdrop-blur-xl border border-white/5
 
 export const PatientDashboardScreen: React.FC = () => {
   const navigate = useNavigate();
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, refreshProfile } = useAuth();
+
+  // Sync Avatar from Auth to Profile if missing (Self-Healing)
+  useEffect(() => {
+    const syncAvatar = async () => {
+      if (user?.user_metadata?.avatar_url && userProfile && !userProfile.avatar_url) {
+        console.log('Syncing avatar from Auth to Profile...');
+        await supabase.from('profiles').update({
+          avatar_url: user.user_metadata.avatar_url
+        }).eq('id', user.id);
+        if (refreshProfile) refreshProfile();
+      }
+    };
+    syncAvatar();
+  }, [user, userProfile]);
+
   const [activeTab, setActiveTab] = useState('home'); // State-based navigation
 
   // Data State
