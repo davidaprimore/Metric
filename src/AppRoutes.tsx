@@ -42,6 +42,7 @@ export const AppRoutes = () => {
 
     return (
         <AnimatePresence mode="wait">
+            {/* @ts-expect-error: Key is required for AnimatePresence but missing in RoutesProps definition */}
             <Routes location={location} key={location.pathname}>
                 <Route path="/welcome" element={<WelcomeScreen />} />
                 <Route path="/login" element={<LoginScreen />} />

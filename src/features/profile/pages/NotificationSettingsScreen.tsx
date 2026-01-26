@@ -6,7 +6,10 @@ import {
     Mail,
     Info,
     CheckCircle2,
-    Loader2
+    Loader2,
+    Smartphone,
+    Shield,
+    Check
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,14 +18,17 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { Toast } from '@/components/ui/Toast';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
+import { Switch } from '@/components/ui/Switch';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 
 export const NotificationSettingsScreen: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { permission, requestPermission, loading: pushLoading } = usePushNotifications();
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' as 'success' | 'error' | 'loading' });
 
-    // Default preferences - all enabled by default now
+    // Default preferences
     const [prefs, setPrefs] = useState({
         push_evaluation: user?.user_metadata?.prefs?.push_evaluation ?? true,
         push_tips: user?.user_metadata?.prefs?.push_tips ?? true,
@@ -68,21 +74,6 @@ export const NotificationSettingsScreen: React.FC = () => {
     const textureCardClass = "bg-black/40 bg-[radial-gradient(120%_120%_at_50%_0%,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent backdrop-blur-3xl border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] relative overflow-hidden";
     const headerButtonClass = "w-10 h-10 rounded-full flex items-center justify-center bg-white/5 border border-white/10 shadow-sm hover:text-white text-slate-400 active:scale-95 transition-all";
 
-    const Switch = ({ active, onClick }: { active: boolean, onClick: () => void }) => (
-        <button
-            onClick={onClick}
-            className={cn(
-                "w-12 h-6 rounded-full transition-colors relative flex items-center px-1 border border-white/10 shadow-inner",
-                active ? "bg-[#CCFF00]" : "bg-black/40"
-            )}
-        >
-            <div className={cn(
-                "w-4 h-4 rounded-full shadow-sm transition-transform duration-200",
-                active ? "translate-x-6 bg-black" : "translate-x-0 bg-slate-500"
-            )} />
-        </button>
-    );
-
     return (
         <FluidBackground variant="luminous" className="pb-40 font-sans px-5 relative overflow-hidden min-h-screen">
             <Toast
@@ -104,24 +95,83 @@ export const NotificationSettingsScreen: React.FC = () => {
             </header>
 
             <div className="relative z-10 space-y-8">
+
+                {/* Main Enable Card */}
+                <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${permission === 'granted' ? 'bg-[#D4AF37]/20 text-[#D4AF37]' : 'bg-white/5 text-slate-400'}`}>
+                            <Bell size={24} />
+                        </div>
+                        <div>
+                            <h3 className="text-white font-bold text-lg">Push Notifications</h3>
+                            <p className="text-slate-400 text-xs mt-1">
+                                {permission === 'granted'
+                                    ? 'Ativado: Você receberá alertas no dispositivo.'
+                                    : permission === 'denied'
+                                        ? 'Bloqueado: Habilite nas configurações do navegador.'
+                                        : 'Desativado: Toque para ativar alertas.'}
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => requestPermission()}
+                        disabled={permission === 'granted' || pushLoading}
+                        className={cn(
+                            "w-full py-3 rounded-xl font-bold uppercase tracking-widest text-xs transition-all",
+                            permission === 'granted'
+                                ? 'bg-green-500/10 text-green-500 cursor-default'
+                                : 'bg-[#D4AF37] text-black hover:scale-[1.02]'
+                        )}
+                    >
+                        {pushLoading ? 'Solicitando...' : permission === 'granted' ? 'Ativado ✅' : 'Ativar no Dispositivo'}
+                    </button>
+
+                    {permission === 'granted' && (
+                        <button
+                            onClick={async () => {
+                                setLoading(true);
+                                try {
+                                    const { error } = await supabase.functions.invoke('send-push', {
+                                        body: {
+                                            user_id: user?.id,
+                                            title: "Teste Metrik",
+                                            body: "Se você leu isso, o sistema funcionou! 🚀"
+                                        }
+                                    });
+                                    if (error) throw error;
+                                    setToast({ show: true, message: 'Notificação enviada! Verifique seu celular.', type: 'success' });
+                                } catch (e) {
+                                    setToast({ show: true, message: 'Erro ao enviar teste.', type: 'error' });
+                                    console.error(e);
+                                } finally {
+                                    setLoading(false);
+                                }
+                            }}
+                            className="w-full mt-3 py-3 border border-white/10 rounded-xl text-white/50 font-bold uppercase tracking-widest text-[10px] hover:bg-white/5 hover:text-white transition-all"
+                        >
+                            {loading ? 'Enviando...' : 'Enviar notificação de teste'}
+                        </button>
+                    )}
+                </div>
+
                 {/* Push Notifications Section */}
                 <section>
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2 mb-4">Notificações Push</p>
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2 mb-4">Canais de Push</p>
                     <div className={`${textureCardClass} rounded-[2rem]`}>
                         <div className="p-6 space-y-6">
                             <div className="flex items-center justify-between">
                                 <span className="text-sm font-bold text-white">Lembretes de Avaliação</span>
-                                <Switch active={prefs.push_evaluation} onClick={() => toggle('push_evaluation')} />
+                                <Switch checked={prefs.push_evaluation} onCheckedChange={() => toggle('push_evaluation')} />
                             </div>
                             <div className="h-px bg-white/5" />
                             <div className="flex items-center justify-between">
                                 <span className="text-sm font-bold text-white">Dicas de Saúde</span>
-                                <Switch active={prefs.push_tips} onClick={() => toggle('push_tips')} />
+                                <Switch checked={prefs.push_tips} onCheckedChange={() => toggle('push_tips')} />
                             </div>
                             <div className="h-px bg-white/5" />
                             <div className="flex items-center justify-between">
                                 <span className="text-sm font-bold text-white">Atualizações do App</span>
-                                <Switch active={prefs.push_updates} onClick={() => toggle('push_updates')} />
+                                <Switch checked={prefs.push_updates} onCheckedChange={() => toggle('push_updates')} />
                             </div>
                         </div>
                     </div>
@@ -134,12 +184,12 @@ export const NotificationSettingsScreen: React.FC = () => {
                         <div className="p-6 space-y-6">
                             <div className="flex items-center justify-between">
                                 <span className="text-sm font-bold text-white">Resumo Mensal</span>
-                                <Switch active={prefs.email_summary} onClick={() => toggle('email_summary')} />
+                                <Switch checked={prefs.email_summary} onCheckedChange={() => toggle('email_summary')} />
                             </div>
                             <div className="h-px bg-white/5" />
                             <div className="flex items-center justify-between">
                                 <span className="text-sm font-bold text-white">Promoções</span>
-                                <Switch active={prefs.email_promo} onClick={() => toggle('email_promo')} />
+                                <Switch checked={prefs.email_promo} onCheckedChange={() => toggle('email_promo')} />
                             </div>
                             <div className="h-px bg-white/5" />
                             <div className="flex items-center justify-between">
@@ -147,7 +197,7 @@ export const NotificationSettingsScreen: React.FC = () => {
                                     <span className="text-sm font-bold text-white block">Segurança da Conta</span>
                                     <span className="text-[8px] font-black text-[#CCFF00] uppercase">Recomendado</span>
                                 </div>
-                                <Switch active={prefs.email_security} onClick={() => toggle('email_security')} />
+                                <Switch checked={prefs.email_security} onCheckedChange={() => toggle('email_security')} />
                             </div>
                         </div>
                     </div>
