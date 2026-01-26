@@ -126,32 +126,41 @@ export const NotificationSettingsScreen: React.FC = () => {
                         {pushLoading ? 'Solicitando...' : permission === 'granted' ? 'Ativado ✅' : 'Ativar no Dispositivo'}
                     </button>
 
-                    {permission === 'granted' && (
-                        <button
-                            onClick={async () => {
-                                setLoading(true);
-                                try {
-                                    const { error } = await supabase.functions.invoke('send-push', {
-                                        body: {
-                                            user_id: user?.id,
-                                            title: "Teste Metrik",
-                                            body: "Se você leu isso, o sistema funcionou! 🚀"
-                                        }
-                                    });
-                                    if (error) throw error;
-                                    setToast({ show: true, message: 'Notificação enviada! Verifique seu celular.', type: 'success' });
-                                } catch (e) {
-                                    setToast({ show: true, message: 'Erro ao enviar teste.', type: 'error' });
-                                    console.error(e);
-                                } finally {
-                                    setLoading(false);
+                    <button
+                        onClick={async () => {
+                            setLoading(true);
+                            try {
+                                const { data, error } = await supabase.functions.invoke('send-push', {
+                                    body: {
+                                        user_id: user?.id,
+                                        title: "Teste Metrik",
+                                        body: "Se você leu isso, o sistema funcionou! 🚀"
+                                    }
+                                });
+
+                                if (error) throw error;
+
+                                console.log('Push Result:', data);
+
+                                if (data?.success === false) {
+                                    setToast({ show: true, message: `Erro: ${data.message || 'Falha ao enviar'}`, type: 'error' });
+                                } else if (data?.sent > 0) {
+                                    setToast({ show: true, message: `Sucesso! Enviado para ${data.sent} aparelho(s).`, type: 'success' });
+                                } else {
+                                    setToast({ show: true, message: 'Nenhum aparelho encontrado no banco de dados.', type: 'error' });
                                 }
-                            }}
-                            className="w-full mt-3 py-3 border border-white/10 rounded-xl text-white/50 font-bold uppercase tracking-widest text-[10px] hover:bg-white/5 hover:text-white transition-all"
-                        >
-                            {loading ? 'Enviando...' : 'Enviar notificação de teste'}
-                        </button>
-                    )}
+
+                            } catch (e) {
+                                setToast({ show: true, message: 'Erro de conexão com o servidor.', type: 'error' });
+                                console.error(e);
+                            } finally {
+                                setLoading(false);
+                            }
+                        }}
+                        className="w-full mt-3 py-3 border border-white/10 rounded-xl text-white/50 font-bold uppercase tracking-widest text-[10px] hover:bg-white/5 hover:text-white transition-all"
+                    >
+                        {loading ? 'Verificando...' : 'Enviar notificação de teste'}
+                    </button>
                 </div>
 
                 {/* Push Notifications Section */}
