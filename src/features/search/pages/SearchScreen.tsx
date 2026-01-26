@@ -18,13 +18,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/useDebounce';
 
-// Mapping specialty IDs to Icons (Airbnb Style Categories - Light Mode)
+// Colors added to categories for visual appeal
 const CATEGORIES = [
-    { id: 'all', label: 'Todos', icon: Search },
-    { id: 'personal', label: 'Personal', icon: Dumbbell },
-    { id: 'nutri', label: 'Nutri', icon: Salad },
-    { id: 'avaliador', label: 'Avaliação', icon: Activity },
-    { id: 'fisioterapeuta', label: 'Fisio', icon: Stethoscope }
+    { id: 'all', label: 'Todos', icon: Search, color: 'text-gray-600', bg: 'bg-gray-100' },
+    { id: 'personal', label: 'Personal', icon: Dumbbell, color: 'text-blue-500', bg: 'bg-blue-50' },
+    { id: 'nutri', label: 'Nutri', icon: Salad, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+    { id: 'avaliador', label: 'Avaliação', icon: Activity, color: 'text-rose-500', bg: 'bg-rose-50' },
+    { id: 'fisioterapeuta', label: 'Fisio', icon: Stethoscope, color: 'text-teal-500', bg: 'bg-teal-50' }
 ];
 
 export const SearchScreen: React.FC = () => {
@@ -113,60 +113,67 @@ export const SearchScreen: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-white text-[#222222] font-sans pb-32">
+        <div className="min-h-screen bg-[#F7F7F7] text-[#222222] font-sans pb-32">
             {/* Mobile Layout Constraint */}
-            <div className="max-w-md mx-auto w-full relative min-h-screen bg-white">
+            <div className="max-w-md mx-auto w-full relative min-h-screen bg-white shadow-xl shadow-black/5">
 
-                {/* Header (Light - Airbnb Style) */}
-                <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 pt-4 pb-2 px-5 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]">
-                    {/* Search Bar - Floating Shadow Pill */}
-                    <div className="flex items-center gap-3 mb-4">
+                {/* Header */}
+                <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md pt-6 pb-2 px-5">
+                    {/* Search Bar */}
+                    <div className="flex items-center gap-3 mb-6">
                         <button
                             onClick={() => navigate(-1)}
-                            className="w-10 h-10 rounded-full bg-transparent flex items-center justify-center text-[#222222] hover:bg-gray-100 active:scale-95 transition-all"
+                            className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-[#222222] hover:bg-gray-100 active:scale-95 transition-all"
                         >
                             <ChevronLeft size={24} strokeWidth={2.5} />
                         </button>
 
-                        <div className="flex-1 h-14 bg-white rounded-full flex items-center px-2 shadow-[0_6px_16px_-4px_rgba(0,0,0,0.12)] border border-gray-100/50">
-                            <div className="w-10 h-10 rounded-full bg-[#FF385C] flex items-center justify-center shadow-md">
-                                <Search size={18} className="text-white" strokeWidth={3} />
+                        <div className="flex-1 h-12 bg-white rounded-full flex items-center px-2 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.1)] border border-gray-100">
+                            <div className="w-9 h-9 rounded-full bg-[#FF385C] flex items-center justify-center shadow-sm">
+                                <Search size={16} className="text-white" strokeWidth={3} />
                             </div>
-                            <div className="flex-1 px-3 flex flex-col justify-center">
-                                <span className="text-[11px] font-bold text-[#222222] leading-tight">Para onde vamos?</span>
+                            <div className="flex-1 px-3">
+                                <span className="block text-[10px] font-bold text-gray-400 leading-none mb-0.5">Buscar</span>
                                 <input
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    placeholder="Buscar profissionais..."
-                                    className="w-full bg-transparent text-[13px] text-gray-600 placeholder:text-gray-400 outline-none leading-tight"
+                                    placeholder="Nome ou especialidade..."
+                                    className="w-full bg-transparent text-sm font-semibold text-[#222222] placeholder:text-gray-300 outline-none leading-none h-4"
                                 />
-                            </div>
-                            <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center text-[#222222]">
-                                <SlidersHorizontal size={16} />
                             </div>
                         </div>
                     </div>
 
-                    {/* Categories (Airbnb Icons - Light) */}
-                    <div className="flex gap-8 overflow-x-auto pb-2 no-scrollbar px-2 pt-2">
-                        {CATEGORIES.map(cat => {
+                    {/* Categories - Colored & Scrollable */}
+                    <div className="flex gap-4 overflow-x-auto pb-4 -mx-5 px-5 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                        {CATEGORIES.map((cat) => {
                             const Icon = cat.icon;
                             const isActive = activeFilter === cat.id;
+
                             return (
                                 <button
                                     key={cat.id}
                                     onClick={() => setActiveFilter(cat.id)}
-                                    className="flex flex-col items-center gap-2 group min-w-[60px] cursor-pointer"
+                                    className={cn(
+                                        "flex flex-col items-center gap-2 min-w-[70px] transition-all duration-300",
+                                        isActive ? "opacity-100 scale-105" : "opacity-60 hover:opacity-100"
+                                    )}
                                 >
                                     <div className={cn(
-                                        "transition-all duration-300 relative",
-                                        isActive ? "text-[#222222]" : "text-gray-400 group-hover:text-gray-600"
+                                        "w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm transition-all border",
+                                        isActive
+                                            ? `${cat.bg} border-${cat.color.split('-')[1]}-200 shadow-${cat.color.split('-')[1]}-200/50`
+                                            : "bg-white border-gray-100"
                                     )}>
-                                        <Icon size={26} strokeWidth={isActive ? 2.5 : 2} />
+                                        <Icon
+                                            size={24}
+                                            className={cn("transition-colors", isActive ? cat.color : "text-gray-400")}
+                                            strokeWidth={2.5}
+                                        />
                                     </div>
                                     <span className={cn(
-                                        "text-[11px] font-medium transition-colors relative pb-2",
-                                        isActive ? "text-[#222222] border-b-2 border-[#222222]" : "text-gray-400 border-b-2 border-transparent"
+                                        "text-[11px] font-bold transition-colors",
+                                        isActive ? "text-[#222222]" : "text-gray-400"
                                     )}>
                                         {cat.label}
                                     </span>
@@ -176,80 +183,93 @@ export const SearchScreen: React.FC = () => {
                     </div>
                 </header>
 
-                {/* Results List */}
-                <div className="p-6 space-y-8">
+                {/* Results List - Compact Horizontal Cards */}
+                <div className="p-5 space-y-4">
                     {loading ? (
-                        <div className="text-center py-20 space-y-3 animate-pulse">
-                            <div className="w-12 h-12 bg-gray-100 rounded-full mx-auto" />
-                            <p className="text-xs font-medium text-gray-400 uppercase tracking-widest">Carregando...</p>
+                        <div className="space-y-4">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="flex gap-4 animate-pulse">
+                                    <div className="w-24 h-24 bg-gray-100 rounded-2xl shrink-0" />
+                                    <div className="flex-1 space-y-2 py-2">
+                                        <div className="h-4 bg-gray-100 rounded w-3/4" />
+                                        <div className="h-3 bg-gray-100 rounded w-1/2" />
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     ) : professionals.length > 0 ? (
                         professionals.map((pro) => (
                             <div
                                 key={pro.id}
                                 onClick={() => navigate(`/profile/${pro.id}`)}
-                                className="group cursor-pointer active:scale-[0.98] transition-transform duration-200"
+                                className="group bg-white rounded-3xl p-3 shadow-[0_2px_20px_-5px_rgba(0,0,0,0.05)] border border-gray-50 flex gap-4 active:scale-[0.98] transition-all cursor-pointer hover:shadow-md"
                             >
-                                {/* Card Image - Clean rounded square */}
-                                <div className="aspect-square rounded-[1.2rem] overflow-hidden relative mb-4 bg-gray-100 shadow-sm border border-gray-100">
+                                {/* Photo - Compact Left Side */}
+                                <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-100 relative shrink-0">
                                     <img
                                         src={pro.avatar_url || `https://ui-avatars.com/api/?name=${pro.full_name}&background=f3f4f6&color=000`}
                                         className="w-full h-full object-cover"
                                     />
+                                    <div className="absolute inset-0 bg-black/5" /> {/* Subtle overlay for depth */}
 
-                                    {/* Favorite Button (White Circle) */}
-                                    <button
-                                        onClick={(e) => toggleFavorite(pro.id, e)}
-                                        className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm shadow-sm flex items-center justify-center transition-transform active:scale-75 hover:scale-110"
-                                    >
-                                        <Heart
-                                            size={18}
-                                            fill={favorites.has(pro.id) ? "#FF385C" : "rgba(0,0,0,0.1)"}
-                                            className={favorites.has(pro.id) ? "text-[#FF385C]" : "text-gray-600"}
-                                        />
-                                    </button>
-
-                                    {/* Superhost / Rating Badge (White Pill) */}
+                                    {/* Rating Pill - Tiny Overlay */}
                                     {pro.rating && (
-                                        <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1 shadow-sm border border-white/50">
-                                            <Star size={12} className="text-[#222222] fill-[#222222]" />
-                                            <span className="text-[12px] font-bold text-[#222222] leading-none">{pro.rating}</span>
+                                        <div className="absolute bottom-1 left-1 right-1 bg-white/90 backdrop-blur-[2px] rounded-lg py-1 flex items-center justify-center gap-1 shadow-sm">
+                                            <Star size={8} className="text-[#222222] fill-[#222222]" />
+                                            <span className="text-[9px] font-black text-[#222222]">{pro.rating}</span>
                                         </div>
                                     )}
                                 </div>
 
-                                {/* Card Details (Clean Typography) */}
-                                <div>
-                                    <div className="flex justify-between items-start mb-0.5">
-                                        <h3 className="text-[#222222] font-semibold text-[15px] leading-tight hover:underline">
-                                            {pro.nickname || pro.full_name}
-                                        </h3>
-                                        <div className="flex items-center gap-1 text-[#222222] text-[15px] font-light">
-                                            <Star size={12} className="fill-[#222222]" />
-                                            <span>{pro.rating || 'New'}</span>
+                                {/* Info - Right Side */}
+                                <div className="flex-1 py-1 flex flex-col justify-between relative">
+                                    <div>
+                                        <div className="flex justify-between items-start">
+                                            <h3 className="text-[#222222] font-bold text-base leading-tight pr-8">
+                                                {pro.nickname || pro.full_name}
+                                            </h3>
+                                        </div>
+
+                                        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide mt-1">
+                                            {pro.specialties?.name || 'Profissional'}
+                                        </p>
+
+                                        {pro.address_city && (
+                                            <div className="flex items-center gap-1 text-gray-400 text-xs mt-1">
+                                                <MapPin size={10} />
+                                                <span className="truncate">{pro.address_city}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="flex items-end justify-between mt-2">
+                                        <div>
+                                            <span className="text-[10px] text-gray-400 font-medium">A partir de</span>
+                                            <div className="flex items-baseline gap-1">
+                                                <span className="text-[#222222] font-black text-sm">R$ 150</span>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <p className="text-gray-500 text-[15px] leading-tight mb-1">
-                                        {pro.specialties?.name || 'Profissional Certificado'}
-                                    </p>
-
-                                    <p className="text-gray-500 text-[15px] leading-tight">
-                                        {pro.address_city ? `${pro.address_city}` : 'Atendimento Online'}
-                                    </p>
-
-                                    <div className="mt-2 flex items-baseline gap-1 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                        <span className="text-[#222222] font-semibold text-[15px]">R$ 150</span>
-                                        <span className="text-gray-500 text-[15px]"> consulta</span>
-                                    </div>
+                                    {/* Favorite - Absolute Top Right */}
+                                    <button
+                                        onClick={(e) => toggleFavorite(pro.id, e)}
+                                        className="absolute top-0 right-0 w-8 h-8 rounded-full flex items-center justify-center -mr-2 -mt-2 active:scale-90 transition-transform"
+                                    >
+                                        <Heart
+                                            size={18}
+                                            fill={favorites.has(pro.id) ? "#FF385C" : "rgba(0,0,0,0.05)"}
+                                            className={favorites.has(pro.id) ? "text-[#FF385C]" : "text-gray-300"}
+                                        />
+                                    </button>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <div className="text-center py-24 opacity-60">
-                            <Search size={40} className="mx-auto mb-4 text-gray-300" />
-                            <p className="text-sm font-medium text-gray-900 mb-1">Nenhum resultado exato</p>
-                            <p className="text-xs text-gray-500">Tente mudar ou remover alguns filtros</p>
+                        <div className="text-center py-12 opacity-60">
+                            <Search size={32} className="mx-auto mb-3 text-gray-300" />
+                            <p className="text-sm font-medium text-gray-900">Nenhum profissional</p>
+                            <p className="text-xs text-gray-400 mt-1">Tento "Nutri" ou "Personal"</p>
                         </div>
                     )}
                 </div>
