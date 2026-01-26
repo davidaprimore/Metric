@@ -107,17 +107,17 @@ export const ProfessionalDetailScreen = () => {
 
             {/* Profile Content Container */}
             <div className="-mt-10 px-4 relative z-20 w-full max-w-md mx-auto">
-                <div className="bg-white/90 backdrop-blur-xl rounded-[2.5rem] p-6 shadow-xl shadow-black/5 border border-white/50 relative overflow-hidden">
+                <div className="bg-white/90 backdrop-blur-xl rounded-[2.5rem] p-6 shadow-xl shadow-black/5 border border-white/50 relative">
 
                     {/* ID Badge */}
-                    <div className="absolute top-6 right-6 flex items-center gap-1 bg-green-50 text-green-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-green-100">
+                    <div className="absolute top-6 right-6 flex items-center gap-1 bg-green-50 text-green-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-green-100 shadow-sm z-20">
                         <ShieldCheck size={12} />
                         Verificado
                     </div>
 
                     {/* Avatar & Basic Info */}
-                    <div className="flex flex-col items-center -mt-16 mb-6">
-                        <div className="w-28 h-28 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100 mb-4 relative z-10">
+                    <div className="flex flex-col items-center -mt-16 mb-6 relative z-10">
+                        <div className="w-28 h-28 rounded-full border-4 border-white shadow-xl overflow-hidden bg-gray-100 mb-4 cursor-pointer active:scale-95 transition-transform">
                             <img
                                 src={professional.avatar_url || `https://ui-avatars.com/api/?name=${professional.full_name}&background=f3f4f6&color=000`}
                                 className="w-full h-full object-cover"
@@ -168,9 +168,45 @@ export const ProfessionalDetailScreen = () => {
                             <Award className="text-[#FF385C]" size={18} />
                             Sobre
                         </h3>
-                        <p className="text-sm text-gray-600 leading-relaxed font-medium text-left">
+                        <p className="text-sm text-gray-600 leading-relaxed font-medium text-left bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
                             {professional.bio || professional.nano_bio || "Olá! Sou especialista em ajudar pessoas a atingirem seus objetivos de saúde através de uma abordagem baseada em dados e acompanhamento personalizado. Com metodologia comprovada, vamos transformar sua qualidade de vida juntos."}
                         </p>
+                    </div>
+
+                    {/* Education / Certifications (New Point) */}
+                    <div className="mb-8">
+                        <h3 className="text-lg font-bold text-[#222222] mb-3 flex items-center gap-2">
+                            <ShieldCheck className="text-[#FF385C]" size={18} />
+                            Formação
+                        </h3>
+                        <ul className="space-y-2">
+                            <li className="flex items-start gap-2 text-sm text-gray-600 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                                <div className="w-1.5 h-1.5 rounded-full bg-[#FF385C] mt-1.5 shrink-0" />
+                                <span>Bacharel em Educação Física (UFRJ)</span>
+                            </li>
+                            <li className="flex items-start gap-2 text-sm text-gray-600 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                                <div className="w-1.5 h-1.5 rounded-full bg-[#FF385C] mt-1.5 shrink-0" />
+                                <span>Pós-graduação em Fisiologia do Exercício</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    {/* Service Hours */}
+                    <div className="mb-8">
+                        <h3 className="text-lg font-bold text-[#222222] mb-3 flex items-center gap-2">
+                            <Calendar className="text-[#FF385C]" size={18} />
+                            Atendimento
+                        </h3>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div className="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center">
+                                <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Seg - Sex</p>
+                                <p className="text-sm font-bold text-[#222222]">06:00 - 22:00</p>
+                            </div>
+                            <div className="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center">
+                                <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Sábados</p>
+                                <p className="text-sm font-bold text-[#222222]">08:00 - 14:00</p>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Services Included */}
@@ -186,6 +222,12 @@ export const ProfessionalDetailScreen = () => {
                                 </span>
                             ))}
                         </div>
+                    </div>
+
+                    {/* CTA Area */}
+                    <div className="bg-gradient-to-br from-[#FF385C]/10 to-[#FF385C]/5 rounded-2xl p-4 border border-[#FF385C]/20 text-center mb-4">
+                        <p className="text-sm font-bold text-[#FF385C] mb-1">Pronto para começar?</p>
+                        <p className="text-xs text-gray-500">Agende sua avaliação inicial e comece sua transformação.</p>
                     </div>
                 </div>
             </div>
