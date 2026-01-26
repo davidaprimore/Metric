@@ -5,7 +5,8 @@ import {
     Calendar,
     Plus,
     BarChart3,
-    Dumbbell
+    Dumbbell,
+    Search
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,7 +25,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab: propActiveTab, 
     const navItems = [
         { icon: Home, label: 'INÍCIO', path: '/dashboard', id: 'home' },
         { icon: Calendar, label: 'AGENDA', path: '/schedule', id: 'schedule' },
-        { icon: Plus, label: 'NOVA', path: '/assessment', id: 'assessment', isHighlight: true },
+        // Dynamic Middle Button: 'Plus' for Pro, 'Search' for Client
+        {
+            icon: userProfile?.role === 'profissional' ? Plus : Search,
+            label: userProfile?.role === 'profissional' ? 'NOVA' : 'BUSCAR',
+            path: userProfile?.role === 'profissional' ? '/assessment' : '/search',
+            id: userProfile?.role === 'profissional' ? 'assessment' : 'search',
+            isHighlight: true
+        },
         { icon: BarChart3, label: 'RESULTADOS', path: '/results', id: 'results' },
         { icon: Dumbbell, label: 'TREINOS', path: '/workouts', id: 'workouts' }
     ];

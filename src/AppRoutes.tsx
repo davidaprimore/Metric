@@ -35,6 +35,7 @@ import { ProfessionalDataScreen } from '@/features/profile/pages/ProfessionalDat
 import { AssessmentHistoryScreen } from '@/features/profile/pages/AssessmentHistoryScreen';
 import { AssessmentDetailScreen } from '@/features/profile/pages/AssessmentDetailScreen';
 import { AppointmentDetailScreen } from '@/features/dashboard/pages/AppointmentDetailScreen';
+import { SearchScreen } from '@/features/search/pages/SearchScreen';
 import { PatientDetailScreen } from '@/features/dashboard/pages/PatientDetailScreen';
 
 export const AppRoutes = () => {
@@ -85,6 +86,8 @@ export const AppRoutes = () => {
 
                 <Route path="/notifications" element={<PrivateRoute><NotificationCenterScreen /></PrivateRoute>} />
                 <Route path="/admin/notifications" element={<PrivateRoute><NotificationCenterScreen /></PrivateRoute>} />
+
+                <Route path="/search" element={<PrivateRoute><SearchScreen /></PrivateRoute>} />
 
                 <Route path="/appointment/:id" element={<PrivateRoute><AppointmentDetailScreen /></PrivateRoute>} />
 
