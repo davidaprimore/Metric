@@ -80,12 +80,12 @@ id, full_name, nickname, avatar_url,
 
             // Text Search (Name, Nickname, ID)
             if (debouncedSearch) {
-                query = query.or(`full_name.ilike.% ${debouncedSearch}%, nickname.ilike.% ${debouncedSearch}%, professional_code.eq.${debouncedSearch} `);
+                query = query.or(`full_name.ilike.%${debouncedSearch}%,nickname.ilike.%${debouncedSearch}%,professional_code.eq.${debouncedSearch}`);
             }
 
             // Location Filters
-            if (filterCity) query = query.ilike('address_city', `% ${filterCity}% `);
-            if (filterState) query = query.ilike('address_state', `% ${filterState}% `);
+            if (filterCity) query = query.ilike('address_city', `%${filterCity}%`);
+            if (filterState) query = query.ilike('address_state', `%${filterState}%`);
 
             const { data, error } = await query;
             if (error) throw error;
@@ -95,7 +95,7 @@ id, full_name, nickname, avatar_url,
             // 1. Filter by Specialty Client-side (if not 'all')
             if (activeFilter !== 'all') {
                 results = results.filter(p =>
-                    p.specialties?.name?.toLowerCase().includes(activeFilter === 'personal' ? 'personal' : activeFilter)
+                    p.specialties?.[0]?.name?.toLowerCase().includes(activeFilter === 'personal' ? 'personal' : activeFilter)
                 );
             }
 
@@ -326,7 +326,7 @@ id, full_name, nickname, avatar_url,
                                     onClick={() => navigate(`/ profile / ${pro.id} `)}
                                     className={cn(
                                         "group rounded-[2rem] p-4 flex gap-4 active:scale-[0.98] transition-all cursor-pointer border border-transparent hover:border-gray-100 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]",
-                                        getCardColor(pro.specialties?.name),
+                                        getCardColor(pro.specialties?.[0]?.name),
                                         isFav ? "ring-1 ring-[#FF385C]/20 bg-[#fff5f7]" : "" // Subtle highlight for favs
                                     )}
                                 >
@@ -336,10 +336,10 @@ id, full_name, nickname, avatar_url,
                                             src={pro.avatar_url || `https://ui-avatars.com/api/?name=${pro.full_name}&background=f3f4f6&color=000`}
                                             className="w-full h-full object-cover"
                                         />
-                                    </div >
+                                    </div>
 
                                     {/* Info */}
-                                    < div className="flex-1 py-0.5 flex flex-col justify-between relative" >
+                                    <div className="flex-1 py-0.5 flex flex-col justify-between relative" >
                                         <div>
                                             <div className="flex justify-between items-start">
                                                 <h3 className="text-[#222222] font-bold text-lg leading-tight pr-8">
@@ -349,7 +349,7 @@ id, full_name, nickname, avatar_url,
 
                                             <div className="flex items-center gap-2 mt-1">
                                                 <span className="bg-white/80 px-2 py-0.5 rounded-md text-[10px] font-bold text-gray-500 uppercase tracking-wide shadow-sm">
-                                                    {pro.specialties?.name || 'Pro'}
+                                                    {pro.specialties?.[0]?.name || 'Profissional'}
                                                 </span>
                                                 {pro.rating && (
                                                     <div className="flex items-center gap-1">
@@ -388,8 +388,8 @@ id, full_name, nickname, avatar_url,
                                                 className={isFav ? "text-[#FF385C]" : "text-gray-400"}
                                             />
                                         </button>
-                                    </div >
-                                </div >
+                                    </div>
+                                </div>
                             );
                         })
                     ) : (
@@ -407,10 +407,10 @@ id, full_name, nickname, avatar_url,
                             )}
                         </div>
                     )}
-                </div >
-            </div >
+                </div>
+            </div>
 
             <BottomNav activeTab="search" />
-        </div >
+        </div>
     );
 };
