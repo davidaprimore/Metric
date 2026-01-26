@@ -52,37 +52,44 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
   // Auto-select Professional (Priority: Alex)
   useEffect(() => {
     if (wizardStep === 'schedule' && !selectedProfessional) {
-      const loadAlex = async () => {
+      const loadProfessional = async () => {
         setLoading(true);
-        console.log('Searching for Alex Maromba...');
-        const { data, error } = await supabase.from('profiles')
-          .select('*')
-          .eq('role', 'profissional') // MATCHING DATABASE: 'profissional'
-          .eq('approval_status', 'approved')
-          .ilike('full_name', '%Alex%')
-          .limit(1)
-          .maybeSingle();
+        try {
+          // Smart Discovery: Find a professional who actually has availability configured
+          const { data: availData } = await supabase
+            .from('professional_availability')
+            .select('professional_id')
+            .eq('is_active', true)
+            .limit(1);
 
-        if (data) {
-          console.log('Alex found:', data.full_name);
-          setSelectedProfessional(data);
-        } else {
-          console.log('Alex not found, falling back. Error:', error);
-          // Fallback to any professional if Alex not found
-          const { data: fallback } = await supabase.from('profiles')
-            .select('*')
-            .eq('role', 'profissional') // MATCHING DATABASE: 'profissional'
-            .eq('approval_status', 'approved')
-            .limit(1)
-            .maybeSingle();
-          if (fallback) {
-            console.log('Fallback professional found:', fallback.full_name);
-            setSelectedProfessional(fallback);
+          let proId = availData?.[0]?.professional_id;
+
+          if (proId) {
+            const { data: pro } = await supabase.from('profiles').select('*').eq('id', proId).single();
+            if (pro) {
+              console.log('Smart Discovery found:', pro.full_name);
+              setSelectedProfessional(pro);
+              setLoading(false);
+              return;
+            }
           }
+
+          // Fallback: Try to find 'Alex' or any 'profissional'
+          const { data: alex } = await supabase.from('profiles').select('*').ilike('full_name', '%Alex%').limit(1).maybeSingle();
+          if (alex) {
+            setSelectedProfessional(alex);
+          } else {
+            const { data: anyPro } = await supabase.from('profiles').select('*').limit(1).single();
+            if (anyPro) setSelectedProfessional(anyPro);
+          }
+
+        } catch (e) {
+          console.error('Error finding professional:', e);
+        } finally {
+          setLoading(false);
         }
-        setLoading(false);
       };
-      loadAlex();
+      loadProfessional();
     }
   }, [wizardStep]);
 
