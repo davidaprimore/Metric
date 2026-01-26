@@ -60,6 +60,24 @@ serve(async (req) => {
                 title,
                 body
             },
+            // Force high priority for Heads-up Notification (Banner)
+            android: {
+                priority: 'high',
+                notification: {
+                    priority: 'max',
+                    channelId: 'default',
+                    defaultSound: true,
+                    icon: 'stock_ticker_update'
+                }
+            },
+            webpush: {
+                headers: {
+                    Urgency: 'high'
+                },
+                notification: {
+                    icon: '/pwa-192x192.png'
+                }
+            },
             data: data || {},
             tokens: tokens
         }
