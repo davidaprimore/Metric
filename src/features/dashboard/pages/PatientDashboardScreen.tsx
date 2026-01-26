@@ -40,9 +40,23 @@ import { ResultsScreen } from '@/features/assessment/pages/ResultsScreen';
 // Glassy, Premium, Minimalist
 const textureCardClass = "bg-[#0A0A0A]/40 backdrop-blur-xl border border-white/5 relative overflow-hidden shadow-2xl";
 
+const MOTIVATIONAL_MESSAGES = [
+  { title: "Seu corpo,", subtitle: "sua obra de arte.", text: "Vamos medir seu progresso hoje?" },
+  { title: "Foco total,", subtitle: "resultado real.", text: "A persistência é o caminho do êxito." },
+  { title: "Cada dia,", subtitle: "mais forte.", text: "Sua evolução é constante." },
+  { title: "Sua meta,", subtitle: "nosso desafio.", text: "Pequenos passos, grandes vitórias." },
+  { title: "Excelência,", subtitle: "é um hábito.", text: "Continue firme no seu propósito." }
+];
+
 export const PatientDashboardScreen: React.FC = () => {
   const navigate = useNavigate();
   const { user, userProfile, refreshProfile } = useAuth();
+  const [motivator, setMotivator] = useState(MOTIVATIONAL_MESSAGES[0]);
+
+  useEffect(() => {
+    const randomIdx = Math.floor(Math.random() * MOTIVATIONAL_MESSAGES.length);
+    setMotivator(MOTIVATIONAL_MESSAGES[randomIdx]);
+  }, []);
 
   // Sync Avatar from Auth to Profile if missing (Self-Healing)
   useEffect(() => {
@@ -221,8 +235,8 @@ export const PatientDashboardScreen: React.FC = () => {
 
         <div className="relative z-10 max-w-[60%]">
           <div className="w-8 h-1 bg-[#D4AF37] rounded-full mb-3"></div>
-          <h2 className="text-xl font-bold text-white leading-tight mb-2">Seu corpo,<br />sua obra de arte.</h2>
-          <p className="text-[10px] text-slate-400 font-medium tracking-wide">Vamos medir seu progresso hoje?</p>
+          <h2 className="text-xl font-bold text-white leading-tight mb-2">{motivator.title}<br />{motivator.subtitle}</h2>
+          <p className="text-[10px] text-slate-400 font-medium tracking-wide">{motivator.text}</p>
         </div>
         <div className="relative z-10 w-36 h-36 -mr-6 animate-in fade-in zoom-in duration-1000">
           <img src="/assets/3d/tape_measure.png" className="w-full h-full object-contain filter drop-shadow-[0_0_25px_rgba(212,175,55,0.2)]" alt="Tape Measure Friend" />
