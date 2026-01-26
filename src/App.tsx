@@ -84,7 +84,7 @@ function App() {
               </PrivateRoute>
             } />
 
-            <Route path="/results" element={
+            <Route path="/assessment/results/:id" element={
               <PrivateRoute>
                 <ResultsScreen />
               </PrivateRoute>
