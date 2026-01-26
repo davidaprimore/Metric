@@ -152,7 +152,7 @@ export const PatientDashboardScreen: React.FC = () => {
       unit: '%',
       trend: getTrendPct('fat_percentage', currentFatPct),
       up: getIsBad('fat_percentage', currentFatPct),
-      icon: "/assets/3d/caliper.png"
+      Icon: Activity
     },
     {
       label: 'Peso Atual',
@@ -160,7 +160,7 @@ export const PatientDashboardScreen: React.FC = () => {
       unit: 'kg',
       trend: getTrendPct('weight', currentWeight),
       up: false,
-      icon: "/assets/3d/scale.png"
+      Icon: Weight
     },
     {
       label: 'Massa Magra',
@@ -168,7 +168,7 @@ export const PatientDashboardScreen: React.FC = () => {
       unit: 'kg',
       trend: getTrendPct('lean_mass', currentLeanMass),
       up: getIsBad('lean_mass', currentLeanMass),
-      icon: "/assets/3d/muscle.png"
+      Icon: Dumbbell
     },
     {
       label: 'Massa Gorda',
@@ -176,7 +176,7 @@ export const PatientDashboardScreen: React.FC = () => {
       unit: 'kg',
       trend: getTrendPct('fat_mass', currentFatMass),
       up: getIsBad('fat_mass', currentFatMass),
-      icon: "/assets/3d/fat.png"
+      Icon: Layers
     }
   ];
 

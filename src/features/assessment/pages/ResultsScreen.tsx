@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
-import { ChevronLeft, Share2, Activity, Ruler, Weight, TrendingUp, TrendingDown, X, ChevronRight } from 'lucide-react';
+import { ChevronLeft, Share2, Activity, Ruler, Weight, TrendingUp, TrendingDown, X, ChevronRight, Dumbbell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { FluidBackground } from '@/components/layout/FluidBackground';
