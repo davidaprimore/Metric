@@ -36,6 +36,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
   const [wizardStep, setWizardStep] = useState<'plans' | 'schedule' | 'checkout' | 'success'>('plans');
   const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium' | null>(null);
   const [selectedProfessional, setSelectedProfessional] = useState<any>(null);
+  const [weekConfig, setWeekConfig] = useState<number[]>([]); // Active Days of Week
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
@@ -59,23 +60,29 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
           // Smart Discovery: Find a professional who actually has availability configured
           const { data: availData } = await supabase
             .from('professional_availability')
-            .select('professional_id')
-            .eq('is_active', true)
-            .limit(1);
+            .select('professional_id, day_of_week')
+            .eq('is_active', true);
 
-          let proId = availData?.[0]?.professional_id;
+          // Get unique IDs
+          const uniquePros = [...new Set(availData?.map(a => a.professional_id))];
+          let proId = uniquePros[0];
 
           if (proId) {
             const { data: pro } = await supabase.from('profiles').select('*').eq('id', proId).single();
             if (pro) {
               console.log('Smart Discovery found:', pro.full_name);
               setSelectedProfessional(pro);
+
+              // Set Week Config
+              const activeDays = availData?.filter(a => a.professional_id === proId).map(a => a.day_of_week) || [];
+              setWeekConfig([...new Set(activeDays)]); // Unique days
+
               setLoading(false);
               return;
             }
           }
 
-          // Fallback: Try to find 'Alex' or any 'profissional'
+          // Fallback logic kept for safety
           const { data: alex } = await supabase.from('profiles').select('*').ilike('full_name', '%Alex%').limit(1).maybeSingle();
           if (alex) {
             setSelectedProfessional(alex);
@@ -375,19 +382,31 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
         const cloneDay = day;
         const isSelected = isSameDay(day, selectedDate);
         const isCurrentMonth = isSameMonth(day, monthStart);
+        const dayOfWeek = day.getDay();
+        const isAvailableDay = weekConfig.includes(dayOfWeek);
+
+        // Style Logic
+        let dayStyle = "text-slate-400 hover:bg-white/10 hover:text-white cursor-pointer";
+        if (!isCurrentMonth) {
+          dayStyle = "text-slate-800 opacity-50 cursor-default";
+        } else if (!isAvailableDay) {
+          dayStyle = "text-slate-700 decoration-slate-600 line-through cursor-not-allowed opacity-40 bg-white/[0.02]";
+        } else if (isSelected) {
+          dayStyle = "bg-[#D4AF37] text-black shadow-[0_0_15px_rgba(212,175,55,0.4)] z-10 cursor-pointer";
+        }
 
         days.push(
-          <div
+          <button
             key={day.toString()}
+            disabled={(!isAvailableDay && isCurrentMonth) || !isCurrentMonth}
             onClick={() => { setSelectedDate(cloneDay); setSelectedSlot(null); }}
             className={cn(
-              "h-10 w-full flex items-center justify-center rounded-lg text-sm font-bold cursor-pointer transition-all relative",
-              !isCurrentMonth ? "text-slate-800" :
-                isSelected ? "bg-[#D4AF37] text-black shadow-[0_0_15px_rgba(212,175,55,0.4)] z-10" : "text-slate-400 hover:bg-white/10 hover:text-white"
+              "h-10 w-full flex items-center justify-center rounded-lg text-sm font-bold transition-all relative",
+              dayStyle
             )}
           >
             {formattedDate}
-          </div>
+          </button>
         );
         day = addDays(day, 1);
       }
