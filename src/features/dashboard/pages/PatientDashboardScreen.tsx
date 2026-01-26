@@ -143,15 +143,24 @@ export const PatientDashboardScreen: React.FC = () => {
     return (diffPct > 0 ? '+' : '') + diffPct.toFixed(1) + '%';
   };
 
-  const getIsBad = (key: string, current: string | number) => {
-    if (assessmentCount < 2) return false;
+  const getTrendConfig = (key: string, current: string | number) => {
+    if (assessmentCount < 2) return { color: "text-slate-400", isUp: false, label: '' };
     const trendStr = getTrendPct(key, current);
-    if (!trendStr) return false;
+    if (!trendStr) return { color: "text-slate-400", isUp: false, label: '' };
     const val = parseFloat(trendStr);
+    const isUp = val > 0;
+    const label = trendStr;
 
-    if (key === 'fat_percentage' || key === 'fat_mass') return val > 0; // Gained fat = Red
-    if (key === 'lean_mass') return val < 0; // Lost muscle = Red
-    return false;
+    if (key === 'fat_percentage' || key === 'fat_mass') {
+      return { color: isUp ? "text-red-500" : "text-green-500", isUp, label };
+    }
+    if (key === 'lean_mass') {
+      return { color: isUp ? "text-green-500" : "text-red-500", isUp, label };
+    }
+    if (key === 'weight') {
+      return { color: isUp ? "text-[#D4AF37]" : "text-blue-400", isUp, label };
+    }
+    return { color: "text-slate-400", isUp, label };
   };
 
   const currentWeight = Number(latestAssessment?.weight || userWeight || 0);
@@ -164,32 +173,28 @@ export const PatientDashboardScreen: React.FC = () => {
       label: 'Gordura Corporal',
       value: currentFatPct || '0.0',
       unit: '%',
-      trend: getTrendPct('fat_percentage', currentFatPct),
-      up: getIsBad('fat_percentage', currentFatPct),
+      config: getTrendConfig('fat_percentage', currentFatPct),
       Icon: Activity
     },
     {
       label: 'Peso Atual',
       value: currentWeight || '0.0',
       unit: 'kg',
-      trend: getTrendPct('weight', currentWeight),
-      up: false,
+      config: getTrendConfig('weight', currentWeight),
       Icon: Weight
     },
     {
       label: 'Massa Magra',
       value: currentLeanMass || '0.0',
       unit: 'kg',
-      trend: getTrendPct('lean_mass', currentLeanMass),
-      up: getIsBad('lean_mass', currentLeanMass),
+      config: getTrendConfig('lean_mass', currentLeanMass),
       Icon: Dumbbell
     },
     {
       label: 'Massa Gorda',
       value: currentFatMass || '0.0',
       unit: 'kg',
-      trend: getTrendPct('fat_mass', currentFatMass),
-      up: getIsBad('fat_mass', currentFatMass),
+      config: getTrendConfig('fat_mass', currentFatMass),
       Icon: Layers
     }
   ];
@@ -228,18 +233,23 @@ export const PatientDashboardScreen: React.FC = () => {
         </button>
       </header>
 
-      {/* HERO SECTION - Texture */}
-      <div className={`${textureCardClass} w-full h-44 rounded-[2.5rem] mb-8 flex items-center justify-between px-8 relative group`}>
-        {/* Subtle Gold Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/10 via-transparent to-transparent pointer-events-none opacity-50"></div>
-
-        <div className="relative z-10 max-w-[60%]">
-          <div className="w-8 h-1 bg-[#D4AF37] rounded-full mb-3"></div>
-          <h2 className="text-xl font-bold text-white leading-tight mb-2">{motivator.title}<br />{motivator.subtitle}</h2>
-          <p className="text-[10px] text-slate-400 font-medium tracking-wide">{motivator.text}</p>
+      {/* HERO SECTION - Background Image */}
+      <div className={`${textureCardClass} w-full h-48 rounded-[2.5rem] mb-8 relative group overflow-hidden`}>
+        {/* Full Inspiring Image Background */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/assets/dashboard-bgs/motivation_bg.png"
+            className="w-full h-full object-cover grayscale brightness-50 contrast-125 group-hover:scale-110 transition-transform duration-[3000ms]"
+            alt="Motivation"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#D4AF37]/20 via-transparent to-transparent"></div>
         </div>
-        <div className="relative z-10 w-36 h-36 -mr-6 animate-in fade-in zoom-in duration-1000">
-          <img src="/assets/3d/tape_measure.png" className="w-full h-full object-contain filter drop-shadow-[0_0_25px_rgba(212,175,55,0.2)]" alt="Tape Measure Friend" />
+
+        <div className="relative z-10 h-full flex flex-col justify-center px-10">
+          <div className="w-12 h-1 bg-[#D4AF37] rounded-full mb-4"></div>
+          <h2 className="text-2xl font-black text-white leading-tight mb-2 drop-shadow-xl">{motivator.title}<br />{motivator.subtitle}</h2>
+          <p className="text-[10px] text-slate-300 font-bold uppercase tracking-[0.2em] drop-shadow-md">{motivator.text}</p>
         </div>
       </div>
 
@@ -301,16 +311,21 @@ export const PatientDashboardScreen: React.FC = () => {
                 <item.Icon size={80} strokeWidth={1} />
               </div>
 
-              <div className="flex items-baseline gap-1 relative z-10">
-                <span className="text-2xl font-black text-white tracking-tighter drop-shadow-sm">{item.value}</span>
-                <span className="text-xs font-bold text-[#D4AF37]">{item.unit}</span>
-              </div>
-              {item.trend && (
-                <div className={cn("flex items-center gap-1 mt-2 text-[10px] font-bold relative z-10", item.up ? "text-red-400" : "text-green-400")}>
-                  {item.up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                  {item.trend}
+              <div className="flex items-end justify-between mt-auto relative z-10">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-black text-white tracking-tighter drop-shadow-sm">{item.value}</span>
+                  <span className="text-xs font-bold text-[#D4AF37]">{item.unit}</span>
                 </div>
-              )}
+                {item.config.label && (
+                  <div className={cn(
+                    "flex items-center gap-1 text-[10px] font-bold relative z-10",
+                    item.config.color
+                  )}>
+                    {item.config.isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                    {item.config.label}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -319,55 +334,86 @@ export const PatientDashboardScreen: React.FC = () => {
 
       <div className={`${textureCardClass} rounded-[2.5rem] p-6 shadow-md mb-8`}>
         <div className="flex justify-between items-center mb-6"><h3 className="text-lg font-bold text-white">Minha Evolução</h3></div>
-        {assessmentCount > 0 ? (
-          <div className="h-40 w-full flex items-end relative overflow-hidden group">
+        {assessments.length > 1 ? (
+          <div className="h-44 w-full relative">
             {(() => {
-              const dataPoints = assessments.slice(-5);
-              if (dataPoints.length < 2) return (
-                <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
-                  <TrendingUp size={24} className="mb-3 opacity-80 text-[#D4AF37]" />
-                  <p className="text-sm font-black text-[#D4AF37] uppercase tracking-wider mb-1">1ª Avaliação!</p>
-                  <p className="text-xs text-slate-300 font-medium opacity-80 mt-1">O gráfico aparecerá na próxima.</p>
-                </div>
-              );
+              const dataPoints = assessments.slice(-6);
+              const padding = 20;
+              const width = 300;
+              const height = 150;
 
-              const width = 100;
-              const height = 50;
-              const values = dataPoints.map(d => Number(d.fat_percentage || d.body_fat || 0));
-              const maxVal = Math.max(...values) * 1.1;
-              const minVal = Math.min(...values) * 0.9;
+              const getX = (i: number) => (i / (dataPoints.length - 1)) * (width - 2 * padding) + padding;
 
-              const getX = (i: number) => (i / (dataPoints.length - 1)) * width;
-              const getY = (val: number) => height - ((val - minVal) / (maxVal - minVal || 1)) * height;
+              const renderLine = (key: string, color: string, showGradient?: boolean) => {
+                const values = dataPoints.map(d => {
+                  const weight = Number(d.weight || 0);
+                  const fatPct = Number(d.fat_percentage || d.body_fat || 0);
+                  if (key === 'fat_mass') return weight * (fatPct / 100);
+                  if (key === 'lean_mass') return weight * (1 - fatPct / 100);
+                  return Number(d[key] || (key === 'fat_percentage' ? fatPct : weight));
+                });
 
-              const pathData = dataPoints.map((d, i) =>
-                `${i === 0 ? 'M' : 'L'} ${getX(i)} ${getY(Number(d.fat_percentage || d.body_fat || 0))}`
-              ).join(' ');
+                const min = Math.min(...values) * 0.9;
+                const max = Math.max(...values) * 1.1;
+                const getY = (val: number) => height - padding - ((val - min) / (max - min)) * (height - 2 * padding);
 
-              const areaPath = `${pathData} V ${height} H 0 Z`;
+                const points = dataPoints.map((_, i) => `${getX(i)},${getY(values[i])}`).join(' ');
+                const pathData = `M ${points}`;
+                const areaPath = `L ${getX(dataPoints.length - 1)},${height - padding} L ${getX(0)},${height - padding} Z`;
+
+                return (
+                  <g key={key}>
+                    {showGradient && (
+                      <path d={pathData + areaPath} fill={`url(#grad-${key})`} opacity="0.15" />
+                    )}
+                    <defs>
+                      <linearGradient id={`grad-${key}`} x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0%" stopColor={color} />
+                        <stop offset="100%" stopColor="transparent" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d={pathData}
+                      fill="none"
+                      stroke={color}
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="drop-shadow-lg"
+                      opacity={showGradient ? 1 : 0.4}
+                    />
+                    {dataPoints.map((_, i) => (
+                      <circle key={i} cx={getX(i)} cy={getY(values[i])} r="3" fill={color} stroke="black" strokeWidth="1" />
+                    ))}
+                  </g>
+                );
+              };
 
               return (
                 <svg className="w-full h-full overflow-visible" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
-                  <line x1="0" y1={height} x2={width} y2={height} stroke="white" strokeOpacity="0.1" strokeWidth="0.5" />
-                  <path d={areaPath} fill="url(#gradient)" opacity="0.2" />
-                  <defs>
-                    <linearGradient id="gradient" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="0%" stopColor="#D4AF37" />
-                      <stop offset="100%" stopColor="transparent" />
-                    </linearGradient>
-                  </defs>
-                  <path d={pathData} fill="none" stroke="#D4AF37" strokeWidth="2" className="drop-shadow-[0_0_10px_rgba(212,175,55,0.5)]" strokeLinecap="round" strokeLinejoin="round" />
-                  {dataPoints.map((d, i) => (
-                    <circle key={i} cx={getX(i)} cy={getY(Number(d.fat_percentage || d.body_fat || 0))} r="2" fill="#D4AF37" />
+                  {/* Grid Lines */}
+                  {[0, 1, 2, 3].map(i => (
+                    <line key={i} x1="0" y1={(height / 3) * i} x2={width} y2={(height / 3) * i} stroke="white" strokeOpacity="0.05" strokeWidth="1" />
                   ))}
+
+                  {renderLine('fat_percentage', '#EF4444')} {/* Body Fat - Red */}
+                  {renderLine('lean_mass', '#22C55E', true)}   {/* Lean Mass - Green (Focus) */}
+                  {renderLine('weight', '#D4AF37')}        {/* Weight - Gold */}
                 </svg>
               );
             })()}
+            {/* Legend */}
+            <div className="flex justify-center gap-4 mt-6">
+              <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-[#EF4444]"></div><span className="text-[8px] font-black text-slate-500 uppercase">Gordura</span></div>
+              <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-[#22C55E]"></div><span className="text-[8px] font-black text-slate-500 uppercase">M. Magra</span></div>
+              <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-[#D4AF37]"></div><span className="text-[8px] font-black text-slate-500 uppercase">Peso</span></div>
+            </div>
           </div>
         ) : (
           <div className="py-12 flex flex-col items-center text-center px-4">
             <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4 text-slate-500 border border-white/5"><TrendingUp size={32} strokeWidth={1.5} /></div>
-            <p className="text-sm font-bold text-slate-500 leading-tight">Aguardando seu primeiro resultado.</p>
+            <p className="text-sm font-black text-[#D4AF37] uppercase tracking-wider mb-1">1ª Avaliação!</p>
+            <p className="text-xs text-slate-300 font-medium opacity-80 mt-1">O gráfico aparecerá na próxima.</p>
           </div>
         )}
       </div>
