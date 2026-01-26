@@ -51,7 +51,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab: propActiveTab, 
     };
 
     return (
-        <div className="fixed bottom-6 left-6 right-6 h-20 bg-[#080C09]/90 backdrop-blur-2xl rounded-[2.5rem] border-t border-white/10 border-b border-black/80 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.8)] flex items-center justify-between px-4 z-50 max-w-md mx-auto">
+        <div className="fixed bottom-4 left-4 right-4 h-20 bg-black/60 backdrop-blur-xl rounded-[2rem] border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] flex items-center justify-between px-2 z-50 max-w-md mx-auto">
             {navItems.map((item) => {
                 const isActive = isTabActive(item);
                 const Icon = item.icon;
@@ -62,13 +62,13 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab: propActiveTab, 
                             key={item.label}
                             onClick={() => handleNavigation(item)}
                             className={cn(
-                                "flex flex-col items-center justify-center w-14 h-14 rounded-full transition-all relative group",
+                                "flex flex-col items-center justify-center w-14 h-14 rounded-full transition-all relative group -mt-6 shadow-xl",
                                 isActive
-                                    ? "bg-[#CCFF00] text-black shadow-[0_0_20px_rgba(204,255,0,0.5)] scale-110"
-                                    : "bg-white/5 text-slate-400 hover:bg-[#CCFF00] hover:text-black hover:scale-105"
+                                    ? "bg-[#CCFF00] text-black shadow-[0_0_20px_rgba(204,255,0,0.6)] scale-110 ring-4 ring-black/50"
+                                    : "bg-white text-black hover:scale-105 hover:bg-[#CCFF00] shadow-white/20"
                             )}
                         >
-                            <Plus size={24} strokeWidth={isActive ? 3 : 2.5} />
+                            <Icon size={24} strokeWidth={3} />
                         </button>
                     );
                 }
@@ -78,13 +78,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab: propActiveTab, 
                         key={item.label}
                         onClick={() => handleNavigation(item)}
                         className={cn(
-                            "flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all",
+                            "flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all relative",
                             isActive
-                                ? "text-[#CCFF00] bg-[#CCFF00]/10 shadow-[0_0_15px_rgba(204,255,0,0.2)]"
-                                : "text-slate-500 hover:text-[#CCFF00]"
+                                ? "text-[#CCFF00] bg-white/5"
+                                : "text-gray-400 hover:text-white"
                         )}
                     >
-                        <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                        <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+                        {isActive && <div className="absolute -bottom-1 w-1 h-1 bg-[#CCFF00] rounded-full" />}
                     </button>
                 );
             })}
