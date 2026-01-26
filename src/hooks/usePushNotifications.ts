@@ -54,6 +54,39 @@ export const usePushNotifications = () => {
         }
     };
 
+    // Auto-sync token on mount if permission granted
+    useEffect(() => {
+        const syncToken = async () => {
+            if (permission === 'granted' && session?.user?.id) {
+                try {
+                    const token = await getToken(messaging, {
+                        vapidKey: 'BJSeBwl9tGemPRQbBcfvf7MmhJNfn2ZEcUcepy-TfpJg-3Gk6ZxUjQY-YrmUpoGO_FaQd0gxsEBQggqyNUKB-R8'
+                    });
+
+                    if (token) {
+                        setFcmToken(token);
+                        console.log('Auto-syncing FCM Token:', token);
+
+                        const { error } = await supabase
+                            .from('user_devices')
+                            .upsert({
+                                user_id: session.user.id,
+                                token: token,
+                                platform: 'web',
+                                last_active_at: new Date().toISOString()
+                            }, { onConflict: 'user_id, token' });
+
+                        if (error) console.error('Supabase Sync Error:', error);
+                    }
+                } catch (error) {
+                    console.error('Token retrieval failed:', error);
+                }
+            }
+        };
+
+        syncToken();
+    }, [permission, session]);
+
     // Foreground listener
     useEffect(() => {
         const unsubscribe = onMessage(messaging, (payload) => {
