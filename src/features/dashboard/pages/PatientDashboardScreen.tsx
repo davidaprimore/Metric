@@ -285,6 +285,39 @@ export const PatientDashboardScreen: React.FC = () => {
         )}
       </div>
 
+      {/* Assessment History List */}
+      <div className="mb-8">
+        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2 mb-4">Histórico de Avaliações</p>
+        <div className="space-y-3">
+          {assessments.slice().reverse().map((assess, idx) => (
+            <div key={assess.id} className={`${textureCardClass} p-4 rounded-3xl flex items-center justify-between group cursor-pointer hover:border-[#D4AF37]/30 transition-all`} onClick={() => navigate(`/assessment/results/${assess.id}`)}>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/5 text-[#D4AF37]">
+                  <span className="text-xs font-black">{new Date(assess.created_at).getDate()}</span>
+                  <span className="text-[8px] font-bold uppercase ml-1 opacity-60">{new Date(assess.created_at).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '')}</span>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-white mb-0.5">{assess.type === 'pollock7' ? 'Protocolo Pollock 7' : 'Avaliação Física'}</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-medium text-slate-400">{assess.weight}kg</span>
+                    <span className="w-1 h-1 rounded-full bg-slate-600"></span>
+                    <span className="text-[10px] font-medium text-slate-400">{assess.fat_percentage || assess.body_fat}% Gordura</span>
+                  </div>
+                </div>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-500 group-hover:text-white group-hover:bg-[#D4AF37] transition-all">
+                <ChevronRight size={14} />
+              </div>
+            </div>
+          ))}
+          {assessments.length === 0 && (
+            <div className="text-center py-8 opacity-50">
+              <p className="text-xs text-slate-500">Nhuma avaliação encontrada.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Floating CTA */}
       <Button variant="primary" className="w-full h-16 rounded-[2rem] bg-[#D4AF37] text-black font-black text-xs gap-3 shadow-[0_0_30px_rgba(212,175,55,0.3)] hover:shadow-2xl transition-all sticky bottom-8 z-30 tracking-widest uppercase hover:bg-white hover:scale-[1.02]" onClick={() => setActiveTab('schedule')}>
         <Plus size={24} strokeWidth={3} />Novo Agendamento
