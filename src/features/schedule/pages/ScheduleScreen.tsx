@@ -37,6 +37,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
   const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium' | null>(null);
   const [selectedProfessional, setSelectedProfessional] = useState<any>(null);
   const [weekConfig, setWeekConfig] = useState<number[]>([]); // Active Days of Week
+  const [blockedDates, setBlockedDates] = useState<string[]>([]); // Specific Blocked Dates (YYYY-MM-DD)
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
@@ -77,6 +78,17 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
               const activeDays = availData?.filter(a => a.professional_id === proId).map(a => a.day_of_week) || [];
               setWeekConfig([...new Set(activeDays)]); // Unique days
 
+              // Fetch Blocked Dates
+              const { data: blocks } = await supabase.from('appointments')
+                .select('start_time')
+                .eq('professional_id', proId)
+                .eq('status', 'blocked');
+
+              if (blocks) {
+                // Store simple YYYY-MM-DD strings for easy comparison
+                setBlockedDates(blocks.map(b => b.start_time.split('T')[0]));
+              }
+
               setLoading(false);
               return;
             }
@@ -113,21 +125,29 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
     setAvailableSlots([]);
 
     try {
-      const dayOfWeek = selectedDate.getDay();
-
-      const { data: config } = await supabase
-        .from('professional_availability')
-        .select('*')
-        .eq('professional_id', selectedProfessional.id)
-        .eq('day_of_week', dayOfWeek)
-        .maybeSingle();
-
-      if (!config || !config.is_active) {
+      // Check Blocked Dates first
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      if (blockedDates.includes(dateStr)) {
         setAvailableSlots([]);
         return;
       }
 
-      // Check existing appointments (Confirmed or Pending/Not Expired)
+      const dayOfWeek = selectedDate.getDay();
+
+      // 1. Fetch ALL schedule segments for this day (Morning, Afternoon, etc.)
+      const { data: configs } = await supabase
+        .from('professional_availability')
+        .select('*')
+        .eq('professional_id', selectedProfessional.id)
+        .eq('day_of_week', dayOfWeek)
+        .eq('is_active', true);
+
+      if (!configs || configs.length === 0) {
+        setAvailableSlots([]);
+        return;
+      }
+
+      // 2. Initial Busy Check
       const dayStart = new Date(selectedDate);
       dayStart.setHours(0, 0, 0, 0);
       const dayEnd = new Date(selectedDate);
@@ -147,35 +167,37 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
         return false;
       }).map(s => format(new Date(s.start_time), 'HH:mm')) || [];
 
-      const startSplit = config.start_time.split(':');
-      const endSplit = config.end_time.split(':');
-      const startHour = parseInt(startSplit[0]);
-      const endHour = parseInt(endSplit[0] || '18');
-
-      const slots = [];
+      // 3. Generate Slots for EACH Config
+      let allSlots: string[] = [];
       const interval = selectedPlan === 'basic' ? 15 : 30;
 
-      // Use selectedDate to ensure we stay on the calendar day
-      let current = new Date(selectedDate);
-      current.setHours(startHour, parseInt(startSplit[1] || '0'), 0, 0);
+      configs.forEach(conf => {
+        const startSplit = conf.start_time.split(':');
+        const endSplit = conf.end_time.split(':');
+        const startHour = parseInt(startSplit[0]);
+        const startMin = parseInt(startSplit[1] || '0');
+        const endHour = parseInt(endSplit[0]);
+        const endMin = parseInt(endSplit[1] || '0');
 
-      const end = new Date(selectedDate);
-      end.setHours(parseInt(endSplit[0] || '18'), parseInt(endSplit[1] || '0'), 0, 0);
+        let current = new Date(selectedDate);
+        current.setHours(startHour, startMin, 0, 0);
 
-      const LUNCH_START = 12;
-      const LUNCH_END = 13;
+        let end = new Date(selectedDate);
+        end.setHours(endHour, endMin, 0, 0);
 
-      while (current < end) {
-        const timeStr = format(current, 'HH:mm');
-        const currentHour = current.getHours();
-        const isLunch = currentHour >= LUNCH_START && currentHour < LUNCH_END;
-
-        if (!busyTimes.includes(timeStr) && !isLunch) {
-          slots.push(timeStr);
+        while (current < end) {
+          const timeStr = format(current, 'HH:mm');
+          // Remove hardcoded lunch check - rely on DB segments
+          if (!busyTimes.includes(timeStr)) {
+            allSlots.push(timeStr);
+          }
+          current = new Date(current.getTime() + interval * 60000);
         }
-        current = new Date(current.getTime() + interval * 60000);
-      }
-      setAvailableSlots(slots);
+      });
+
+      // 4. Sort and Dedupe
+      allSlots = [...new Set(allSlots)].sort();
+      setAvailableSlots(allSlots);
     } catch (err) {
       console.error('Fetch slots failed:', err);
     } finally {
@@ -383,7 +405,11 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
         const isSelected = isSameDay(day, selectedDate);
         const isCurrentMonth = isSameMonth(day, monthStart);
         const dayOfWeek = day.getDay();
-        const isAvailableDay = weekConfig.includes(dayOfWeek);
+        const dateString = format(day, 'yyyy-MM-dd');
+        const isBlockedDate = blockedDates.includes(dateString);
+
+        // Available if: Day of week is active AND Date is not specifically blocked
+        const isAvailableDay = weekConfig.includes(dayOfWeek) && !isBlockedDate;
 
         // Style Logic
         let dayStyle = "text-slate-400 hover:bg-white/10 hover:text-white cursor-pointer";
