@@ -79,30 +79,30 @@ export const ResultsScreen: React.FC = () => {
       const diff = Number(currVal) - Number(prevVal);
       const isGood = isReverse ? diff < 0 : diff > 0;
       return (
-        <div className="bg-white/30 backdrop-blur-xl rounded-[1.5rem] p-5 border border-white/30 shadow-sm relative group overflow-hidden">
-          <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] text-center mb-4">{label}</p>
+        <div className="bg-white/40 backdrop-blur-xl rounded-[1.5rem] p-5 border border-white/40 shadow-sm relative group overflow-hidden">
+          <p className="text-[9px] font-black text-slate-800 uppercase tracking-[0.2em] text-center mb-4">{label}</p>
 
           <div className="flex items-center justify-between gap-2">
             {/* Previous */}
             <div className="flex-1 flex flex-col items-center">
               <div className="flex items-baseline gap-0.5">
-                <span className="text-xl font-bold text-slate-600 tracking-tight">{prevVal}</span>
-                <span className="text-[9px] font-medium text-slate-400">{unit}</span>
+                <span className="text-xl font-black text-slate-900 tracking-tight">{prevVal}</span>
+                <span className="text-[9px] font-bold text-slate-500">{unit}</span>
               </div>
-              <p className="text-[7px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">Anterior</p>
+              <p className="text-[7px] font-black text-slate-500/60 uppercase tracking-tighter mt-0.5">Anterior</p>
             </div>
 
             {/* Indicator - Minimalist */}
-            <div className="flex flex-col items-center px-3 border-x border-slate-900/5">
+            <div className="flex flex-col items-center px-4 border-x border-slate-900/10">
               <div className={cn(
                 "w-7 h-7 rounded-full flex items-center justify-center transition-all duration-500",
-                diff === 0 ? "bg-slate-100/50 text-slate-400" : isGood ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"
+                diff === 0 ? "bg-slate-100/50 text-slate-400" : isGood ? "bg-green-500/10 text-green-700" : "bg-red-500/10 text-red-700"
               )}>
                 {diff === 0 ? <div className="w-2 h-0.5 bg-current" /> : diff > 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
               </div>
               <span className={cn(
-                "text-[9px] font-bold mt-1 tabular-nums",
-                diff === 0 ? "text-slate-400" : isGood ? "text-green-600" : "text-red-500"
+                "text-[9px] font-black mt-1 tabular-nums",
+                diff === 0 ? "text-slate-400" : isGood ? "text-green-700" : "text-red-600"
               )}>
                 {diff > 0 ? '+' : ''}{diff.toFixed(1)}
               </span>
@@ -111,10 +111,10 @@ export const ResultsScreen: React.FC = () => {
             {/* Current */}
             <div className="flex-1 flex flex-col items-center">
               <div className="flex items-baseline gap-0.5">
-                <span className="text-2xl font-black text-slate-900 tracking-tight">{currVal}</span>
-                <span className="text-[9px] font-bold text-[#D4AF37]">{unit}</span>
+                <span className="text-2xl font-black text-black tracking-tight">{currVal}</span>
+                <span className="text-[9px] font-bold text-[#B8860B]">{unit}</span>
               </div>
-              <p className="text-[7px] font-bold text-[#C5A028] uppercase tracking-tighter mt-0.5">Atual</p>
+              <p className="text-[7px] font-black text-[#B8860B] uppercase tracking-tighter mt-0.5">Atual</p>
             </div>
           </div>
         </div>
@@ -137,26 +137,26 @@ export const ResultsScreen: React.FC = () => {
             className="w-full h-full object-cover scale-105 animate-subtle-zoom"
             alt="Natural Background"
           />
-          <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px]"></div>
+          <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px]"></div>
           <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-black/5"></div>
         </div>
 
         <div className="relative z-10 flex flex-col h-full p-6 pt-14">
           <div className="mb-6 text-center animate-in fade-in slide-in-from-top-4 duration-700">
             <div className="inline-block">
-              <span className="px-5 py-2 rounded-xl backdrop-blur-md border border-white/50 bg-white/20 text-slate-500 text-[9px] font-bold uppercase tracking-[0.3em]">
+              <span className="px-5 py-2 rounded-xl backdrop-blur-md border border-white/50 bg-white/10 text-slate-900 opacity-40 text-[9px] font-black uppercase tracking-[0.3em]">
                 Resumo de Evolução
               </span>
             </div>
 
-            <h1 className="text-3xl font-black text-slate-900 mt-6 leading-tight tracking-tighter uppercase italic drop-shadow-sm">
+            <h1 className="text-3xl font-black text-slate-900 mt-6 leading-tight tracking-tighter uppercase italic drop-shadow-sm opacity-80">
               Minha evolução<br />
-              <span className="text-[#D4AF37]">
+              <span className="text-[#D4AF37] opacity-90">
                 em {dayDiff} dias
               </span>
             </h1>
 
-            <p className="text-slate-400 text-[9px] font-bold uppercase tracking-[0.2em] mt-2 opacity-70">
+            <p className="text-slate-900 text-[9px] font-bold uppercase tracking-[0.2em] mt-2 opacity-30">
               {prevDate?.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })} — {currDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
             </p>
           </div>
@@ -191,18 +191,18 @@ export const ResultsScreen: React.FC = () => {
           </div>
 
           {/* Minimalist Integrated Footer */}
-          <div className="mt-4 pt-6 flex justify-between items-center opacity-90 border-t border-black/5">
+          <div className="mt-4 pt-6 flex justify-between items-center opacity-60 border-t border-black/5">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center opacity-80">
                 <span className="font-black text-[#D4AF37] text-xs">M</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-[10px] font-black text-slate-800 tracking-[0.2em]">METRIK</span>
+                <span className="text-[10px] font-black text-slate-900 tracking-[0.2em]">METRIK</span>
                 <span className="text-[7px] font-bold text-slate-400 uppercase tracking-widest">PERSONAL PRO</span>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-[10px] font-black text-[#D4AF37] italic uppercase tracking-tighter opacity-80">
+              <p className="text-[10px] font-black text-[#B8860B] italic uppercase tracking-tighter">
                 #SuaObraDeArte
               </p>
             </div>
