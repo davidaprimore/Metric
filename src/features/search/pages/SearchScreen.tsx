@@ -410,7 +410,7 @@ export const SearchScreen: React.FC = () => {
                                                     {/* Location - Left Aligned under Photo */}
                                                     <div className="flex items-center gap-1 text-gray-500 text-xs w-full justify-center text-center leading-tight">
                                                         <MapPin size={12} className="shrink-0" />
-                                                        <span className="truncate max-w-[70px]">
+                                                        <span className="">
                                                             {pro.address_city || 'Online'}
                                                         </span>
                                                     </div>
