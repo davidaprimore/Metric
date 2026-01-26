@@ -107,9 +107,73 @@ export const PatientDashboardScreen: React.FC = () => {
   const latestAssessment = assessmentCount > 0 ? assessments[assessmentCount - 1] : null;
   const userWeight = user?.user_metadata?.weight || '0.0';
 
+  // Trend Helper
+  const getTrendPct = (key: string, current: string | number) => {
+    if (assessmentCount < 2) return null;
+    const prev = assessments[assessmentCount - 2];
+    const prevFatPct = Number(prev.fat_percentage || prev.body_fat || 0);
+    const prevWeight = Number(prev.weight || 0);
+
+    let prevVal = 0;
+    if (key === 'fat_mass') prevVal = prevWeight * (prevFatPct / 100);
+    else if (key === 'lean_mass') prevVal = prevWeight * (1 - prevFatPct / 100);
+    else prevVal = Number(prev[key] || (key === 'fat_percentage' ? prevFatPct : prevWeight));
+
+    const currVal = Number(current);
+    if (!prevVal) return null;
+    const diffPct = ((currVal - prevVal) / prevVal) * 100;
+    return (diffPct > 0 ? '+' : '') + diffPct.toFixed(1) + '%';
+  };
+
+  const getIsBad = (key: string, current: string | number) => {
+    if (assessmentCount < 2) return false;
+    const trendStr = getTrendPct(key, current);
+    if (!trendStr) return false;
+    const val = parseFloat(trendStr);
+
+    if (key === 'fat_percentage' || key === 'fat_mass') return val > 0; // Gained fat = Red
+    if (key === 'lean_mass') return val < 0; // Lost muscle = Red
+    return false;
+  };
+
+  const currentWeight = Number(latestAssessment?.weight || userWeight || 0);
+  const currentFatPct = Number(latestAssessment?.fat_percentage || latestAssessment?.body_fat || 0);
+  const currentFatMass = (currentWeight * (currentFatPct / 100)).toFixed(1);
+  const currentLeanMass = (currentWeight - parseFloat(currentFatMass)).toFixed(1);
+
   const metrics = [
-    { label: 'Gordura Corporal', value: latestAssessment?.fat_percentage || latestAssessment?.body_fat || '0.0', unit: '%', trend: assessmentCount >= 2 ? (Number(latestAssessment?.fat_percentage || 0) - Number(assessments[assessmentCount - 2]?.fat_percentage || 0)).toFixed(1) + '%' : null, up: assessmentCount >= 2 && Number(latestAssessment?.fat_percentage) > Number(assessments[assessments.length - 2]?.fat_percentage), icon: "/assets/3d/caliper.png" },
-    { label: 'Peso Atual', value: latestAssessment?.weight || userWeight || '0.0', unit: 'kg', trend: assessmentCount >= 2 ? (Number(latestAssessment?.weight || 0) - Number(assessments[assessmentCount - 2]?.weight || 0)).toFixed(1) + 'kg' : null, up: assessmentCount >= 2 && Number(latestAssessment?.weight) > Number(assessments[assessments.length - 2]?.weight), icon: "/assets/3d/scale.png" }
+    {
+      label: 'Gordura Corporal',
+      value: currentFatPct || '0.0',
+      unit: '%',
+      trend: getTrendPct('fat_percentage', currentFatPct),
+      up: getIsBad('fat_percentage', currentFatPct),
+      icon: "/assets/3d/caliper.png"
+    },
+    {
+      label: 'Peso Atual',
+      value: currentWeight || '0.0',
+      unit: 'kg',
+      trend: getTrendPct('weight', currentWeight),
+      up: false,
+      icon: "/assets/3d/scale.png"
+    },
+    {
+      label: 'Massa Magra',
+      value: currentLeanMass || '0.0',
+      unit: 'kg',
+      trend: getTrendPct('lean_mass', currentLeanMass),
+      up: getIsBad('lean_mass', currentLeanMass),
+      icon: "/assets/3d/muscle.png"
+    },
+    {
+      label: 'Massa Gorda',
+      value: currentFatMass || '0.0',
+      unit: 'kg',
+      trend: getTrendPct('fat_mass', currentFatMass),
+      up: getIsBad('fat_mass', currentFatMass),
+      icon: "/assets/3d/fat.png"
+    }
   ];
 
   const handleTabChange = (tab: string) => {
