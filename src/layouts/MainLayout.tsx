@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Sidebar } from './Sidebar';
-import { BottomNav } from './BottomNav';
+import { BottomNav } from '@/components/layout/BottomNav';
 
 interface MainLayoutProps {
     children: ReactNode;
