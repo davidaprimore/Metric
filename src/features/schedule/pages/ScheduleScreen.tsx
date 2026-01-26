@@ -78,15 +78,14 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
               const activeDays = availData?.filter(a => a.professional_id === proId).map(a => a.day_of_week) || [];
               setWeekConfig([...new Set(activeDays)]); // Unique days
 
-              // Fetch Blocked Dates
+              // Fetch Blocked Dates (Support both status='blocked' and notes='FULL_DAY_BLOCK')
               const { data: blocks } = await supabase.from('appointments')
                 .select('start_time')
                 .eq('professional_id', proId)
-                .eq('status', 'blocked');
+                .or('status.eq.blocked,notes.eq.FULL_DAY_BLOCK');
 
               if (blocks) {
-                // Store simple YYYY-MM-DD strings for easy comparison
-                setBlockedDates(blocks.map(b => b.start_time.split('T')[0]));
+                setBlockedDates(blocks.map(b => format(new Date(b.start_time), 'yyyy-MM-dd')));
               }
 
               setLoading(false);
