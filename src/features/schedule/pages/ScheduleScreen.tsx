@@ -20,7 +20,7 @@ import {
 import { Toast } from '@/components/ui/Toast';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay } from 'date-fns';
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, isBefore, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface ScheduleScreenProps {
@@ -187,8 +187,16 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
 
         while (current < end) {
           const timeStr = format(current, 'HH:mm');
-          // Remove hardcoded lunch check - rely on DB segments
-          if (!busyTimes.includes(timeStr)) {
+
+          // Check if slot is in the past (if today)
+          let isPastSlot = false;
+          if (isSameDay(selectedDate, now)) {
+            const slotTime = new Date(selectedDate);
+            slotTime.setHours(current.getHours(), current.getMinutes(), 0, 0);
+            if (slotTime < now) isPastSlot = true;
+          }
+
+          if (!busyTimes.includes(timeStr) && !isPastSlot) {
             allSlots.push(timeStr);
           }
           current = new Date(current.getTime() + interval * 60000);
@@ -388,6 +396,14 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
   );
 
   const renderSchedule = () => {
+    // 2026/2027 Brazil Holidays
+    const BRAZIL_HOLIDAYS = [
+      '2026-01-01', '2026-02-17', '2026-04-03', '2026-04-21',
+      '2026-05-01', '2026-06-04', '2026-09-07', '2026-10-12',
+      '2026-11-02', '2026-11-15', '2026-12-25',
+      '2027-01-01'
+    ];
+
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(monthStart);
     const startDate = startOfWeek(monthStart);
@@ -398,6 +414,8 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
     let day = startDate;
     let formattedDate = "";
 
+    const today = startOfDay(new Date());
+
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
         formattedDate = format(day, dateFormat);
@@ -406,17 +424,22 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
         const isCurrentMonth = isSameMonth(day, monthStart);
         const dayOfWeek = day.getDay();
         const dateString = format(day, 'yyyy-MM-dd');
-        const isBlockedDate = blockedDates.includes(dateString);
 
-        // Available if: Day of week is active AND Date is not specifically blocked
-        const isAvailableDay = weekConfig.includes(dayOfWeek) && !isBlockedDate;
+        // Checks
+        const isBlockedDate = blockedDates.includes(dateString);
+        const isPast = isBefore(day, today);
+        const isHoliday = BRAZIL_HOLIDAYS.includes(dateString);
+
+        // Available if: Active Day AND Not Blocked AND Not Past AND Not Holiday
+        const isAvailableDay = weekConfig.includes(dayOfWeek) && !isBlockedDate && !isPast && !isHoliday;
 
         // Style Logic
         let dayStyle = "text-slate-400 hover:bg-white/10 hover:text-white cursor-pointer";
         if (!isCurrentMonth) {
           dayStyle = "text-slate-800 opacity-50 cursor-default";
         } else if (!isAvailableDay) {
-          dayStyle = "text-slate-700 decoration-slate-600 line-through cursor-not-allowed opacity-40 bg-white/[0.02]";
+          // Visualize differently if it's blocked/past
+          dayStyle = "text-slate-700 decoration-slate-600 line-through cursor-not-allowed opacity-30 bg-white/[0.02]";
         } else if (isSelected) {
           dayStyle = "bg-[#D4AF37] text-black shadow-[0_0_15px_rgba(212,175,55,0.4)] z-10 cursor-pointer";
         }
