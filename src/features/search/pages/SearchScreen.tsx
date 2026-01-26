@@ -151,7 +151,7 @@ export const SearchScreen: React.FC = () => {
                 .select(`
 id, full_name, nickname, avatar_url,
     rating, review_count, specialties(name),
-    address_city, address_state
+    address_city, address_state, bio
         `)
                 .eq('role', 'profissional');
 
@@ -365,7 +365,7 @@ id, full_name, nickname, avatar_url,
                                         return (
                                             <div
                                                 key={pro.id}
-                                                onClick={() => navigate(`/profile/${pro.id}`)}
+                                                onClick={() => navigate(`/professional/${pro.id}`)}
                                                 className={cn(
                                                     "group rounded-[2rem] p-4 flex gap-4 active:scale-[0.98] transition-all cursor-pointer border",
                                                     isFav
@@ -373,61 +373,77 @@ id, full_name, nickname, avatar_url,
                                                         : getCardColor(pro.specialties?.[0]?.name)
                                                 )}
                                             >
-                                                {/* Card Content (Same as before) */}
-                                                <div className="w-20 h-20 rounded-full overflow-hidden bg-white shadow-sm border-2 border-white relative shrink-0">
-                                                    <img
-                                                        src={pro.avatar_url || `https://ui-avatars.com/api/?name=${pro.full_name}&background=f3f4f6&color=000`}
-                                                        className="w-full h-full object-cover"
-                                                    />
+                                                {/* Left Column: Avatar + Location */}
+                                                <div className="flex flex-col items-center gap-3 shrink-0 w-20">
+                                                    <div className="w-20 h-20 rounded-full overflow-hidden bg-white shadow-sm border-2 border-white relative">
+                                                        <img
+                                                            src={pro.avatar_url || `https://ui-avatars.com/api/?name=${pro.full_name}&background=f3f4f6&color=000`}
+                                                            className="w-full h-full object-cover"
+                                                            alt={pro.full_name}
+                                                        />
+                                                    </div>
+
+                                                    {/* Location - Left Aligned under Photo */}
+                                                    <div className="flex items-center gap-1 text-gray-500 text-[10px] w-full justify-center text-center leading-tight">
+                                                        <MapPin size={10} className="shrink-0" />
+                                                        <span className="truncate max-w-[70px]">
+                                                            {pro.address_city || 'Online'}
+                                                        </span>
+                                                    </div>
                                                 </div>
 
-                                                <div className="flex-1 py-0.5 flex flex-col justify-between relative">
-                                                    <div>
-                                                        <div className="flex justify-between items-start">
-                                                            <h3 className="text-[#222222] font-bold text-lg leading-tight pr-8">
+                                                {/* Right Column: Info */}
+                                                <div className="flex-1 py-0.5 flex flex-col relative min-w-0">
+                                                    {/* Header: Name + Rating/Fav */}
+                                                    <div className="flex justify-between items-start mb-1 h-8">
+                                                        <div className="pr-16">
+                                                            <h3 className="text-[#222222] font-bold text-lg leading-tight truncate">
                                                                 {pro.nickname || pro.full_name}
                                                             </h3>
-                                                        </div>
-
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            <span className="bg-white/80 px-2 py-0.5 rounded-md text-[10px] font-bold text-gray-500 uppercase tracking-wide shadow-sm">
+                                                            <span className="bg-white/80 px-2 py-0.5 rounded-md text-[10px] font-bold text-gray-500 uppercase tracking-wide shadow-sm inline-block mt-1">
                                                                 {pro.specialties?.[0]?.name || 'Profissional'}
                                                             </span>
+                                                        </div>
+
+                                                        {/* Top Right: Rating + Favorite */}
+                                                        <div className="absolute top-0 right-0 flex items-center gap-2">
+                                                            {/* Rating */}
                                                             {pro.rating && (
-                                                                <div className="flex items-center gap-1">
-                                                                    <Star size={12} className="text-amber-400 fill-amber-400" />
-                                                                    <span className="text-xs font-bold text-[#222222]">
-                                                                        {Number(pro.rating).toFixed(2)}
+                                                                <div className="flex items-center gap-1 bg-amber-100/50 px-2 py-1 rounded-lg border border-amber-100">
+                                                                    <Star size={10} className="text-amber-500 fill-amber-500" />
+                                                                    <span className="text-[10px] font-bold text-amber-700">
+                                                                        {Number(pro.rating).toFixed(1)}
                                                                     </span>
                                                                 </div>
                                                             )}
+
+                                                            {/* Favorite */}
+                                                            <button
+                                                                onClick={(e) => toggleFavorite(pro.id, e)}
+                                                                className="w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-transform bg-white/50 hover:bg-white border border-transparent hover:border-gray-100"
+                                                            >
+                                                                <Heart
+                                                                    size={16}
+                                                                    fill={isFav ? "#FF385C" : "rgba(0,0,0,0.05)"}
+                                                                    className={isFav ? "text-[#FF385C]" : "text-gray-400"}
+                                                                />
+                                                            </button>
                                                         </div>
                                                     </div>
 
-                                                    <div className="flex items-end justify-between mt-2">
-                                                        <div className="flex items-center gap-1 text-gray-500 text-xs">
-                                                            <MapPin size={12} />
-                                                            <span className="truncate max-w-[100px]">
-                                                                {pro.address_city ? `${pro.address_city}` : 'Online'}
-                                                                {pro.address_state ? ` - ${pro.address_state}` : ''}
-                                                            </span>
-                                                        </div>
+                                                    {/* Nano Bio - New */}
+                                                    <div className="mt-2 mb-3">
+                                                        <p className="text-xs text-gray-600 leading-relaxed line-clamp-2 font-medium">
+                                                            {pro.bio || "Especialista em transformação corporal e saúde preventiva. Agende sua consulta hoje mesmo."}
+                                                        </p>
+                                                    </div>
 
-                                                        <div className="bg-white/90 px-3 py-1 rounded-full shadow-sm">
+                                                    {/* Footer: Price */}
+                                                    <div className="mt-auto flex justify-end">
+                                                        <div className="bg-white/90 px-3 py-1 rounded-full shadow-sm border border-black/5">
                                                             <span className="text-[#222222] font-black text-xs">R$ 150</span>
                                                         </div>
                                                     </div>
-
-                                                    <button
-                                                        onClick={(e) => toggleFavorite(pro.id, e)}
-                                                        className="absolute top-0 right-0 w-8 h-8 rounded-full flex items-center justify-center -mr-2 -mt-2 active:scale-90 transition-transform bg-white/50 hover:bg-white"
-                                                    >
-                                                        <Heart
-                                                            size={18}
-                                                            fill={isFav ? "#FF385C" : "rgba(0,0,0,0.05)"}
-                                                            className={isFav ? "text-[#FF385C]" : "text-gray-400"}
-                                                        />
-                                                    </button>
                                                 </div>
                                             </div>
                                         );

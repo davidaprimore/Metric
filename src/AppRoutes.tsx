@@ -37,6 +37,7 @@ import { AssessmentDetailScreen } from '@/features/profile/pages/AssessmentDetai
 import { AppointmentDetailScreen } from '@/features/dashboard/pages/AppointmentDetailScreen';
 import { SearchScreen } from '@/features/search/pages/SearchScreen';
 import { PatientDetailScreen } from '@/features/dashboard/pages/PatientDetailScreen';
+import { ProfessionalDetailScreen } from '@/features/search/pages/ProfessionalDetailScreen';
 
 export const AppRoutes = () => {
     const location = useLocation();
@@ -88,6 +89,7 @@ export const AppRoutes = () => {
                 <Route path="/admin/notifications" element={<PrivateRoute><NotificationCenterScreen /></PrivateRoute>} />
 
                 <Route path="/search" element={<PrivateRoute><SearchScreen /></PrivateRoute>} />
+                <Route path="/professional/:id" element={<PrivateRoute><ProfessionalDetailScreen /></PrivateRoute>} />
 
                 <Route path="/appointment/:id" element={<PrivateRoute><AppointmentDetailScreen /></PrivateRoute>} />
 
