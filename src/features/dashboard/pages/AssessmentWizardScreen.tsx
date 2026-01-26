@@ -137,6 +137,12 @@ export const AssessmentWizardScreen: React.FC = () => {
             });
 
             if (error) throw error;
+
+            // Mark appointment as Completed so it leaves the "Upcoming" list
+            if (appointmentId) {
+                await supabase.from('appointments').update({ status: 'completed' }).eq('id', appointmentId);
+            }
+
             navigate(`/appointment/${appointmentId}`);
         } catch (err: any) {
             console.error('Error saving assessment:', err);

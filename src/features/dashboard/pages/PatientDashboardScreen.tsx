@@ -81,6 +81,10 @@ export const PatientDashboardScreen: React.FC = () => {
 
       const { data: notifs } = await supabase.from('notifications').select('*').eq('user_id', user.id).eq('read', false).order('created_at', { ascending: false });
       if (notifs) setNotifications(notifs);
+
+      // Fetch Completed Assessments (For Dashboard Metrics)
+      const { data: assess } = await supabase.from('assessments').select('*').eq('patient_id', user.id).order('created_at', { ascending: true });
+      if (assess) setAssessments(assess);
     };
     fetchUserData();
   }, [user]);
