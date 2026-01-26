@@ -108,8 +108,8 @@ export const PatientDashboardScreen: React.FC = () => {
   const userWeight = user?.user_metadata?.weight || '0.0';
 
   const metrics = [
-    { label: 'Gordura Corporal', value: latestAssessment?.body_fat || '0.0', unit: '%', trend: assessmentCount >= 2 ? '-1.2%' : null, up: false, icon: "/assets/3d/caliper.png" },
-    { label: 'Peso Atual', value: userWeight, unit: 'kg', trend: assessmentCount >= 2 ? '-0.5kg' : null, up: false, icon: "/assets/3d/scale.png" }
+    { label: 'Gordura Corporal', value: latestAssessment?.fat_percentage || latestAssessment?.body_fat || '0.0', unit: '%', trend: assessmentCount >= 2 ? (Number(latestAssessment?.fat_percentage || 0) - Number(assessments[assessmentCount - 2]?.fat_percentage || 0)).toFixed(1) + '%' : null, up: assessmentCount >= 2 && Number(latestAssessment?.fat_percentage) > Number(assessments[assessments.length - 2]?.fat_percentage), icon: "/assets/3d/caliper.png" },
+    { label: 'Peso Atual', value: latestAssessment?.weight || userWeight || '0.0', unit: 'kg', trend: assessmentCount >= 2 ? (Number(latestAssessment?.weight || 0) - Number(assessments[assessmentCount - 2]?.weight || 0)).toFixed(1) + 'kg' : null, up: assessmentCount >= 2 && Number(latestAssessment?.weight) > Number(assessments[assessments.length - 2]?.weight), icon: "/assets/3d/scale.png" }
   ];
 
   const handleTabChange = (tab: string) => {
@@ -232,10 +232,57 @@ export const PatientDashboardScreen: React.FC = () => {
 
       <div className={`${textureCardClass} rounded-[2.5rem] p-6 shadow-md mb-8`}>
         <div className="flex justify-between items-center mb-6"><h3 className="text-lg font-bold text-white">Minha Evolução</h3></div>
-        <div className="py-12 flex flex-col items-center text-center px-4">
-          <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4 text-slate-500 border border-white/5"><TrendingUp size={32} strokeWidth={1.5} /></div>
-          <p className="text-sm font-bold text-slate-500 leading-tight">{assessmentCount === 0 ? "Aguardando seu primeiro resultado." : "Gráficos de evolução em breve."}</p>
-        </div>
+        {assessmentCount > 0 ? (
+          <div className="h-40 w-full flex items-end relative overflow-hidden group">
+            {(() => {
+              const dataPoints = assessments.slice(-5);
+              if (dataPoints.length < 2) return (
+                <div className="w-full h-full flex flex-col items-center justify-center text-slate-500">
+                  <TrendingUp size={24} className="mb-2 opacity-50 text-[#D4AF37]" />
+                  <p className="text-xs font-bold">1ª Avaliação Registrada!</p>
+                  <p className="text-[10px] opacity-60 mt-1">O gráfico aparecerá na próxima consulta.</p>
+                </div>
+              );
+
+              const width = 100;
+              const height = 50;
+              const values = dataPoints.map(d => Number(d.fat_percentage || d.body_fat || 0));
+              const maxVal = Math.max(...values) * 1.1;
+              const minVal = Math.min(...values) * 0.9;
+
+              const getX = (i: number) => (i / (dataPoints.length - 1)) * width;
+              const getY = (val: number) => height - ((val - minVal) / (maxVal - minVal || 1)) * height;
+
+              const pathData = dataPoints.map((d, i) =>
+                `${i === 0 ? 'M' : 'L'} ${getX(i)} ${getY(Number(d.fat_percentage || d.body_fat || 0))}`
+              ).join(' ');
+
+              const areaPath = `${pathData} V ${height} H 0 Z`;
+
+              return (
+                <svg className="w-full h-full overflow-visible" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+                  <line x1="0" y1={height} x2={width} y2={height} stroke="white" strokeOpacity="0.1" strokeWidth="0.5" />
+                  <path d={areaPath} fill="url(#gradient)" opacity="0.2" />
+                  <defs>
+                    <linearGradient id="gradient" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0%" stopColor="#D4AF37" />
+                      <stop offset="100%" stopColor="transparent" />
+                    </linearGradient>
+                  </defs>
+                  <path d={pathData} fill="none" stroke="#D4AF37" strokeWidth="2" className="drop-shadow-[0_0_10px_rgba(212,175,55,0.5)]" strokeLinecap="round" strokeLinejoin="round" />
+                  {dataPoints.map((d, i) => (
+                    <circle key={i} cx={getX(i)} cy={getY(Number(d.fat_percentage || d.body_fat || 0))} r="2" fill="#D4AF37" />
+                  ))}
+                </svg>
+              );
+            })()}
+          </div>
+        ) : (
+          <div className="py-12 flex flex-col items-center text-center px-4">
+            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4 text-slate-500 border border-white/5"><TrendingUp size={32} strokeWidth={1.5} /></div>
+            <p className="text-sm font-bold text-slate-500 leading-tight">Aguardando seu primeiro resultado.</p>
+          </div>
+        )}
       </div>
 
       {/* Floating CTA */}
