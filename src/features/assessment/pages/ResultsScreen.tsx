@@ -71,79 +71,151 @@ export const ResultsScreen: React.FC = () => {
   // --- SLIDES ----
 
   const SlideSummary = () => (
-    <div className="flex flex-col h-full p-8 relative">
-      <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-[#D4AF37]/20 to-transparent pointer-events-none" />
-
-      <div className="mt-10 mb-8 text-center">
-        <span className="px-4 py-1.5 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.2em]">Resultado Oficial</span>
-        <p className="text-white/50 text-[10px] uppercase tracking-widest mt-4 font-bold">{new Date(assessment.created_at).toLocaleDateString('pt-BR', { dateStyle: 'long' })}</p>
-        <h1 className="text-4xl font-black text-white mt-2 drop-shadow-lg">Seu Corpo<br />Hoja</h1>
+    <div className="flex flex-col h-full relative overflow-hidden">
+      {/* Premium Background Layer */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src="/assets/dashboard-bgs/motivation_bg.png"
+          className="w-full h-full object-cover grayscale brightness-[0.3] contrast-125"
+          alt="Background"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#D4AF37]/10 via-black/40 to-black"></div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        {/* Weight */}
-        <div className="bg-white/5 backdrop-blur-md rounded-3xl p-5 border border-white/10 relative overflow-hidden group">
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Peso Total</p>
-          <div className="flex items-baseline gap-1">
-            <span className="text-3xl font-black text-white">{assessment.weight}</span>
-            <span className="text-sm font-bold text-[#D4AF37]">kg</span>
+      <div className="relative z-10 flex flex-col h-full p-8 pt-16">
+        <div className="mb-8 text-center animate-in fade-in slide-in-from-top-4 duration-700">
+          <div className="inline-block relative">
+            <span className="px-5 py-2 rounded-xl backdrop-blur-md border border-[#D4AF37]/30 bg-black/40 text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.3em]">Resultado Oficial</span>
+            <div className="absolute -inset-1 bg-[#D4AF37]/20 blur-xl -z-10 rounded-full"></div>
           </div>
-          {diffWeight && (
-            <div className={cn("inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-md text-[10px] font-bold", diffWeight.positive ? "bg-red-500/20 text-red-400" : "bg-green-500/20 text-green-400")}>
-              {diffWeight.positive ? <TrendingUp size={10} /> : <TrendingDown size={10} />} {diffWeight.val}
-            </div>
-          )}
+
+          <p className="text-white/40 text-[10px] uppercase tracking-[0.2em] mt-6 font-black">{new Date(assessment.created_at).toLocaleDateString('pt-BR', { dateStyle: 'long' })}</p>
+          <h1 className="text-5xl font-black text-white mt-3 leading-[1.1] tracking-tighter italic uppercase text-shadow-lg">
+            Seu Corpo<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-amber-100">Hoje</span>
+          </h1>
         </div>
 
-        {/* Fat % */}
-        <div className="bg-white/5 backdrop-blur-md rounded-3xl p-5 border border-white/10 relative overflow-hidden group">
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Gordura</p>
-          <div className="flex items-baseline gap-1">
-            <span className="text-3xl font-black text-white">{Number(assessment.fat_percentage || assessment.body_fat).toFixed(1)}</span>
-            <span className="text-sm font-bold text-[#D4AF37]">%</span>
-          </div>
-          {diffFat && (
-            <div className={cn("inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-md text-[10px] font-bold", diffFat.positive ? "bg-red-500/20 text-red-400" : "bg-green-500/20 text-green-400")}>
-              {diffFat.positive ? <TrendingUp size={10} /> : <TrendingDown size={10} />} {diffFat.val}
+        <div className="flex-1 space-y-5 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+          <div className="grid grid-cols-2 gap-5">
+            {/* Weight Card */}
+            <div className="bg-black/40 backdrop-blur-2xl rounded-[2rem] p-6 border-t border-l border-white/10 shadow-2xl relative group overflow-hidden">
+              <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-white/5 to-transparent rounded-bl-3xl"></div>
+              <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2">Peso Total</p>
+              <div className="flex items-baseline gap-1">
+                <span className="text-4xl font-black text-white tracking-tighter">{assessment.weight}</span>
+                <span className="text-xs font-bold text-[#D4AF37]">kg</span>
+              </div>
+              {diffWeight && (
+                <div className={cn(
+                  "flex items-center gap-1 mt-3 text-[10px] font-black",
+                  diffWeight.positive ? "text-red-500" : "text-green-500"
+                )}>
+                  {diffWeight.positive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                  {diffWeight.val}
+                </div>
+              )}
             </div>
-          )}
+
+            {/* Fat Card */}
+            <div className="bg-black/40 backdrop-blur-2xl rounded-[2rem] p-6 border-t border-l border-white/10 shadow-2xl relative group overflow-hidden">
+              <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-white/5 to-transparent rounded-bl-3xl"></div>
+              <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2">Gordura</p>
+              <div className="flex items-baseline gap-1">
+                <span className="text-4xl font-black text-white tracking-tighter">{Number(assessment.fat_percentage || assessment.body_fat).toFixed(1)}</span>
+                <span className="text-xs font-bold text-[#D4AF37]">%</span>
+              </div>
+              {diffFat && (
+                <div className={cn(
+                  "flex items-center gap-1 mt-3 text-[10px] font-black",
+                  diffFat.positive ? "text-red-500" : "text-green-500"
+                )}>
+                  {diffFat.positive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                  {diffFat.val}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Lean Mass - Horizontal Progress Card */}
+          <div className="bg-black/40 backdrop-blur-2xl rounded-[2.5rem] p-7 border-t border-l border-white/10 shadow-2xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-[#D4AF37]/10 transition-colors"></div>
+
+            <div className="flex justify-between items-center mb-5">
+              <div className="flex flex-col">
+                <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mb-1">Massa Magra (Músculo)</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black text-white">{(assessment.weight * (1 - Number(assessment.fat_percentage || assessment.body_fat) / 100)).toFixed(1)}</span>
+                  <span className="text-xs font-bold text-[#D4AF37]">kg</span>
+                </div>
+              </div>
+              {diffLean && (
+                <div className={cn(
+                  "px-3 py-1.5 rounded-xl text-[10px] font-black flex items-center gap-1.5",
+                  !diffLean.positive ? "bg-red-500/10 text-red-500" : "bg-green-500/10 text-green-500"
+                )}>
+                  {diffLean.positive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                  {diffLean.val}
+                </div>
+              )}
+            </div>
+
+            <div className="relative h-4 bg-white/5 rounded-full overflow-hidden border border-white/5 mb-2">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${100 - Number(assessment.fat_percentage || assessment.body_fat)}%` }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
+                className="h-full bg-gradient-to-r from-[#D4AF37] via-amber-200 to-white relative"
+              >
+                <div className="absolute inset-0 bg-[url('/assets/grain.png')] opacity-30 mix-blend-overlay"></div>
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Fat Mass Card */}
+          <div className="bg-black/40 backdrop-blur-2xl rounded-[2.5rem] p-7 border-t border-l border-white/10 shadow-2xl relative overflow-hidden group">
+            <div className="flex justify-between items-center mb-5">
+              <div className="flex flex-col">
+                <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mb-1">Massa Gorda</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black text-white">{(assessment.weight * (Number(assessment.fat_percentage || assessment.body_fat) / 100)).toFixed(1)}</span>
+                  <span className="text-xs font-bold text-[#D4AF37]">kg</span>
+                </div>
+              </div>
+              {diffFatMass && (
+                <div className={cn(
+                  "px-3 py-1.5 rounded-xl text-[10px] font-black flex items-center gap-1.5",
+                  diffFatMass.positive ? "bg-red-500/10 text-red-500" : "bg-green-500/10 text-green-500"
+                )}>
+                  {diffFatMass.positive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                  {diffFatMass.val}
+                </div>
+              )}
+            </div>
+
+            <div className="relative h-4 bg-white/5 rounded-full overflow-hidden border border-white/5">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${Number(assessment.fat_percentage || assessment.body_fat)}%` }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
+                className="h-full bg-slate-700"
+              >
+              </motion.div>
+            </div>
+          </div>
         </div>
 
-        {/* Lean Mass */}
-        <div className="bg-white/5 backdrop-blur-md rounded-3xl p-5 border border-white/10 relative overflow-hidden group col-span-2">
-          <div className="flex justify-between items-center mb-2">
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Massa Magra (Músculo)</p>
-            {diffLean && (
-              <span className={cn("text-[10px] font-black", !diffLean.positive ? "text-red-400" : "text-green-400")}>{diffLean.val}</span>
-            )}
+        {/* Brand Footer */}
+        <div className="mt-8 flex justify-between items-center px-2 opacity-60">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center font-black text-[#D4AF37] text-lg">M</div>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black text-white tracking-[0.2em]">METRIK</span>
+              <span className="text-[7px] font-bold text-[#D4AF37] uppercase tracking-[0.1em]">Gold Standard Assessment</span>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[#D4AF37]/20 flex items-center justify-center text-[#D4AF37] border border-[#D4AF37]/30">
-              <Dumbbell size={20} />
-            </div>
-            <div className="flex-1 h-3 bg-white/10 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-[#D4AF37] to-amber-200" style={{ width: `${100 - Number(assessment.fat_percentage || assessment.body_fat)}%` }}></div>
-            </div>
-            <span className="text-2xl font-black text-white">{(assessment.weight * (1 - Number(assessment.fat_percentage || assessment.body_fat) / 100)).toFixed(1)}<span className="text-xs text-slate-500 ml-0.5">kg</span></span>
-          </div>
-        </div>
-
-        {/* Fat Mass */}
-        <div className="bg-white/5 backdrop-blur-md rounded-3xl p-5 border border-white/10 relative overflow-hidden group col-span-2">
-          <div className="flex justify-between items-center mb-2">
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Massa Gorda</p>
-            {diffFatMass && (
-              <span className={cn("text-[10px] font-black", diffFatMass.positive ? "text-red-400" : "text-green-400")}>{diffFatMass.val}</span>
-            )}
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 border border-white/10">
-              <Activity size={20} />
-            </div>
-            <div className="flex-1 h-3 bg-white/10 rounded-full overflow-hidden">
-              <div className="h-full bg-slate-600" style={{ width: `${Number(assessment.fat_percentage || assessment.body_fat)}%` }}></div>
-            </div>
-            <span className="text-2xl font-black text-white">{(assessment.weight * (Number(assessment.fat_percentage || assessment.body_fat) / 100)).toFixed(1)}<span className="text-xs text-slate-500 ml-0.5">kg</span></span>
+          <div className="text-right">
+            <p className="text-[10px] font-black text-white/40 italic">#SuaObraDeArte</p>
           </div>
         </div>
       </div>
