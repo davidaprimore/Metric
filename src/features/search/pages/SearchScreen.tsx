@@ -151,7 +151,7 @@ export const SearchScreen: React.FC = () => {
                 .select(`
 id, full_name, nickname, avatar_url,
     rating, review_count, specialties(name),
-    address_city, address_state, bio
+    address_city, address_state, bio, nano_bio
         `)
                 .eq('role', 'profissional');
 
@@ -384,8 +384,8 @@ id, full_name, nickname, avatar_url,
                                                     </div>
 
                                                     {/* Location - Left Aligned under Photo */}
-                                                    <div className="flex items-center gap-1 text-gray-500 text-[10px] w-full justify-center text-center leading-tight">
-                                                        <MapPin size={10} className="shrink-0" />
+                                                    <div className="flex items-center gap-1 text-gray-500 text-xs w-full justify-center text-center leading-tight">
+                                                        <MapPin size={12} className="shrink-0" />
                                                         <span className="truncate max-w-[70px]">
                                                             {pro.address_city || 'Online'}
                                                         </span>
@@ -400,8 +400,9 @@ id, full_name, nickname, avatar_url,
                                                             <h3 className="text-[#222222] font-bold text-lg leading-tight truncate">
                                                                 {pro.nickname || pro.full_name}
                                                             </h3>
-                                                            <span className="bg-white/80 px-2 py-0.5 rounded-md text-[10px] font-bold text-gray-500 uppercase tracking-wide shadow-sm inline-block mt-1">
-                                                                {pro.specialties?.[0]?.name || 'Profissional'}
+                                                            {/* Specialty Pill REMOVED */}
+                                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide inline-block mt-0.5">
+                                                                PRO
                                                             </span>
                                                         </div>
 
@@ -431,19 +432,14 @@ id, full_name, nickname, avatar_url,
                                                         </div>
                                                     </div>
 
-                                                    {/* Nano Bio - New */}
-                                                    <div className="mt-2 mb-3">
+                                                    {/* Nano Bio */}
+                                                    <div className="mt-1">
                                                         <p className="text-xs text-gray-600 leading-relaxed line-clamp-2 font-medium">
-                                                            {pro.bio || "Especialista em transformação corporal e saúde preventiva. Agende sua consulta hoje mesmo."}
+                                                            {pro.nano_bio || pro.bio || "Especialista em transformação corporal. Agende hoje mesmo."}
                                                         </p>
                                                     </div>
 
-                                                    {/* Footer: Price */}
-                                                    <div className="mt-auto flex justify-end">
-                                                        <div className="bg-white/90 px-3 py-1 rounded-full shadow-sm border border-black/5">
-                                                            <span className="text-[#222222] font-black text-xs">R$ 150</span>
-                                                        </div>
-                                                    </div>
+                                                    {/* Price REMOVED */}
                                                 </div>
                                             </div>
                                         );

@@ -9,7 +9,8 @@ import {
     MessageCircle,
     Share2,
     Award,
-    Activity
+    Activity,
+    AlertCircle
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
@@ -20,6 +21,7 @@ export const ProfessionalDetailScreen = () => {
     const navigate = useNavigate();
     const [professional, setProfessional] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (id) fetchProfessional();
@@ -27,11 +29,13 @@ export const ProfessionalDetailScreen = () => {
 
     const fetchProfessional = async () => {
         try {
+            // Simplified query first to avoid missing column errors if possible
+            // But we need the data.
             const { data, error } = await supabase
                 .from('profiles')
                 .select(`
                     id, full_name, nickname, avatar_url,
-                    rating, review_count, bio,
+                    rating, review_count, bio, nano_bio,
                     specialties(name),
                     address_city, address_state,
                     role
@@ -39,11 +43,14 @@ export const ProfessionalDetailScreen = () => {
                 .eq('id', id)
                 .single();
 
-            if (error) throw error;
+            if (error) {
+                // If specific column error, fallback? Not easy with Supabase-js.
+                throw error;
+            }
             setProfessional(data);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error fetching professional:', error);
-            // navigate('/search'); // Optional: redirect if not found
+            setError(error.message || "Não foi possível carregar os dados do profissional.");
         } finally {
             setLoading(false);
         }
@@ -51,30 +58,47 @@ export const ProfessionalDetailScreen = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#F7F7F7] flex items-center justify-center">
+            <div className="min-h-screen bg-[#F7F7F7] flex items-center justify-center text-gray-500">
                 <div className="w-10 h-10 border-4 border-[#FF385C] border-t-transparent rounded-full animate-spin" />
             </div>
         );
     }
 
-    if (!professional) return null;
+    if (error || !professional) {
+        return (
+            <div className="min-h-screen bg-[#F7F7F7] flex flex-col items-center justify-center p-6 text-center">
+                <AlertCircle size={48} className="text-gray-300 mb-4" />
+                <h2 className="text-lg font-bold text-gray-700 mb-2">Ops! Algo deu errado.</h2>
+                <p className="text-sm text-gray-500 mb-6 max-w-xs">{error || "Profissional não encontrado."}</p>
+                <Button variant="outline" onClick={() => navigate(-1)} className="bg-white border-gray-200">
+                    Voltar
+                </Button>
+            </div>
+        );
+    }
+
+    // Default Banner
+    const bannerUrl = "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=2070&auto=format&fit=crop";
 
     return (
-        <div className="min-h-screen bg-[#F7F7F7] pb-32">
+        <div className="min-h-screen bg-[#F7F7F7] pb-32 w-full text-left">
             {/* Cover Image & Header Actions */}
-            <div className="h-64 bg-gradient-to-br from-gray-800 to-gray-900 relative">
-                {/* Simulated Cover Image */}
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-40 mix-blend-overlay"></div>
+            <div className="h-64 bg-gray-900 relative overflow-hidden">
+                <div
+                    className="absolute inset-0 bg-cover bg-center opacity-60 mix-blend-overlay"
+                    style={{ backgroundImage: `url('${bannerUrl}')` }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent" />
 
-                <header className="absolute top-0 w-full px-6 pt-8 flex justify-between items-center z-10">
+                <header className="absolute top-0 w-full px-6 pt-8 flex justify-between items-center z-10 w-full">
                     <button
                         onClick={() => navigate(-1)}
-                        className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-all border border-white/10"
+                        className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-all border border-white/10 shadow-lg"
                     >
                         <ChevronLeft size={24} />
                     </button>
                     <div className="flex gap-3">
-                        <button className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-all border border-white/10">
+                        <button className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-all border border-white/10 shadow-lg">
                             <Share2 size={20} />
                         </button>
                     </div>
@@ -82,8 +106,8 @@ export const ProfessionalDetailScreen = () => {
             </div>
 
             {/* Profile Content Container */}
-            <div className="-mt-10 px-4 relative z-20">
-                <div className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-6 shadow-xl shadow-black/5 border border-white/50 relative overflow-hidden">
+            <div className="-mt-10 px-4 relative z-20 w-full max-w-md mx-auto">
+                <div className="bg-white/90 backdrop-blur-xl rounded-[2.5rem] p-6 shadow-xl shadow-black/5 border border-white/50 relative overflow-hidden">
 
                     {/* ID Badge */}
                     <div className="absolute top-6 right-6 flex items-center gap-1 bg-green-50 text-green-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-green-100">
@@ -93,7 +117,7 @@ export const ProfessionalDetailScreen = () => {
 
                     {/* Avatar & Basic Info */}
                     <div className="flex flex-col items-center -mt-16 mb-6">
-                        <div className="w-28 h-28 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100 mb-4">
+                        <div className="w-28 h-28 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100 mb-4 relative z-10">
                             <img
                                 src={professional.avatar_url || `https://ui-avatars.com/api/?name=${professional.full_name}&background=f3f4f6&color=000`}
                                 className="w-full h-full object-cover"
@@ -105,13 +129,13 @@ export const ProfessionalDetailScreen = () => {
                             {professional.nickname || professional.full_name}
                         </h1>
                         <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3 text-center">
-                            {professional.specialties?.[0]?.name || professional.role}
+                            {professional.specialties?.[0]?.name || professional.role || "Especialista"}
                         </p>
 
-                        <div className="flex items-center gap-4 text-xs font-semibold text-gray-600 bg-gray-50 px-4 py-2 rounded-2xl border border-gray-100">
+                        <div className="flex flex-wrap justify-center items-center gap-3 text-xs font-semibold text-gray-600 bg-gray-50 px-4 py-2 rounded-2xl border border-gray-100">
                             <div className="flex items-center gap-1.5">
                                 <MapPin size={14} className="text-[#FF385C]" />
-                                {professional.address_city || "Online"}, {professional.address_state || "BR"}
+                                {professional.address_city || "Online"}
                             </div>
                             <div className="w-px h-3 bg-gray-300"></div>
                             <div className="flex items-center gap-1.5">
@@ -124,15 +148,15 @@ export const ProfessionalDetailScreen = () => {
 
                     {/* Stats Grid */}
                     <div className="grid grid-cols-3 gap-3 mb-8">
-                        <div className="bg-gray-50 rounded-2xl p-3 text-center border border-gray-100">
+                        <div className="bg-white rounded-2xl p-3 text-center border border-gray-100 shadow-sm">
                             <p className="text-xl font-black text-[#222222]">1.2k</p>
                             <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide">Pacientes</p>
                         </div>
-                        <div className="bg-gray-50 rounded-2xl p-3 text-center border border-gray-100">
+                        <div className="bg-white rounded-2xl p-3 text-center border border-gray-100 shadow-sm">
                             <p className="text-xl font-black text-[#222222]">5+</p>
                             <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide">Anos Exp.</p>
                         </div>
-                        <div className="bg-gray-50 rounded-2xl p-3 text-center border border-gray-100">
+                        <div className="bg-white rounded-2xl p-3 text-center border border-gray-100 shadow-sm">
                             <p className="text-xl font-black text-[#222222]">4.9</p>
                             <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide">Avaliação</p>
                         </div>
@@ -144,8 +168,8 @@ export const ProfessionalDetailScreen = () => {
                             <Award className="text-[#FF385C]" size={18} />
                             Sobre
                         </h3>
-                        <p className="text-sm text-gray-600 leading-relaxed font-medium">
-                            {professional.bio || "Olá! Sou especialista em ajudar pessoas a atingirem seus objetivos de saúde através de uma abordagem baseada em dados e acompanhamento personalizado. Com metodologia comprovada, vamos transformar sua qualidade de vida juntos."}
+                        <p className="text-sm text-gray-600 leading-relaxed font-medium text-left">
+                            {professional.bio || professional.nano_bio || "Olá! Sou especialista em ajudar pessoas a atingirem seus objetivos de saúde através de uma abordagem baseada em dados e acompanhamento personalizado. Com metodologia comprovada, vamos transformar sua qualidade de vida juntos."}
                         </p>
                     </div>
 
