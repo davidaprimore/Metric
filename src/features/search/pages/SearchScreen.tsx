@@ -20,70 +20,70 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/useDebounce';
 
-// Categories: Soft Pastels & Wireframe Aesthetics
+// Categories: More Solid Pastels & Defined Wireframes
 const CATEGORIES = [
     {
         id: 'favorites',
         label: 'Favoritos',
         icon: Heart,
-        // Gradient: Soft Rose
-        gradient: 'bg-gradient-to-br from-[#FFF0F5] to-[#FFE4E1]',
-        border: 'border-[#FFB6C1]',
-        iconColor: 'text-[#DB7093]'
+        // Gradient: Solid Rose/Pink (Stronger)
+        gradient: 'bg-gradient-to-br from-rose-100 to-rose-200',
+        border: 'border-rose-300',
+        iconColor: 'text-rose-600'
     },
     {
         id: 'all',
         label: 'Tudo',
         icon: Search,
-        // Gradient: Soft Gray
-        gradient: 'bg-gradient-to-br from-gray-50 to-gray-100',
-        border: 'border-gray-200',
-        iconColor: 'text-gray-400'
+        // Gradient: Solid Gray
+        gradient: 'bg-gradient-to-br from-gray-100 to-gray-200',
+        border: 'border-gray-300',
+        iconColor: 'text-gray-600'
     },
     {
         id: 'personal',
         label: 'Personal',
         icon: Dumbbell,
-        // Gradient: Soft Blue
-        gradient: 'bg-gradient-to-br from-blue-50 to-blue-100',
-        border: 'border-blue-200',
-        iconColor: 'text-blue-400'
+        // Gradient: Solid Blue
+        gradient: 'bg-gradient-to-br from-blue-100 to-blue-200',
+        border: 'border-blue-300',
+        iconColor: 'text-blue-600'
     },
     {
         id: 'nutri',
         label: 'Nutri',
         icon: Salad,
-        // Gradient: Soft Emerald
-        gradient: 'bg-gradient-to-br from-emerald-50 to-emerald-100',
-        border: 'border-emerald-200',
-        iconColor: 'text-emerald-500' // slightly darker for visibility
+        // Gradient: Solid Emerald
+        gradient: 'bg-gradient-to-br from-emerald-100 to-emerald-200',
+        border: 'border-emerald-300',
+        iconColor: 'text-emerald-700'
     },
     {
         id: 'fisioterapeuta',
         label: 'Fisioterapeuta',
         icon: Stethoscope,
-        // Gradient: Soft Teal
-        gradient: 'bg-gradient-to-br from-teal-50 to-teal-100',
-        border: 'border-teal-200',
-        iconColor: 'text-teal-500'
+        // Gradient: Solid Teal
+        gradient: 'bg-gradient-to-br from-teal-100 to-teal-200',
+        border: 'border-teal-300',
+        iconColor: 'text-teal-700'
     },
     {
         id: 'consultoria',
         label: 'Consultoria',
         icon: Activity,
-        // Gradient: Soft Violet
-        gradient: 'bg-gradient-to-br from-violet-50 to-violet-100',
-        border: 'border-violet-200',
-        iconColor: 'text-violet-500'
+        // Gradient: Solid Violet
+        gradient: 'bg-gradient-to-br from-violet-100 to-violet-200',
+        border: 'border-violet-300',
+        iconColor: 'text-violet-700'
     },
     {
         id: 'endocrino',
         label: 'Endócrino',
         icon: Activity,
-        // Gradient: Soft Orange
-        gradient: 'bg-gradient-to-br from-orange-50 to-orange-100',
-        border: 'border-orange-200',
-        iconColor: 'text-orange-500'
+        // Gradient: Solid Orange
+        gradient: 'bg-gradient-to-br from-orange-100 to-orange-200',
+        border: 'border-orange-300',
+        iconColor: 'text-orange-700'
     }
 ];
 
@@ -228,20 +228,20 @@ id, full_name, nickname, avatar_url,
     };
 
     const getCardColor = (specialtyName?: string) => {
-        // Base glass + border classes
-        const base = "backdrop-blur-sm shadow-sm transition-all";
+        // Less Translucent (opacity-95 to solid)
+        const base = "shadow-sm transition-all";
 
-        if (!specialtyName) return `${base} bg-gray-50 border-gray-200 hover:border-gray-300`; // Default stronger gray glass
+        if (!specialtyName) return `${base} bg-gray-50 border-gray-200`; // Default stronger gray glass
 
         const lower = specialtyName.toLowerCase();
 
-        // Glassy Pastels
-        if (lower.includes('personal')) return `${base} bg-blue-50/50 border-blue-100 hover:border-blue-200`;
-        if (lower.includes('nutri')) return `${base} bg-emerald-50/50 border-emerald-100 hover:border-emerald-200`;
-        if (lower.includes('fisio')) return `${base} bg-teal-50/50 border-teal-100 hover:border-teal-200`;
-        if (lower.includes('avalia')) return `${base} bg-orange-50/50 border-orange-100 hover:border-orange-200`;
+        // Solid Colors (90-95% opacity for slight blur but mostly solid)
+        if (lower.includes('personal')) return `${base} bg-blue-50/95 border-blue-200 hover:border-blue-300`;
+        if (lower.includes('nutri')) return `${base} bg-emerald-50/95 border-emerald-200 hover:border-emerald-300`;
+        if (lower.includes('fisio')) return `${base} bg-teal-50/95 border-teal-200 hover:border-teal-300`;
+        if (lower.includes('avalia')) return `${base} bg-orange-50/95 border-orange-200 hover:border-orange-300`;
 
-        return `${base} bg-gray-50/80 border-gray-100 hover:bg-gray-100`; // Fallback Gray
+        return `${base} bg-gray-50/95 border-gray-200 hover:border-gray-300`; // Fallback
     };
 
     const hasActiveSearch = searchTerm.length > 0 || activeFilter !== 'all' || filterCity || filterState;
@@ -312,7 +312,7 @@ id, full_name, nickname, avatar_url,
                                                 strokeWidth={0.5}
                                                 className={cn(
                                                     "absolute -bottom-4 -right-4 transition-transform duration-700 group-hover:scale-110 group-hover:-rotate-12 opacity-20",
-                                                    isFavorites ? "text-rose-500 fill-rose-200" : cat.iconColor // Use color, not white
+                                                    isFavorites ? "text-rose-600 fill-rose-200" : cat.iconColor // Increased contrast
                                                 )}
                                             />
 
@@ -329,7 +329,7 @@ id, full_name, nickname, avatar_url,
                                                 <div>
                                                     <h3 className="text-[#222222] font-extrabold text-lg leading-none mb-1">{cat.label}</h3>
                                                     <span className={cn(
-                                                        "text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity",
+                                                        "text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 opacity-70 group-hover:opacity-100 transition-opacity",
                                                         cat.iconColor
                                                     )}>
                                                         Ver <ChevronLeft size={10} className="rotate-180" />
