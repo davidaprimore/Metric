@@ -58,11 +58,22 @@ export const usePushNotifications = () => {
     useEffect(() => {
         const unsubscribe = onMessage(messaging, (payload) => {
             console.log('Foreground Message:', payload);
-            // You can show a custom toast here
-            new Notification(payload.notification?.title || 'Nova mensagem', {
-                body: payload.notification?.body,
-                icon: '/pwa-192x192.png'
+            const { title, body } = payload.notification || {};
+
+            // 1. Try native notification
+            if (Notification.permission === 'granted') {
+                new Notification(title || 'Nova mensagem', {
+                    body: body,
+                    icon: '/pwa-192x192.png'
+                });
+            }
+
+            // 2. Fallback: Dispatch custom event for UI Toast
+            // This ensures the user sees it inside the app even if native notification fails
+            const event = new CustomEvent('push-notification', {
+                detail: { title, body }
             });
+            window.dispatchEvent(event);
         });
 
         return () => unsubscribe();
