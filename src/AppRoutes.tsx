@@ -37,7 +37,7 @@ import { AssessmentDetailScreen } from '@/features/profile/pages/AssessmentDetai
 import { AppointmentDetailScreen } from '@/features/dashboard/pages/AppointmentDetailScreen';
 import SearchScreen from '@/features/search/pages/SearchScreen';
 import { PatientDetailScreen } from '@/features/dashboard/pages/PatientDetailScreen';
-import { ProfessionalDetailScreen } from '@/features/search/pages/ProfessionalDetailScreen';
+import ProfessionalDetailScreen from '@/features/search/pages/ProfessionalDetailScreen';
 import { ServiceSelectionScreen } from '@/features/search/pages/ServiceSelectionScreen';
 
 export const AppRoutes = () => {

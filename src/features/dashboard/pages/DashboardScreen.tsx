@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { PatientDashboardScreen } from './PatientDashboardScreen';
+import HomeScreen from './HomeScreen';
 import ProfessionalDashboardScreen from './ProfessionalDashboardScreen';
 import { Loader } from 'lucide-react';
 
@@ -21,6 +21,6 @@ export const DashboardScreen: React.FC = () => {
         return <ProfessionalDashboardScreen />;
     }
 
-    // Default to Patient Dashboard
-    return <PatientDashboardScreen />;
+    // Default to Patient Dashboard (New HomeScreen)
+    return <HomeScreen />;
 };
