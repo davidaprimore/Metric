@@ -1,166 +1,185 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
-/* Cores Metrika - Definidas como CSS Variables para o Tailwind v4 capturar automaticamente se configurado ou para uso direto */
-:root {
-    --lavender-50: #FAF8FC;
-    --lavender-100: #F3E8F7;
-    --lavender-200: #E8D5F0;
-    --lavender-300: #D4B8E0;
-    --lavender-400: #C8A4D4;
-    --lavender-600: #9B6AB0;
-    --lavender-800: #5D3D6B;
-    --lavender-900: #3D2646;
-    --ink: #2D2A32;
-    --ink-muted: #8B8591;
-    --background: #FAF8FC;
-}
+/* FONTES */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
 
+/* TEMA METRIKA - Configuração Tailwind v4 */
 @theme {
-    --color-lavender-50: var(--lavender-50);
-    --color-lavender-100: var(--lavender-100);
-    --color-lavender-200: var(--lavender-200);
-    --color-lavender-300: var(--lavender-300);
-    --color-lavender-400: var(--lavender-400);
-    --color-lavender-600: var(--lavender-600);
-    --color-lavender-800: var(--lavender-800);
-    --color-lavender-900: var(--lavender-900);
-    --color-ink: var(--ink);
-    --color-ink-muted: var(--ink-muted);
-    --color-background: var(--background);
+    /* Cores principais */
+    --color-lavender-50: #FAF8FC;
+    --color-lavender-100: #F3E8F7;
+    --color-lavender-200: #E8D5F0;
+    --color-lavender-300: #D4B8E0;
+    --color-lavender-400: #C8A4D4;
+    --color-lavender-500: #B085C4;
+    --color-lavender-600: #9B6AB0;
+    --color-lavender-700: #7D5490;
+    --color-lavender-800: #5D3D6B;
+    --color-lavender-900: #3D2646;
+
+    /* Cores de contraste (INK) */
+    --color-ink: #2D2A32;
+    --color-ink-light: #5A5560;
+    --color-ink-muted: #8B8591;
+    --color-surface: #FFFFFF;
+    --color-background: #FAF8FC;
+
+    /* Fontes */
     --font-sans: 'Inter', system-ui, sans-serif;
     --font-display: 'Outfit', 'Inter', sans-serif;
+
+    /* Animações customizadas */
+    --animate-breathe: breathe 4s ease-in-out infinite;
+    --animate-float: float 6s ease-in-out infinite;
+    --animate-slide-up: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* Keyframes */
+    @keyframes breathe {
+
+        0%,
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        50% {
+            transform: scale(1.02);
+            opacity: 0.9;
+        }
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    @keyframes slideUp {
+        0% {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
 }
 
-/* Base Styles */
+/* ESTILOS BASE */
 body {
-    background-color: var(--background);
-    color: var(--ink);
+    background-color: var(--color-background);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-family: var(--font-sans);
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-    font-family: var(--font-display);
-    color: var(--ink);
-    font-weight: 700;
-}
-
-/* Nunca use branco puro em telas claras - OFUSCA O LILÁS */
-.bg-white-safe {
-    background-color: #FFFFFF;
-}
-
-/* Componentes */
-
-/* Cards estilo Airbnb mas com nossa identidade */
-.card-metric {
-    background-color: #FFFFFF;
+/* UTILITÁRIOS CUSTOMIZADOS - v4 usa @utility */
+@utility card-metric {
+    background-color: var(--color-surface);
     border-radius: 1.5rem;
-    border: 1px solid rgba(232, 213, 240, 0.5);
+    border: 1px solid var(--color-lavender-200);
     box-shadow: 0 2px 20px rgba(93, 61, 107, 0.06);
-    transition: all 300ms ease-out;
+    transition: all 0.3s ease;
+
+    &:hover {
+        box-shadow: 0 8px 30px rgba(93, 61, 107, 0.12);
+        transform: translateY(-2px);
+    }
 }
 
-.card-metric:hover {
-    box-shadow: 0 8px 30px rgba(93, 61, 107, 0.12);
-    transform: translateY(-0.25rem);
+@utility btn-primary {
+    background-color: var(--color-lavender-600);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    box-shadow: 0 4px 20px rgba(155, 106, 176, 0.3);
+    transition: all 0.2s;
+
+    &:hover {
+        background-color: var(--color-lavender-700);
+        transform: translateY(-1px);
+    }
+
+    &:active {
+        transform: scale(0.98);
+    }
 }
 
-/* Botão primário com contraste adequado */
-.btn-primary {
-    background-color: var(--lavender-600);
-    color: #FFFFFF;
+@utility btn-ghost {
+    background-color: var(--color-lavender-50);
+    color: var(--color-lavender-800);
     padding: 0.75rem 1.5rem;
     border-radius: 1rem;
     font-weight: 600;
     transition: all 200ms;
+
+    &:hover {
+        background-color: var(--color-lavender-100);
+    }
+
+    &:active {
+        transform: scale(0.95);
+    }
 }
 
-.btn-primary:hover {
-    background-color: #7D5490;
-    box-shadow: 0 0 20px rgba(200, 164, 212, 0.4);
-}
-
-.btn-primary:active {
-    transform: scale(0.95);
-}
-
-.btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Botão secundário (ghost) */
-.btn-ghost {
-    background-color: var(--lavender-50);
-    color: var(--lavender-800);
-    padding: 0.75rem 1.5rem;
-    border-radius: 1rem;
-    font-weight: 600;
-    transition: all 200ms;
-}
-
-.btn-ghost:hover {
-    background-color: var(--lavender-100);
-}
-
-.btn-ghost:active {
-    transform: scale(0.95);
-}
-
-/* Input estilo iOS/Airbnb */
-.input-metric {
+@utility input-metric {
     width: 100%;
-    background-color: #FFFFFF;
-    border: 1px solid var(--lavender-200);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-lavender-200);
     border-radius: 1rem;
     padding: 0.875rem 1rem;
-    color: var(--ink);
+    color: var(--color-ink);
     transition: all 200ms;
+
+    &::placeholder {
+        color: rgba(200, 164, 212, 0.7);
+    }
+
+    &:focus {
+        outline: none;
+        border-color: #B085C4;
+        box-shadow: 0 0 0 2px var(--color-lavender-200);
+    }
 }
 
-.input-metric::placeholder {
-    color: rgba(200, 164, 212, 0.7);
+@utility text-gradient {
+    background: linear-gradient(135deg, var(--color-lavender-600), var(--color-lavender-800));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
-.input-metric:focus {
-    outline: none;
-    border-color: #B085C4;
-    box-shadow: 0 0 0 2px var(--lavender-200);
-}
-
-/* Navegação inferior corrigida */
-.bottom-nav-fixed {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-top: 1px solid var(--lavender-100);
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.03);
-    z-index: 50;
-    padding-bottom: env(safe-area-inset-bottom, 20px);
-}
-
-/* Container principal */
-.safe-container {
-    padding-bottom: 8rem;
+@utility safe-container {
     padding-top: 5rem;
+    padding-bottom: 8rem;
     padding-left: 1.25rem;
     padding-right: 1.25rem;
     min-height: 100vh;
 }
 
-/* Scrollbar estilizada */
+@utility bottom-nav-fixed {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--color-lavender-100);
+    z-index: 50;
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+/* SCROLLBAR */
 ::-webkit-scrollbar {
     width: 6px;
 }
@@ -170,14 +189,11 @@ h6 {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--lavender-300);
+    background: var(--color-lavender-300);
     border-radius: 10px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: var(--lavender-400);
-}
-
+/* HIDE SCROLLBAR */
 .hide-scrollbar::-webkit-scrollbar {
     display: none;
 }
