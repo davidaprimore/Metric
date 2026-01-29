@@ -31,14 +31,11 @@ export function BottomNav({ activeTab = 'home', onTabChange }: {
                             <motion.button
                                 key={item.id}
                                 onClick={() => onTabChange(item.id)}
-                                className="relative -top-6 w-14 h-14 rounded-full bg-gradient-to-br from-lavender-400 
-                         to-lavender-600 text-white shadow-glow flex items-center justify-center
-                         hover:shadow-lift transition-shadow cursor-pointer"
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                                whileHover={{ scale: 1.1, rotate: 90 }}
+                                whileTap={{ scale: 0.8 }}
+                                className="btn-floating relative -top-8 w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl"
                             >
-                                <i className={`${item.icon} text-xl`}></i>
+                                <i className="fas fa-plus"></i>
                             </motion.button>
                         );
                     }
