@@ -246,3 +246,11 @@ body {
 .icon-exams {
   background: linear-gradient(135deg, #45B7D1, #74C7E3);
 }
+
+/* PREVENIR SCROLL HORIZONTAL (BUG FIX POCO X7/MOBILE) */
+html, body, #root {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  width: 100%;
+  position: relative;
+}

@@ -135,7 +135,7 @@ export default function HomeScreen() {
     ];
 
     return (
-        <div className="min-h-screen bg-background pb-24 max-w-md mx-auto shadow-2xl relative">
+        <div className="min-h-screen bg-background pb-24 max-w-md mx-auto shadow-2xl relative overflow-x-hidden">
             {/* Header com Notificação Funcional */}
             <header className="px-5 pt-6 pb-2 flex justify-between items-center bg-background sticky top-0 z-30">
                 <div className="flex items-center gap-3">
