@@ -58,7 +58,7 @@ export const AppRoutes = () => {
 
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-                <Route path="/dashboard" element={<PrivateRoute><DashboardScreen /></PrivateRoute>} />
+                <Route path="/dashboard" element={<PrivateRoute showNav={false}><DashboardScreen /></PrivateRoute>} />
 
                 <Route path="/assessment" element={<PrivateRoute><AssessmentScreen /></PrivateRoute>} />
                 <Route path="/assessment/anamnesis" element={<PrivateRoute><AnamnesisScreen /></PrivateRoute>} />

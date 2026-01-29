@@ -7,9 +7,10 @@ import { motion } from 'framer-motion';
 interface PrivateRouteProps {
     children: React.ReactNode;
     fullScreen?: boolean;
+    showNav?: boolean;
 }
 
-export const PrivateRoute = ({ children, fullScreen = false }: PrivateRouteProps) => {
+export const PrivateRoute = ({ children, fullScreen = false, showNav = true }: PrivateRouteProps) => {
     const { session, loading } = useAuth();
 
     if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-[#D4AF37] font-black tracking-widest animate-pulse">CARREGANDO...</div>;
@@ -26,7 +27,7 @@ export const PrivateRoute = ({ children, fullScreen = false }: PrivateRouteProps
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="w-full min-h-screen"
         >
-            <MainLayout fullScreen={fullScreen}>{children}</MainLayout>
+            <MainLayout fullScreen={fullScreen} showNav={showNav}>{children}</MainLayout>
         </motion.div>
     );
 };

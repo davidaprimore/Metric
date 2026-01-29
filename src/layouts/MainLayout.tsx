@@ -5,12 +5,13 @@ import { BottomNav } from '@/components/layout/BottomNav';
 interface MainLayoutProps {
     children: ReactNode;
     fullScreen?: boolean;
+    showNav?: boolean;
 }
 
 import { Toast } from '@/components/ui/Toast';
 import { useState, useEffect } from 'react';
 
-export const MainLayout = ({ children, fullScreen = false }: MainLayoutProps) => {
+export const MainLayout = ({ children, fullScreen = false, showNav = true }: MainLayoutProps) => {
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' as 'success' | 'error' | 'loading' });
 
     // Global listener for foreground notifications
@@ -44,8 +45,8 @@ export const MainLayout = ({ children, fullScreen = false }: MainLayoutProps) =>
                 {children}
             </main>
 
-            {/* Bottom Nav - Mobile Only (Hidden if fullScreen) */}
-            {!fullScreen && <BottomNav />}
+            {/* Bottom Nav - Mobile Only (Hidden if fullScreen or showNav is false) */}
+            {!fullScreen && showNav && <BottomNav />}
         </div>
     );
 };

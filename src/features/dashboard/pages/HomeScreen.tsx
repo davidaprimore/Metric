@@ -135,7 +135,7 @@ export default function HomeScreen() {
     ];
 
     return (
-        <div className="min-h-screen bg-background pb-24">
+        <div className="min-h-screen bg-background pb-24 max-w-md mx-auto shadow-2xl relative">
             {/* Header com Notificação Funcional */}
             <header className="px-5 pt-6 pb-2 flex justify-between items-center bg-background sticky top-0 z-30">
                 <div className="flex items-center gap-3">
@@ -379,40 +379,42 @@ export default function HomeScreen() {
             </main >
 
             {/* Bottom Nav - ÚNICA E FUNCIONAL */}
-            < nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-lavender-100 pb-safe z-50" >
-                <div className="max-w-md mx-auto flex justify-around items-center py-3 relative">
-                    {/* Item 1 */}
-                    <button className="flex flex-col items-center gap-1 text-lavender-600 w-16">
-                        <div className="text-xl">{Icons.grid}</div>
-                        <span className="text-[10px] font-medium">Início</span>
-                    </button>
+            <nav className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
+                <div className="max-w-md mx-auto bg-white/95 backdrop-blur-lg border-t border-lavender-100 pb-safe pointer-events-auto shadow-lg-up">
+                    <div className="flex justify-around items-center py-3 relative">
+                        {/* Item 1 */}
+                        <button className="flex flex-col items-center gap-1 text-lavender-600 w-16">
+                            <div className="text-xl">{Icons.grid}</div>
+                            <span className="text-[10px] font-medium">Início</span>
+                        </button>
 
-                    {/* Item 2 */}
-                    <button className="flex flex-col items-center gap-1 text-ink-muted hover:text-lavender-600 transition-colors w-16">
-                        <div className="text-xl">{Icons.calendar}</div>
-                        <span className="text-[10px] font-medium">Buscar</span>
-                    </button>
+                        {/* Item 2 */}
+                        <button className="flex flex-col items-center gap-1 text-ink-muted hover:text-lavender-600 transition-colors w-16">
+                            <div className="text-xl">{Icons.calendar}</div>
+                            <span className="text-[10px] font-medium">Buscar</span>
+                        </button>
 
-                    {/* FAB Central */}
-                    <div className="relative -top-8">
-                        <button className="w-14 h-14 rounded-full bg-gradient-to-br from-lavender-400 to-lavender-600 text-white shadow-lg shadow-lavender-500/30 flex items-center justify-center text-2xl hover:scale-110 transition-transform">
-                            {Icons.plus}
+                        {/* FAB Central */}
+                        <div className="relative -top-8">
+                            <button className="w-14 h-14 rounded-full bg-gradient-to-br from-lavender-400 to-lavender-600 text-white shadow-lg shadow-lavender-500/30 flex items-center justify-center text-2xl hover:scale-110 transition-transform">
+                                {Icons.plus}
+                            </button>
+                        </div>
+
+                        {/* Item 4 */}
+                        <button className="flex flex-col items-center gap-1 text-ink-muted hover:text-lavender-600 transition-colors w-16">
+                            <div className="text-xl">{Icons.fileText}</div>
+                            <span className="text-[10px] font-medium">Agenda</span>
+                        </button>
+
+                        {/* Item 5 */}
+                        <button className="flex flex-col items-center gap-1 text-ink-muted hover:text-lavender-600 transition-colors w-16">
+                            <div className="text-xl">{Icons.heart}</div>
+                            <span className="text-[10px] font-medium">Perfil</span>
                         </button>
                     </div>
-
-                    {/* Item 4 */}
-                    <button className="flex flex-col items-center gap-1 text-ink-muted hover:text-lavender-600 transition-colors w-16">
-                        <div className="text-xl">{Icons.fileText}</div>
-                        <span className="text-[10px] font-medium">Agenda</span>
-                    </button>
-
-                    {/* Item 5 */}
-                    <button className="flex flex-col items-center gap-1 text-ink-muted hover:text-lavender-600 transition-colors w-16">
-                        <div className="text-xl">{Icons.heart}</div>
-                        <span className="text-[10px] font-medium">Perfil</span>
-                    </button>
                 </div>
-            </nav >
+            </nav>
         </div >
     );
 }
