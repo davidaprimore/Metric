@@ -1,0 +1,188 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+/* Cores Metrika - Definidas como CSS Variables para o Tailwind v4 capturar automaticamente se configurado ou para uso direto */
+:root {
+    --lavender-50: #FAF8FC;
+    --lavender-100: #F3E8F7;
+    --lavender-200: #E8D5F0;
+    --lavender-300: #D4B8E0;
+    --lavender-400: #C8A4D4;
+    --lavender-600: #9B6AB0;
+    --lavender-800: #5D3D6B;
+    --lavender-900: #3D2646;
+    --ink: #2D2A32;
+    --ink-muted: #8B8591;
+    --background: #FAF8FC;
+}
+
+@theme {
+    --color-lavender-50: var(--lavender-50);
+    --color-lavender-100: var(--lavender-100);
+    --color-lavender-200: var(--lavender-200);
+    --color-lavender-300: var(--lavender-300);
+    --color-lavender-400: var(--lavender-400);
+    --color-lavender-600: var(--lavender-600);
+    --color-lavender-800: var(--lavender-800);
+    --color-lavender-900: var(--lavender-900);
+    --color-ink: var(--ink);
+    --color-ink-muted: var(--ink-muted);
+    --color-background: var(--background);
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-display: 'Outfit', 'Inter', sans-serif;
+}
+
+/* Base Styles */
+body {
+    background-color: var(--background);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: var(--font-sans);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-display);
+    color: var(--ink);
+    font-weight: 700;
+}
+
+/* Nunca use branco puro em telas claras - OFUSCA O LILÁS */
+.bg-white-safe {
+    background-color: #FFFFFF;
+}
+
+/* Componentes */
+
+/* Cards estilo Airbnb mas com nossa identidade */
+.card-metric {
+    background-color: #FFFFFF;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(232, 213, 240, 0.5);
+    box-shadow: 0 2px 20px rgba(93, 61, 107, 0.06);
+    transition: all 300ms ease-out;
+}
+
+.card-metric:hover {
+    box-shadow: 0 8px 30px rgba(93, 61, 107, 0.12);
+    transform: translateY(-0.25rem);
+}
+
+/* Botão primário com contraste adequado */
+.btn-primary {
+    background-color: var(--lavender-600);
+    color: #FFFFFF;
+    padding: 0.75rem 1.5rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    transition: all 200ms;
+}
+
+.btn-primary:hover {
+    background-color: #7D5490;
+    box-shadow: 0 0 20px rgba(200, 164, 212, 0.4);
+}
+
+.btn-primary:active {
+    transform: scale(0.95);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Botão secundário (ghost) */
+.btn-ghost {
+    background-color: var(--lavender-50);
+    color: var(--lavender-800);
+    padding: 0.75rem 1.5rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    transition: all 200ms;
+}
+
+.btn-ghost:hover {
+    background-color: var(--lavender-100);
+}
+
+.btn-ghost:active {
+    transform: scale(0.95);
+}
+
+/* Input estilo iOS/Airbnb */
+.input-metric {
+    width: 100%;
+    background-color: #FFFFFF;
+    border: 1px solid var(--lavender-200);
+    border-radius: 1rem;
+    padding: 0.875rem 1rem;
+    color: var(--ink);
+    transition: all 200ms;
+}
+
+.input-metric::placeholder {
+    color: rgba(200, 164, 212, 0.7);
+}
+
+.input-metric:focus {
+    outline: none;
+    border-color: #B085C4;
+    box-shadow: 0 0 0 2px var(--lavender-200);
+}
+
+/* Navegação inferior corrigida */
+.bottom-nav-fixed {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--lavender-100);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.03);
+    z-index: 50;
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+/* Container principal */
+.safe-container {
+    padding-bottom: 8rem;
+    padding-top: 5rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    min-height: 100vh;
+}
+
+/* Scrollbar estilizada */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--lavender-300);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--lavender-400);
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
