@@ -165,9 +165,9 @@ export default function HomeScreen() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="relative"
+                    className="relative -mx-5 px-5"
                 >
-                    <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 snap-x snap-mandatory">
+                    <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-8 pt-2 px-1 snap-x snap-mandatory">
                         {healthMetrics.map((metric, index) => (
                             <motion.div
                                 key={metric.id}
@@ -396,9 +396,14 @@ export default function HomeScreen() {
 
                         {/* FAB Central */}
                         <div className="relative -top-8">
-                            <button className="w-14 h-14 rounded-full bg-gradient-to-br from-lavender-400 to-lavender-600 text-white shadow-lg shadow-lavender-500/30 flex items-center justify-center text-2xl hover:scale-110 transition-transform">
+                            <motion.button
+                                whileHover={{ scale: 1.1, rotate: 90 }}
+                                whileTap={{ scale: 0.9, rotate: 90 }}
+                                transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                                className="w-14 h-14 rounded-full bg-gradient-to-br from-lavender-400 to-lavender-600 text-white shadow-lg shadow-lavender-500/30 flex items-center justify-center text-2xl"
+                            >
                                 {Icons.plus}
-                            </button>
+                            </motion.button>
                         </div>
 
                         {/* Item 4 */}

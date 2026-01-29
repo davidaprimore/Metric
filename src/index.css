@@ -254,3 +254,11 @@ html, body, #root {
   width: 100%;
   position: relative;
 }
+
+/* AJUSTE FINO SCROLL */
+body {
+  overflow-x: hidden;
+  width: 100vw;
+  position: relative;
+}
+
