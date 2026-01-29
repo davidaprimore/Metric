@@ -166,11 +166,12 @@ export const SearchScreen: React.FC = () => {
         };
 
         try {
-            // 1. Try fetching with NEW columns (bio, nano_bio)
+            // 1. Try fetching with NEW columns (bio, nano_bio, gender)
             const { data, error } = await buildQuery(`
                 id, full_name, nickname, avatar_url,
                 rating, review_count, specialties(name),
-                address_city, address_state, bio, nano_bio
+                address_city, address_state, bio, nano_bio,
+                gender
             `);
 
             if (error) throw error; // If this fails (e.g. column missing), go to catch
@@ -201,16 +202,28 @@ export const SearchScreen: React.FC = () => {
     };
 
     const processResults = (data: any[]) => {
-        let results = data || [];
+        // Sanitize data: Ensure specialties is always an array
+        let results = (data || []).map(p => ({
+            ...p,
+            specialties: Array.isArray(p.specialties) ? p.specialties : (p.specialties ? [p.specialties] : [])
+        }));
 
         // 1. Filter by Specialty / Favorites
         if (activeFilter !== 'all') {
             if (activeFilter === 'favorites') {
                 results = results.filter(p => favorites.has(p.id));
             } else {
-                results = results.filter(p =>
-                    p.specialties?.[0]?.name?.toLowerCase().includes(activeFilter === 'personal' ? 'personal' : activeFilter)
-                );
+                results = results.filter(p => {
+                    const firstSpecialty = p.specialties?.[0]?.name?.toLowerCase();
+                    if (!firstSpecialty) return false;
+
+                    const f = activeFilter.toLowerCase();
+                    if (f === 'personal') return firstSpecialty.includes('personal');
+                    if (f === 'fisioterapeuta') return firstSpecialty.includes('fisio');
+                    if (f === 'endocrino') return firstSpecialty.includes('endócrino') || firstSpecialty.includes('endocrino');
+
+                    return firstSpecialty.includes(f);
+                });
             }
         }
 
@@ -386,6 +399,13 @@ export const SearchScreen: React.FC = () => {
                                 ) : professionals.length > 0 ? (
                                     professionals.map((pro) => {
                                         const isFav = favorites.has(pro.id);
+                                        const gender = pro.gender?.toLowerCase();
+                                        const avatarSrc = pro.avatar_url
+                                            ? pro.avatar_url
+                                            : (gender === 'female' || gender === 'feminino' || gender === 'f' || gender === 'mulher')
+                                                ? `https://avatar.iran.liara.run/public/girl?username=${pro.id}`
+                                                : `https://avatar.iran.liara.run/public/boy?username=${pro.id}`;
+
                                         return (
                                             <div
                                                 key={pro.id}
@@ -401,17 +421,17 @@ export const SearchScreen: React.FC = () => {
                                                 <div className="flex flex-col items-center gap-3 shrink-0 w-20">
                                                     <div className="w-20 h-20 rounded-full overflow-hidden bg-white shadow-sm border-2 border-white relative">
                                                         <img
-                                                            src={pro.avatar_url || `https://ui-avatars.com/api/?name=${pro.full_name}&background=f3f4f6&color=000`}
+                                                            src={avatarSrc}
                                                             className="w-full h-full object-cover"
                                                             alt={pro.full_name}
                                                         />
                                                     </div>
 
-                                                    {/* Location - Left Aligned under Photo */}
-                                                    <div className="flex items-center gap-1 text-gray-500 text-xs w-full justify-center text-center leading-tight">
-                                                        <MapPin size={12} className="shrink-0" />
+                                                    {/* Location - City - UF */}
+                                                    <div className="flex items-center gap-1 text-gray-400 text-[10px] w-full justify-center text-center leading-tight font-medium">
+                                                        <MapPin size={10} className="shrink-0" />
                                                         <span className="">
-                                                            {pro.address_city || 'Online'}
+                                                            {pro.address_city || 'Online'} {pro.address_state ? `- ${pro.address_state}` : ''}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -424,10 +444,6 @@ export const SearchScreen: React.FC = () => {
                                                             <h3 className="text-[#222222] font-bold text-lg leading-tight truncate">
                                                                 {pro.nickname || pro.full_name}
                                                             </h3>
-                                                            {/* Specialty Pill REMOVED */}
-                                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide inline-block mt-0.5">
-                                                                PRO
-                                                            </span>
                                                         </div>
 
                                                         {/* Top Right: Rating + Favorite */}
@@ -457,13 +473,35 @@ export const SearchScreen: React.FC = () => {
                                                     </div>
 
                                                     {/* Nano Bio */}
-                                                    <div className="mt-1">
+                                                    <div className="mt-1 mb-3">
                                                         <p className="text-xs text-gray-600 leading-relaxed line-clamp-2 font-medium">
                                                             {pro.nano_bio || pro.bio || "Especialista em transformação corporal. Agende hoje mesmo."}
                                                         </p>
                                                     </div>
 
-                                                    {/* Price REMOVED */}
+                                                    {/* Specialties Tags */}
+                                                    <div className="flex flex-wrap gap-1 mb-3">
+                                                        {pro.specialties?.map((s: any, i: number) => (
+                                                            <span key={i} className="px-2 py-1 bg-gray-100/80 rounded-md text-[9px] font-bold text-gray-600 uppercase tracking-wide border border-gray-200/50">
+                                                                {s.name}
+                                                            </span>
+                                                        ))}
+                                                        {(!pro.specialties || pro.specialties.length === 0) && (
+                                                            <span className="px-2 py-1 bg-gray-100/80 rounded-md text-[9px] font-bold text-gray-600 uppercase tracking-wide border border-gray-200/50">
+                                                                Personal Trainer
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Footer: Schedule Button */}
+                                                    <div className="mt-auto">
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); navigate(`/professional/${pro.id}`); }}
+                                                            className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm shadow-emerald-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                                        >
+                                                            Agendar
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         );

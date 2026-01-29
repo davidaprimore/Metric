@@ -38,6 +38,7 @@ import { AppointmentDetailScreen } from '@/features/dashboard/pages/AppointmentD
 import { SearchScreen } from '@/features/search/pages/SearchScreen';
 import { PatientDetailScreen } from '@/features/dashboard/pages/PatientDetailScreen';
 import { ProfessionalDetailScreen } from '@/features/search/pages/ProfessionalDetailScreen';
+import { ServiceSelectionScreen } from '@/features/search/pages/ServiceSelectionScreen';
 
 export const AppRoutes = () => {
     const location = useLocation();
@@ -90,6 +91,7 @@ export const AppRoutes = () => {
 
                 <Route path="/search" element={<PrivateRoute><SearchScreen /></PrivateRoute>} />
                 <Route path="/professional/:id" element={<PrivateRoute><ProfessionalDetailScreen /></PrivateRoute>} />
+                <Route path="/professional/:id/services" element={<PrivateRoute><ServiceSelectionScreen /></PrivateRoute>} />
 
                 <Route path="/appointment/:id" element={<PrivateRoute><AppointmentDetailScreen /></PrivateRoute>} />
 

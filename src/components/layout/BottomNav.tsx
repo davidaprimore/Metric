@@ -1,12 +1,12 @@
 import React from 'react';
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
-    Home,
-    Calendar,
+    LayoutGrid,
+    CalendarCheck,
     Plus,
-    BarChart3,
-    Dumbbell,
-    Search
+    Search,
+    Trophy,
+    Smile
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,8 +23,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab: propActiveTab, 
 
     // Mapping paths to IDs for embedded mode
     const navItems = [
-        { icon: Home, label: 'INÍCIO', path: '/dashboard', id: 'home' },
-        { icon: Calendar, label: 'AGENDA', path: '/schedule', id: 'schedule' },
+        { icon: LayoutGrid, label: 'INÍCIO', path: '/dashboard', id: 'home' },
+        { icon: CalendarCheck, label: 'DIÁRIO', path: '/schedule', id: 'daily' }, // Daily routine
         // Dynamic Middle Button: 'Plus' for Pro, 'Search' for Client
         {
             icon: userProfile?.role === 'profissional' ? Plus : Search,
@@ -33,8 +33,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab: propActiveTab, 
             id: userProfile?.role === 'profissional' ? 'assessment' : 'search',
             isHighlight: true
         },
-        { icon: BarChart3, label: 'RESULTADOS', path: '/results', id: 'results' },
-        { icon: Dumbbell, label: 'TREINOS', path: '/workouts', id: 'workouts' }
+        { icon: Trophy, label: 'EVOLUÇÃO', path: '/profile/history', id: 'progress' }, // Trophy = Success/Happy
+        { icon: Smile, label: 'PERFIL', path: '/profile', id: 'profile' } // Smile = Happy/User
     ];
 
     const handleNavigation = (item: any) => {
@@ -51,24 +51,25 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab: propActiveTab, 
     };
 
     return (
-        <div className="fixed bottom-4 left-4 right-4 h-20 bg-black/80 backdrop-blur-xl rounded-[2rem] border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] flex items-center justify-between px-2 z-50 max-w-md mx-auto transition-all duration-300">
+        <div className="fixed bottom-0 left-0 right-0 h-16 bg-white/85 backdrop-blur-xl border-t border-white/50 shadow-[0_-10px_40px_-5px_rgba(0,0,0,0.1)] flex items-center justify-between px-8 z-50 transition-all duration-300">
             {navItems.map((item) => {
                 const isActive = isTabActive(item);
                 const Icon = item.icon;
 
-                if (item.isHighlight) {
+                if (item.id === 'search' || item.id === 'assessment') {
+                    // Main Action Button (Floating Look)
                     return (
                         <button
                             key={item.label}
                             onClick={() => handleNavigation(item)}
                             className={cn(
-                                "flex flex-col items-center justify-center w-14 h-14 rounded-full transition-all relative group -mt-6 shadow-xl",
+                                "flex flex-col items-center justify-center w-14 h-14 -mt-8 rounded-full transition-all relative group shadow-xl border-4 border-[#F1F5F9]",
                                 isActive
-                                    ? "bg-[#CCFF00] text-black shadow-[0_0_20px_rgba(204,255,0,0.6)] scale-110 ring-4 ring-black/50"
-                                    : "bg-white text-black hover:scale-105 hover:bg-[#CCFF00] shadow-white/20"
+                                    ? "bg-slate-900 text-white scale-110 shadow-slate-900/30"
+                                    : "bg-blue-600 text-white hover:bg-slate-900 hover:scale-105"
                             )}
                         >
-                            <Icon size={24} strokeWidth={3} />
+                            <Icon size={24} strokeWidth={2.5} />
                         </button>
                     );
                 }
@@ -78,20 +79,25 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab: propActiveTab, 
                         key={item.label}
                         onClick={() => handleNavigation(item)}
                         className={cn(
-                            "flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all relative",
+                            "group flex flex-col items-center justify-center w-10 h-10 rounded-xl transition-all relative active:scale-95",
                             isActive
-                                ? "text-[#CCFF00]"
-                                : "text-gray-500 hover:text-white"
+                                ? "text-slate-900"
+                                : "text-slate-400 hover:text-slate-600"
                         )}
                     >
-                        {/* Filled Icon Logic for 'Happy'/Bold Look */}
-                        <Icon
-                            size={24}
-                            strokeWidth={isActive ? 0 : 2}
-                            fill={isActive ? "currentColor" : "none"}
-                            className="transition-all"
-                        />
-                        {isActive && <div className="absolute -bottom-1 w-1 h-1 bg-[#CCFF00] rounded-full shadow-[0_0_5px_#CCFF00]" />}
+                        <div className={cn(
+                            "relative transition-all duration-300",
+                            isActive ? "-translate-y-1" : "group-hover:-translate-y-0.5"
+                        )}>
+                            <Icon
+                                size={24} // Slightly larger for clarity
+                                strokeWidth={isActive ? 2.5 : 2}
+                                className={cn(
+                                    "transition-all",
+                                    isActive ? "drop-shadow-sm" : ""
+                                )}
+                            />
+                        </div>
                     </button>
                 );
             })}

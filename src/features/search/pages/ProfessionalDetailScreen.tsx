@@ -6,26 +6,62 @@ import {
     Star,
     ShieldCheck,
     Calendar,
-    MessageCircle,
     Share2,
     Award,
     Activity,
-    AlertCircle
+    AlertCircle,
+    Heart
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const ProfessionalDetailScreen = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
+
     const [professional, setProfessional] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isFavorite, setIsFavorite] = useState(false);
 
     useEffect(() => {
-        if (id) fetchProfessional();
-    }, [id]);
+        if (id) {
+            fetchProfessional();
+            checkFavorite();
+        }
+    }, [id, user]);
+
+    const checkFavorite = async () => {
+        if (!user || !id) return;
+        const { data } = await supabase
+            .from('favorites')
+            .select('id')
+            .match({ user_id: user.id, professional_id: id })
+            .single();
+        setIsFavorite(!!data);
+    };
+
+    const toggleFavorite = async () => {
+        if (!user || !id) return;
+
+        // Optimistic update
+        const newState = !isFavorite;
+        setIsFavorite(newState);
+
+        try {
+            if (newState) {
+                await supabase.from('favorites').insert({ user_id: user.id, professional_id: id });
+            } else {
+                await supabase.from('favorites').delete().match({ user_id: user.id, professional_id: id });
+            }
+        } catch (err) {
+            console.error('Error toggling favorite:', err);
+            setIsFavorite(!newState); // Revert
+        }
+    };
 
     const fetchProfessional = async () => {
         try {
@@ -38,7 +74,7 @@ export const ProfessionalDetailScreen = () => {
                     rating, review_count, bio, nano_bio,
                     specialties(name),
                     address_city, address_state,
-                    role
+                    role, gender
                 `)
                 .eq('id', id)
                 .single();
@@ -47,6 +83,12 @@ export const ProfessionalDetailScreen = () => {
                 // If specific column error, fallback? Not easy with Supabase-js.
                 throw error;
             }
+            // Sanitize specialties
+            if (data) {
+                data.specialties = Array.isArray(data.specialties)
+                    ? data.specialties
+                    : (data.specialties ? [data.specialties] : []);
+            }
             setProfessional(data);
         } catch (error: any) {
             console.error('Error fetching professional:', error);
@@ -54,6 +96,17 @@ export const ProfessionalDetailScreen = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const getAvatarUrl = (pro: any) => {
+        if (pro.avatar_url) return pro.avatar_url;
+
+        // Generic Gender-Based Avatar
+        const gender = pro.gender?.toLowerCase();
+        if (gender === 'female' || gender === 'feminino' || gender === 'f' || gender === 'mulher') {
+            return `https://avatar.iran.liara.run/public/girl?username=${pro.id}`;
+        }
+        return `https://avatar.iran.liara.run/public/boy?username=${pro.id}`;
     };
 
     if (loading) {
@@ -77,18 +130,18 @@ export const ProfessionalDetailScreen = () => {
         );
     }
 
-    // Default Banner
-    const bannerUrl = "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=2070&auto=format&fit=crop";
+    // Default Banner - Neutral/Abstract (Brighter)
+    const bannerUrl = professional.banner_url || "/assets/default_banner.png";
 
     return (
         <div className="min-h-screen bg-[#F7F7F7] pb-32 w-full text-left">
             {/* Cover Image & Header Actions */}
             <div className="h-64 bg-gray-900 relative overflow-hidden">
                 <div
-                    className="absolute inset-0 bg-cover bg-center opacity-60 mix-blend-overlay"
+                    className="absolute inset-0 bg-cover bg-center opacity-80 mix-blend-normal" // Increased opacity, removed overlay mix blend for clarity
                     style={{ backgroundImage: `url('${bannerUrl}')` }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent" /> {/* Lighter gradient */}
 
                 <header className="absolute top-0 w-full px-6 pt-8 flex justify-between items-center z-10 w-full">
                     <button
@@ -98,6 +151,12 @@ export const ProfessionalDetailScreen = () => {
                         <ChevronLeft size={24} />
                     </button>
                     <div className="flex gap-3">
+                        <button
+                            onClick={toggleFavorite}
+                            className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-all border border-white/10 shadow-lg"
+                        >
+                            <Heart size={20} className={isFavorite ? "fill-[#FF385C] text-[#FF385C]" : "text-white"} />
+                        </button>
                         <button className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-all border border-white/10 shadow-lg">
                             <Share2 size={20} />
                         </button>
@@ -119,7 +178,7 @@ export const ProfessionalDetailScreen = () => {
                     <div className="flex flex-col items-center -mt-16 mb-6 relative z-10">
                         <div className="w-28 h-28 rounded-full border-4 border-white shadow-xl overflow-hidden bg-gray-100 mb-4 cursor-pointer active:scale-95 transition-transform">
                             <img
-                                src={professional.avatar_url || `https://ui-avatars.com/api/?name=${professional.full_name}&background=f3f4f6&color=000`}
+                                src={getAvatarUrl(professional)}
                                 className="w-full h-full object-cover"
                                 alt={professional.full_name}
                             />
@@ -225,9 +284,16 @@ export const ProfessionalDetailScreen = () => {
                     </div>
 
                     {/* CTA Area */}
-                    <div className="bg-gradient-to-br from-[#FF385C]/10 to-[#FF385C]/5 rounded-2xl p-4 border border-[#FF385C]/20 text-center mb-4">
-                        <p className="text-sm font-bold text-[#FF385C] mb-1">Pronto para começar?</p>
-                        <p className="text-xs text-gray-500">Agende sua avaliação inicial e comece sua transformação.</p>
+                    <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 rounded-2xl p-4 border border-emerald-500/20 text-center mb-4">
+                        <p className="text-sm font-bold text-emerald-600 mb-3">Pronto para começar?</p>
+                        <p className="text-xs text-gray-500 mb-3">Agende sua avaliação inicial e comece sua transformação.</p>
+                        <Button
+                            variant="primary"
+                            className="w-full h-10 bg-emerald-600 hover:bg-emerald-700 text-xs font-bold uppercase tracking-wide shadow-lg shadow-emerald-200"
+                            onClick={() => navigate(`/professional/${id}/services`)}
+                        >
+                            Ver Horários Disponíveis
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -243,8 +309,8 @@ export const ProfessionalDetailScreen = () => {
                     </div>
                     <Button
                         variant="primary"
-                        className="flex-1 h-14 rounded-2xl bg-[#FF385C] hover:bg-[#e01f45] shadow-lg shadow-rose-200 text-sm font-bold uppercase tracking-wide"
-                        onClick={() => navigate('/schedule')}
+                        className="flex-1 h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200 text-sm font-bold uppercase tracking-wide"
+                        onClick={() => navigate(`/professional/${id}/services`)}
                     >
                         Agendar Agora
                     </Button>

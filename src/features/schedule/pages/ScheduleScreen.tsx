@@ -19,7 +19,7 @@ import {
   WifiOff
 } from 'lucide-react';
 import { Toast } from '@/components/ui/Toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useOfflineQueue } from '@/contexts/OfflineQueueContext';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, isBefore, startOfDay } from 'date-fns';
@@ -33,6 +33,7 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
   const { session } = useAuth();
   const { isOnline } = useOfflineQueue();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Wizard State
   const [isBookingOpen, setIsBookingOpen] = useState(true);
@@ -46,6 +47,59 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'pix' | 'credit'>('pix');
 
+  // Initialization from Navigation State (e.g. from ServiceSelectionScreen)
+  useEffect(() => {
+    if (location.state?.professionalId) {
+      const init = async () => {
+        setLoading(true);
+        try {
+          // Fetch the passed professional
+          const { data: pro } = await supabase.from('profiles').select('*').eq('id', location.state.professionalId).single();
+          if (pro) {
+            setSelectedProfessional(pro);
+            // Load Blocks/Availability for this pro
+            loadProfessionalConfig(pro.id);
+          }
+
+          // Pre-select plan if passed
+          if (location.state?.plan) {
+            setSelectedPlan(location.state.plan);
+            setWizardStep('schedule');
+          }
+        } catch (err) {
+          console.error("Error initializing from state", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      init();
+    }
+  }, [location.state]);
+
+  const loadProfessionalConfig = async (proId: string) => {
+    try {
+      const { data: availData } = await supabase
+        .from('professional_availability')
+        .select('day_of_week')
+        .eq('professional_id', proId)
+        .eq('is_active', true);
+
+      const activeDays = availData?.map(a => a.day_of_week) || [];
+      setWeekConfig([...new Set(activeDays)]);
+
+      const { data: blocks } = await supabase.from('appointments')
+        .select('start_time')
+        .eq('professional_id', proId)
+        .or('status.eq.blocked,notes.eq.FULL_DAY_BLOCK');
+
+      if (blocks) {
+        setBlockedDates(blocks.map(b => format(new Date(b.start_time), 'yyyy-MM-dd')));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   // Data
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -55,9 +109,9 @@ export const ScheduleScreen: React.FC<ScheduleScreenProps> = (props) => {
   const [appointmentId, setAppointmentId] = useState<string | null>(null);
   const [confirmedDate, setConfirmedDate] = useState<Date | null>(null);
 
-  // Auto-select Professional (Priority: Alex)
+  // Auto-select Professional (Priority: Alex) - ONLY if not already selected via State
   useEffect(() => {
-    if (wizardStep === 'schedule' && !selectedProfessional) {
+    if (wizardStep === 'schedule' && !selectedProfessional && !location.state?.professionalId) {
       const loadProfessional = async () => {
         setLoading(true);
         try {

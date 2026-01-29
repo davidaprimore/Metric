@@ -284,7 +284,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = (props) => {
             </div>
 
             {/* Bottom Nav Section - Only show if not embedded */}
-            {!props.embedded && <ProfessionalBottomNav activeTab="profile" onTabChange={() => { }} />}
+            {/* Bottom Nav handled by MainLayout */}
         </FluidBackground>
     );
 };
