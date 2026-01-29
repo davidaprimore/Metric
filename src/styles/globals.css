@@ -1,0 +1,209 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        background-color: #FAF8FC;
+        color: #2D2A32;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        font-family: 'Inter', sans-serif;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: 'Outfit', sans-serif;
+        color: #2D2A32;
+        font-weight: 700;
+    }
+
+    /* Nunca use branco puro em telas claras - OFUSCA O LILÁS */
+    .bg-white-safe {
+        background-color: #FFFFFF;
+    }
+}
+
+@layer components {
+
+    /* Cards estilo Airbnb mas com nossa identidade */
+    .card-metric {
+        background-color: #FFFFFF;
+        border-radius: 1.5rem;
+        /* rounded-3xl */
+        border: 1px solid rgba(232, 213, 240, 0.5);
+        /* border-lavender-200/50 */
+        box-shadow: 0 2px 20px rgba(93, 61, 107, 0.06);
+        /* shadow-soft */
+        transition: all 300ms ease-out;
+    }
+
+    .card-metric:hover {
+        box-shadow: 0 8px 30px rgba(93, 61, 107, 0.12);
+        /* shadow-lift */
+        transform: translateY(-0.25rem);
+        /* -translate-y-1 */
+    }
+
+    /* Botão primário com contraste adequado */
+    .btn-primary {
+        background-color: #9B6AB0;
+        /* bg-lavender-600 */
+        color: #FFFFFF;
+        padding: 0.75rem 1.5rem;
+        /* px-6 py-3 */
+        border-radius: 1rem;
+        /* rounded-2xl */
+        font-weight: 600;
+        transition: all 200ms;
+    }
+
+    .btn-primary:hover {
+        background-color: #7D5490;
+        /* bg-lavender-700 */
+        box-shadow: 0 0 20px rgba(200, 164, 212, 0.4);
+        /* shadow-glow */
+    }
+
+    .btn-primary:active {
+        transform: scale(0.95);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Botão secundário (ghost) */
+    .btn-ghost {
+        background-color: #FAF8FC;
+        /* bg-lavender-50 */
+        color: #5D3D6B;
+        /* text-lavender-800 */
+        padding: 0.75rem 1.5rem;
+        border-radius: 1rem;
+        font-weight: 600;
+        transition: all 200ms;
+    }
+
+    .btn-ghost:hover {
+        background-color: #F3E8F7;
+        /* bg-lavender-100 */
+    }
+
+    .btn-ghost:active {
+        transform: scale(0.95);
+    }
+
+    /* Input estilo iOS/Airbnb */
+    .input-metric {
+        width: 100%;
+        background-color: #FFFFFF;
+        /* bg-surface */
+        border: 1px solid #E8D5F0;
+        /* border-lavender-200 */
+        border-radius: 1rem;
+        /* rounded-2xl */
+        padding: 0.875rem 1rem;
+        /* px-4 py-3.5 */
+        color: #2D2A32;
+        /* text-ink */
+        transition: all 200ms;
+    }
+
+    .input-metric::placeholder {
+        color: rgba(200, 164, 212, 0.7);
+        /* text-lavender-400/70 */
+    }
+
+    .input-metric:focus {
+        outline: none;
+        border-color: #B085C4;
+        /* border-lavender-500 */
+        box-shadow: 0 0 0 2px #E8D5F0;
+        /* ring-2 ring-lavender-200 */
+    }
+
+    /* Navegação inferior corrigida (nunca será sobreposta) */
+    .bottom-nav-fixed {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(255, 255, 255, 0.95);
+        /* bg-white/95 */
+        backdrop-filter: blur(16px);
+        /* backdrop-blur-lg - approximate */
+        -webkit-backdrop-filter: blur(16px);
+        border-top: 1px solid #F3E8F7;
+        /* border-lavender-100 */
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.03);
+        /* shadow-nav */
+        z-index: 50;
+        /* pb-safe é para iPhones com notch */
+        padding-bottom: env(safe-area-inset-bottom, 20px);
+    }
+
+    /* Container principal com padding para não ficar sob a nav */
+    .safe-container {
+        padding-bottom: 8rem;
+        /* pb-32 */
+        padding-top: 5rem;
+        /* pt-20 */
+        padding-left: 1.25rem;
+        /* px-5 */
+        padding-right: 1.25rem;
+        min-height: 100vh;
+    }
+
+    /* Animações de entrada */
+    .animate-enter {
+        animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .animate-enter-delay-1 {
+        animation-delay: 0.1s;
+    }
+
+    .animate-enter-delay-2 {
+        animation-delay: 0.2s;
+    }
+
+    .animate-enter-delay-3 {
+        animation-delay: 0.3s;
+    }
+}
+
+/* Scrollbar estilizada */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #D4B8E0;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #C8A4D4;
+}
+
+/* Para esconder scrollbar mas manter funcionalidade */
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

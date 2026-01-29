@@ -12,7 +12,7 @@ export const FinancialOverview = () => {
 
             {/* Main Balance Card */}
             <div className="bg-gradient-to-br from-[#122216] to-[#0A0A0A] border border-[#D4AF37]/20 p-8 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
-                <div className="absolute top-0 right-0 w-full h-full bg-[url('/assets/grain.png')] opacity-20 pointer-events-none mix-blend-overlay"></div>
+                <div className="absolute top-0 right-0 w-full h-full opacity-20 pointer-events-none mix-blend-overlay"></div>
                 <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#D4AF37]/20 rounded-full blur-3xl" />
 
                 <div className="relative z-10">
