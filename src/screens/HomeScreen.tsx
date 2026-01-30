@@ -3,8 +3,14 @@ import { motion } from 'framer-motion';
 import { MetricCard } from '../components/MetricCard';
 import { MatchCard } from '../components/MatchCard';
 import { QuickActions } from '../components/QuickActions';
+import { BottomNav } from '../components/BottomNav';
 
-export default function HomeScreen() {
+interface HomeScreenProps {
+    onOpenNotifications: () => void;
+    onOpenWater: () => void;
+}
+
+export default function HomeScreen({ onOpenNotifications, onOpenWater }: HomeScreenProps) {
     const [hour, setHour] = useState(0);
 
     useEffect(() => {
@@ -25,7 +31,10 @@ export default function HomeScreen() {
                 </div>
 
                 {/* SININHO GARANTIDO - SVG inline visível */}
-                <button className="w-10 h-10 bg-white rounded-full border border-[#E8D5F0] flex items-center justify-center relative hover:bg-[#F3E8F7] transition-colors">
+                <button
+                    onClick={onOpenNotifications}
+                    className="w-10 h-10 bg-white rounded-full border border-[#E8D5F0] flex items-center justify-center relative hover:bg-[#F3E8F7] transition-colors"
+                >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3D2646" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                         <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -58,7 +67,7 @@ export default function HomeScreen() {
                     <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 -mx-5 px-5">
                         <MetricCard icon="📊" value="18.5%" label="Gordura" progress={65} progressColor="bg-gradient-to-r from-orange-400 to-red-400" subtext="-2% este mês" subColor="text-green-600" delay={0.1} />
                         <MetricCard icon="🥗" value="1.450" label="kcal" progress={80} progressColor="bg-gradient-to-r from-green-400 to-emerald-500" subtext="Na meta" subColor="text-green-600" delay={0.2} />
-                        <MetricCard icon="💧" value="1.2L" label="Água" progress={60} progressColor="bg-gradient-to-r from-blue-400 to-cyan-500" subtext="+500ml" subColor="text-blue-600" delay={0.3} />
+                        <MetricCard icon="💧" value="1.2L" label="Água" progress={60} progressColor="bg-gradient-to-r from-blue-400 to-cyan-500" subtext="+500ml" subColor="text-blue-600" delay={0.3} onClick={onOpenWater} />
                     </div>
                 </div>
 
@@ -111,6 +120,51 @@ export default function HomeScreen() {
 
                 {/* AÇÕES RÁPIDAS */}
                 <QuickActions />
+
+                {/* PATROCINADOR GROWTH */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                    whileHover={{ scale: 1.02 }}
+                    className="bg-white rounded-[24px] p-5 border border-[#E8D5F0] shadow-[0_4px_20px_rgba(93,61,107,0.06)] flex gap-4 items-center relative overflow-hidden mb-6 cursor-pointer group"
+                >
+                    {/* Badge sutil */}
+                    <div className="absolute top-3 right-3 text-[9px] text-[#8B8591] font-semibold tracking-wider uppercase opacity-60">
+                        Patrocinado
+                    </div>
+
+                    {/* Imagem/Ícone */}
+                    <motion.div
+                        className="w-20 h-20 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl flex items-center justify-center text-4xl flex-shrink-0 border border-green-100"
+                        whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        💪
+                    </motion.div>
+
+                    <div className="flex-1 pt-2">
+                        <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-[Outfit] text-[16px] font-bold text-[#3D2646]">Growth Suplementos</h4>
+                            <span className="px-1.5 py-0.5 bg-green-100 text-green-600 text-[9px] font-bold rounded">PARCEIRO</span>
+                        </div>
+                        <p className="text-[13px] text-[#8B8591] leading-snug mb-3">
+                            Whey Protein Isolado com <span className="text-green-600 font-bold">30% OFF</span> exclusivo para membros Metrika
+                        </p>
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="px-4 py-2 bg-[#FAF8FC] border border-[#E8D5F0] rounded-full text-[12px] font-bold text-[#3D2646] hover:bg-[#F3E8F7] hover:border-[#9B6AB0] transition-colors group-hover:shadow-md"
+                        >
+                            Ver oferta →
+                        </motion.button>
+                    </div>
+
+                    {/* Efeito de brilho sutil no hover */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                    </div>
+                </motion.div>
 
                 {/* PLANO */}
                 <motion.div
@@ -176,42 +230,7 @@ export default function HomeScreen() {
             </main>
 
             {/* NAV INFERIOR */}
-            <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-[#E8D5F0] px-6 py-3 pb-7 flex justify-between items-start max-w-[430px] mx-auto z-50">
-                <button className="flex flex-col items-center gap-1 text-[#9B6AB0] w-16">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M3 13h1v7c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-7h1a1 1 0 0 0 .707-1.707l-9-9a1 1 0 0 0-1.414 0l-9 9A1 1 0 0 0 3 13z" />
-                    </svg>
-                    <span className="text-[10px] font-semibold">Início</span>
-                </button>
-                <button className="flex flex-col items-center gap-1 text-[#8B8591] w-16">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    <span className="text-[10px] font-semibold">Buscar</span>
-                </button>
-                <div className="relative -top-7">
-                    <button className="w-14 h-14 bg-gradient-to-br from-[#C8A4D4] to-[#9B6AB0] rounded-full flex items-center justify-center text-white text-3xl shadow-lg border-4 border-[#FAF8FC]">
-                        +
-                    </button>
-                </div>
-                <button className="flex flex-col items-center gap-1 text-[#8B8591] w-16">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
-                    <span className="text-[10px] font-semibold">Agenda</span>
-                </button>
-                <button className="flex flex-col items-center gap-1 text-[#8B8591] w-16">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                    <span className="text-[10px] font-semibold">Perfil</span>
-                </button>
-            </nav>
+            <BottomNav />
         </div>
     );
 }

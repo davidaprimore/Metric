@@ -9,18 +9,21 @@ interface Props {
     subtext: string;
     subColor: string;
     delay: number;
+    onClick?: () => void;
 }
 
-export function MetricCard({ icon, value, label, progress, progressColor, subtext, subColor, delay }: Props) {
+export function MetricCard({ icon, value, label, progress, progressColor, subtext, subColor, delay, onClick }: Props) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay, duration: 0.5 }}
-            className="min-w-[140px] bg-white rounded-[20px] p-4 border border-[#E8D5F0] shadow-[0_4px_20px_rgba(93,61,107,0.06)]"
+            onClick={onClick}
+            whileTap={onClick ? { scale: 0.95 } : undefined}
+            className={`min-w-[140px] bg-white rounded-[20px] p-4 border border-[#E8D5F0] shadow-[0_4px_20px_rgba(93,61,107,0.06)] ${onClick ? 'cursor-pointer' : ''}`}
         >
             <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-2xl mb-3 ${progressColor.includes('orange') ? 'bg-[#FFF0E6]' :
-                    progressColor.includes('green') ? 'bg-[#E6F7F0]' : 'bg-[#E6F0FF]'
+                progressColor.includes('green') ? 'bg-[#E6F7F0]' : 'bg-[#E6F0FF]'
                 }`}>
                 {icon}
             </div>
