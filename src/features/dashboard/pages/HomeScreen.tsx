@@ -64,6 +64,7 @@ export default function HomeScreen() {
     const [activeTab, setActiveTab] = useState('upcoming');
     const [showMoreActions, setShowMoreActions] = useState(false);
     const [selectedMetric, setSelectedMetric] = useState(0);
+    const [fabRotation, setFabRotation] = useState(0);
 
     useEffect(() => {
         const hour = new Date().getHours();
@@ -135,9 +136,9 @@ export default function HomeScreen() {
     ];
 
     return (
-        <div className="min-h-screen bg-background pb-24 max-w-md mx-auto shadow-2xl relative overflow-x-hidden">
+        <div className="min-h-screen bg-background pb-24 w-full max-w-md mx-auto shadow-2xl relative overflow-x-hidden">
             {/* Header com Notificação Funcional */}
-            <header className="px-5 pt-6 pb-2 flex justify-between items-center bg-background sticky top-0 z-30">
+            <header className="px-4 pt-6 pb-2 flex justify-between items-center bg-background sticky top-0 z-30">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lavender-400 to-lavender-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
                         M
@@ -151,7 +152,7 @@ export default function HomeScreen() {
                 </button>
             </header>
 
-            <main className="px-5 pt-4 space-y-6">
+            <main className="px-4 pt-4 space-y-6">
                 {/* Saudação */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                     <p className="text-ink-muted text-sm mb-1">{greeting},</p>
@@ -161,21 +162,21 @@ export default function HomeScreen() {
                 </motion.div>
 
                 {/* CAROUSEL DE MÉTRICAS CLÍNICAS (C6 Bank style) */}
+                {/* CAROUSEL DE MÉTRICAS CLÍNICAS (C6 Bank style) */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="relative -mx-5 px-5"
+                    className="relative -mx-4" // Pull full width (matched to px-4)
                 >
-                    <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-8 pt-2 px-1 snap-x snap-mandatory">
+                    <div className="flex gap-4 overflow-x-auto hide-scrollbar py-6 px-4 snap-x snap-mandatory">
                         {healthMetrics.map((metric, index) => (
                             <motion.div
                                 key={metric.id}
                                 onClick={() => setSelectedMetric(index)}
-                                className={`flex-shrink-0 w-40 snap-center rounded-3xl p-4 cursor-pointer transition-all border-2 ${selectedMetric === index ? 'border-lavender-500 shadow-lg scale-105' : 'border-transparent'
+                                className={`flex-shrink-0 w-40 snap-center rounded-3xl p-4 cursor-pointer transition-all border-2 ${selectedMetric === index ? 'border-lavender-500 shadow-xl scale-105' : 'border-transparent'
                                     } bg-white shadow-soft`}
-                                whileHover={{ y: -4 }}
-                                whileTap={{ scale: 0.98 }}
+                                whileTap={{ scale: 0.95 }}
                             >
                                 {/* Header do card */}
                                 <div className="flex justify-between items-start mb-3">
@@ -224,7 +225,7 @@ export default function HomeScreen() {
                     </div>
 
                     {/* Indicador de página */}
-                    <div className="flex justify-center gap-1.5 mt-3">
+                    <div className="flex justify-center gap-1.5 -mt-2 mb-4">
                         {healthMetrics.map((_, i) => (
                             <div
                                 key={i}
@@ -248,7 +249,7 @@ export default function HomeScreen() {
                         </motion.button>
                     </div>
 
-                    <div className="grid grid-cols-4 gap-4 mb-2">
+                    <div className="grid grid-cols-4 gap-2 sm:gap-4 mb-2">
                         {visibleActions.map((action, i) => (
                             <motion.button
                                 key={action.id}
@@ -276,7 +277,7 @@ export default function HomeScreen() {
                                 exit={{ height: 0, opacity: 0 }}
                                 className="overflow-hidden"
                             >
-                                <div className="grid grid-cols-4 gap-4 pt-4 border-t border-lavender-100 mt-4">
+                                <div className="grid grid-cols-4 gap-2 sm:gap-4 pt-4 border-t border-lavender-100 mt-4">
                                     {hiddenActions.map((action, i) => (
                                         <motion.button
                                             key={action.id}
@@ -397,8 +398,10 @@ export default function HomeScreen() {
                         {/* FAB Central */}
                         <div className="relative -top-8">
                             <motion.button
-                                whileHover={{ scale: 1.1, rotate: 90 }}
-                                whileTap={{ scale: 0.9, rotate: 90 }}
+                                onClick={() => setFabRotation(fabRotation === 0 ? 45 : 0)}
+                                animate={{ rotate: fabRotation }}
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
                                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
                                 className="w-14 h-14 rounded-full bg-gradient-to-br from-lavender-400 to-lavender-600 text-white shadow-lg shadow-lavender-500/30 flex items-center justify-center text-2xl"
                             >
