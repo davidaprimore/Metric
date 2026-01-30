@@ -131,7 +131,11 @@ export function ProfessionalProfileScreen({
                                 className="bg-white rounded-3xl shadow-xl p-6"
                             >
                                 {/* HEADER */}
-                                <div className="flex items-start justify-between mb-4">
+                                <div className="flex items-start gap-4 mb-4">
+                                    <div className="w-16 h-16 rounded-2xl overflow-hidden border-3 border-white shadow-md flex-shrink-0">
+                                        <img src={professionalData.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                                    </div>
+
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-1">
                                             <h1 className="text-2xl font-bold text-gray-900 leading-tight">{professionalData.name}</h1>
@@ -139,10 +143,6 @@ export function ProfessionalProfileScreen({
                                         </div>
                                         <p className="text-purple-600 font-semibold text-sm">{professionalData.specialty}</p>
                                         <p className="text-gray-400 text-xs mt-1">CRM: {professionalData.crm}</p>
-                                    </div>
-
-                                    <div className="w-16 h-16 rounded-2xl overflow-hidden border-3 border-white shadow-md flex-shrink-0 ml-4">
-                                        <img src={professionalData.avatar} alt="Avatar" className="w-full h-full object-cover" />
                                     </div>
                                 </div>
 
