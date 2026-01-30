@@ -1,6 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useMemo } from 'react';
-import { addDays, isBefore, startOfDay } from 'date-fns';
 import {
     ArrowLeft,
     ChevronLeft,
@@ -9,38 +8,34 @@ import {
     Calendar as CalendarIcon,
     Video,
     MapPin,
-    CheckCircle2,
     Info
 } from 'lucide-react';
 
 const availabilityMock = {
     availableDays: [1, 2, 3, 6, 7, 8, 9, 10, 13, 14, 15],
     slots: {
-        '2026-01-30': ['09:00', '10:00', '14:00', '15:30', '16:00', '17:00'],
-        '2026-01-31': ['08:00', '09:30', '11:00', '14:00'],
-        '2026-02-01': ['10:00', '11:00', '15:00', '16:00', '17:00'],
-        '2026-02-03': ['09:00', '10:00', '11:00'],
+        '2026-02-03': ['09:00', '10:00', '11:00', '14:00', '15:30', '16:00'],
+        '2026-02-04': ['08:00', '09:30', '11:00', '14:00'],
+        '2026-02-06': ['10:00', '11:00', '15:00', '16:00', '17:00'],
     }
 };
 
 const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho'];
 
 export function BookingScreen({
     isOpen,
     onClose,
-    professionalName = "Dr. Ricardo Silva"
+    onAdvance
 }: {
     isOpen: boolean;
     onClose: () => void;
-    professionalName?: string;
+    onAdvance: (bookingData: any) => void;
 }) {
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
-    const [currentMonth, setCurrentMonth] = useState(new Date(2026, 0, 1));
-    const [showConfirmation, setShowConfirmation] = useState(false);
-
-    const today = startOfDay(new Date());
+    const [selectedModality, setSelectedModality] = useState<'online' | 'presential'>('online');
+    const [currentMonth, setCurrentMonth] = useState(new Date(2026, 1, 1)); // Fevereiro 2026
 
     const daysInMonth = useMemo(() => {
         const year = currentMonth.getFullYear();
@@ -64,6 +59,12 @@ export function BookingScreen({
         return availabilityMock.availableDays.includes(date.getDate());
     };
 
+    const isPastDate = (date: Date) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return date < today;
+    };
+
     const changeMonth = (delta: number) => {
         setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + delta, 1));
         setSelectedDate(null);
@@ -72,58 +73,19 @@ export function BookingScreen({
 
     const availableSlots = selectedDate ? (availabilityMock.slots[formatDateKey(selectedDate)] || []) : [];
 
-    if (showConfirmation) {
-        return (
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-white z-50 flex flex-col"
-            >
-                <div className="p-4 border-b border-gray-100 flex items-center">
-                    <button onClick={() => setShowConfirmation(false)} className="p-2 -ml-2">
-                        <ArrowLeft className="w-6 h-6 text-gray-600" />
-                    </button>
-                    <h1 className="text-lg font-bold ml-2">Confirmação</h1>
-                </div>
+    const handleAdvance = () => {
+        if (!selectedDate || !selectedTime) return;
 
-                <div className="flex-1 p-6 flex flex-col items-center justify-center text-center">
-                    <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6"
-                    >
-                        <CheckCircle2 className="w-10 h-10 text-green-600" />
-                    </motion.div>
+        const bookingData = {
+            date: selectedDate,
+            time: selectedTime,
+            modality: selectedModality,
+            price: selectedModality === 'online' ? 300 : 350,
+            professionalName: 'Dr. Ricardo Silva',
+        };
 
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Agendado!</h2>
-                    <p className="text-gray-600 mb-8">
-                        Sua consulta com {professionalName} está confirmada para:
-                    </p>
-
-                    <div className="bg-gray-50 rounded-2xl p-6 w-full max-w-sm mb-8">
-                        <div className="flex items-center gap-3 mb-3">
-                            <CalendarIcon className="w-5 h-5 text-purple-600" />
-                            <span className="font-semibold text-gray-800">
-                                {selectedDate?.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <Clock className="w-5 h-5 text-purple-600" />
-                            <span className="font-semibold text-gray-800">{selectedTime}</span>
-                        </div>
-                    </div>
-
-                    <button
-                        onClick={onClose}
-                        className="w-full max-w-sm bg-purple-600 text-white font-bold py-4 rounded-2xl"
-                    >
-                        Ir para Meus Agendamentos
-                    </button>
-                </div>
-            </motion.div>
-        );
-    }
+        onAdvance(bookingData);
+    };
 
     return (
         <motion.div
@@ -176,7 +138,7 @@ export function BookingScreen({
                             const isAvailable = hasAvailability(date);
                             const isSelected = selectedDate?.toDateString() === date.toDateString();
                             const isToday = new Date().toDateString() === date.toDateString();
-                            const isPast = isBefore(date, today);
+                            const isPast = isPastDate(date);
 
                             return (
                                 <motion.button
@@ -265,7 +227,7 @@ export function BookingScreen({
                                 </div>
                             )}
 
-                            {/* Opções de Local */}
+                            {/* Opções de Modalidade */}
                             {selectedTime && (
                                 <motion.div
                                     initial={{ opacity: 0, height: 0 }}
@@ -275,16 +237,28 @@ export function BookingScreen({
                                     <p className="text-sm font-bold text-gray-800 mb-3">Como deseja atendimento?</p>
 
                                     <div className="grid grid-cols-2 gap-3">
-                                        <button className="p-4 bg-white rounded-2xl border-2 border-purple-500 flex flex-col items-center gap-2 shadow-sm">
-                                            <Video className="w-6 h-6 text-purple-600" />
-                                            <span className="text-sm font-semibold text-gray-800">Online</span>
+                                        <button
+                                            onClick={() => setSelectedModality('online')}
+                                            className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${selectedModality === 'online'
+                                                    ? 'border-purple-600 bg-purple-50 shadow-sm'
+                                                    : 'border-gray-200 bg-white'
+                                                }`}
+                                        >
+                                            <Video className={`w-6 h-6 ${selectedModality === 'online' ? 'text-purple-600' : 'text-gray-400'}`} />
+                                            <span className={`text-sm font-semibold ${selectedModality === 'online' ? 'text-gray-800' : 'text-gray-600'}`}>Online</span>
                                             <span className="text-xs text-gray-500">R$ 300</span>
                                         </button>
 
-                                        <button className="p-4 bg-white rounded-2xl border border-gray-200 flex flex-col items-center gap-2 opacity-60">
-                                            <MapPin className="w-6 h-6 text-gray-400" />
-                                            <span className="text-sm font-semibold text-gray-600">Presencial</span>
-                                            <span className="text-xs text-gray-400">R$ 350</span>
+                                        <button
+                                            onClick={() => setSelectedModality('presential')}
+                                            className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${selectedModality === 'presential'
+                                                    ? 'border-purple-600 bg-purple-50 shadow-sm'
+                                                    : 'border-gray-200 bg-white opacity-60'
+                                                }`}
+                                        >
+                                            <MapPin className={`w-6 h-6 ${selectedModality === 'presential' ? 'text-purple-600' : 'text-gray-400'}`} />
+                                            <span className={`text-sm font-semibold ${selectedModality === 'presential' ? 'text-gray-800' : 'text-gray-600'}`}>Presencial</span>
+                                            <span className="text-xs text-gray-500">R$ 350</span>
                                         </button>
                                     </div>
                                 </motion.div>
@@ -299,7 +273,9 @@ export function BookingScreen({
                 <div className="flex items-center justify-between mb-3">
                     <div>
                         <p className="text-xs text-gray-500">Valor total</p>
-                        <p className="text-xl font-bold text-gray-800">R$ 300,00</p>
+                        <p className="text-xl font-bold text-gray-800">
+                            R$ {selectedModality === 'online' ? '300,00' : '350,00'}
+                        </p>
                     </div>
                     {selectedDate && selectedTime && (
                         <div className="text-right">
@@ -315,15 +291,7 @@ export function BookingScreen({
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     disabled={!selectedDate || !selectedTime}
-                    onClick={() => {
-                        // Agora este botão redireciona para o fluxo de pagamento no App.tsx
-                        // mas para fins de demonstração, podemos manter o setShowConfirmation ou emitir uma nova prop handleAdvance
-                        if (typeof (onClose as any).onAdvance === 'function') {
-                            (onClose as any).onAdvance();
-                        } else {
-                            setShowConfirmation(true);
-                        }
-                    }}
+                    onClick={handleAdvance}
                     className={`
             w-full py-4 rounded-2xl font-bold text-white transition-all
             ${selectedDate && selectedTime
@@ -332,7 +300,7 @@ export function BookingScreen({
                         }
           `}
                 >
-                    {selectedDate && selectedTime ? 'Avançar' : 'Selecione data e horário'}
+                    Avançar para Pagamento
                 </motion.button>
             </div>
         </motion.div>

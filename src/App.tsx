@@ -10,6 +10,7 @@ import { BookingScreen } from './screens/BookingScreen';
 import { PaymentScreen } from './screens/PaymentScreen';
 import { AnamneseScreen } from './screens/AnamneseScreen';
 import { ProfessionalProfileScreen } from './screens/ProfessionalProfileScreen';
+import { SuccessScreen } from './screens/SuccessScreen';
 import { BottomNavigation } from './components/BottomNavigation';
 import { LoadingTransition } from './components/LoadingTransition';
 
@@ -17,16 +18,17 @@ export default function App() {
   const [mainTab, setMainTab] = useState<'home' | 'agenda' | 'search' | 'records' | 'profile'>('home');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Estado para perfil do profissional selecionado
   const [selectedProfessionalId, setSelectedProfessionalId] = useState<string | null>(null);
+
+  // Dados do agendamento em progresso
+  const [pendingBooking, setPendingBooking] = useState<any>(null);
 
   // Estados de telas modais/overlay
   const [activeOverlay, setActiveOverlay] = useState<{
-    screen: 'none' | 'appointment-detail' | 'booking' | 'payment' | 'anamnese' | 'professional-profile';
+    screen: 'none' | 'professional-profile' | 'booking' | 'payment' | 'success' | 'anamnese' | 'appointment-detail';
     data?: any;
   }>({ screen: 'none' });
 
-  // Handler de navegação com loading
   const handleNavigate = (tab: typeof mainTab) => {
     if (tab === mainTab) return;
 
@@ -34,30 +36,44 @@ export default function App() {
     setTimeout(() => {
       setMainTab(tab);
       setIsLoading(false);
-    }, 600); // Tempo da animação reduzido para 600ms conforme plano
+    }, 600);
   };
 
-  // ABRIR PERFIL DO PROFISSIONAL (usado tanto na Home quanto na Search)
   const handleOpenProfessionalProfile = (id: string) => {
     setSelectedProfessionalId(id);
     setActiveOverlay({ screen: 'professional-profile', data: id });
   };
 
-  const handleOpenAppointment = (appointment: any) => {
-    setActiveOverlay({ screen: 'appointment-detail', data: appointment });
+  // FLUXO DE AGENDAMENTO
+  const handleStartBooking = () => {
+    setActiveOverlay({ screen: 'booking', data: null });
   };
 
-  const handleOpenPayment = () => {
-    setActiveOverlay({ screen: 'payment', data: null });
-  };
-
-  const handleOpenAnamnese = () => {
-    setActiveOverlay({ screen: 'anamnese', data: null });
+  const handleBookingAdvance = (bookingData: any) => {
+    setPendingBooking(bookingData);
+    setActiveOverlay({ screen: 'payment', data: bookingData });
   };
 
   const handlePaymentSuccess = () => {
+    setActiveOverlay({ screen: 'success', data: pendingBooking });
+  };
+
+  const handleGoToAnamnese = () => {
+    setActiveOverlay({ screen: 'anamnese', data: null });
+  };
+
+  const handleSuccessComplete = () => {
     setActiveOverlay({ screen: 'none' });
+    setPendingBooking(null);
     setMainTab('agenda');
+  };
+
+  const handleOpenAnamneseFromSettings = () => {
+    setActiveOverlay({ screen: 'anamnese', data: null });
+  };
+
+  const handleOpenAppointment = (appointment: any) => {
+    setActiveOverlay({ screen: 'appointment-detail', data: appointment });
   };
 
   return (
@@ -98,7 +114,7 @@ export default function App() {
               <SearchScreen
                 isOpen={true}
                 onClose={() => handleNavigate('home')}
-                // @ts-ignore - Prop adicionada conforme plano
+                // @ts-ignore
                 onSelectProfessional={handleOpenProfessionalProfile}
               />
             )}
@@ -109,14 +125,14 @@ export default function App() {
               <SettingsScreen
                 isOpen={true}
                 onClose={() => handleNavigate('home')}
-                onOpenAnamnese={handleOpenAnamnese}
+                onOpenAnamnese={handleOpenAnamneseFromSettings}
               />
             )}
           </motion.div>
         </AnimatePresence>
 
-        {/* Bottom Navigation - SEMPRE visível na base, exceto quando overlay de perfil está aberto */}
-        {activeOverlay.screen !== 'professional-profile' && (
+        {/* Bottom Navigation - Escondido durante o fluxo de agendamento/pagamento */}
+        {!['professional-profile', 'booking', 'payment', 'success', 'anamnese'].includes(activeOverlay.screen) && (
           <BottomNavigation
             currentScreen={mainTab}
             onNavigate={handleNavigate}
@@ -124,16 +140,64 @@ export default function App() {
         )}
       </div>
 
-      {/* Overlays/Modais */}
+      {/* Overlays */}
 
-      {/* PERFIL DO PROFISSIONAL */}
       {activeOverlay.screen === 'professional-profile' && (
         <ProfessionalProfileScreen
           isOpen={true}
           onClose={() => setActiveOverlay({ screen: 'none' })}
-          onBook={() => setActiveOverlay({ screen: 'booking', data: activeOverlay.data })}
+          onBook={handleStartBooking}
           // @ts-ignore
           professionalId={selectedProfessionalId}
+        />
+      )}
+
+      {activeOverlay.screen === 'booking' && (
+        <BookingScreen
+          isOpen={true}
+          onClose={() => setActiveOverlay({ screen: 'none' })}
+          onAdvance={handleBookingAdvance}
+        />
+      )}
+
+      {activeOverlay.screen === 'payment' && (
+        <PaymentScreen
+          isOpen={true}
+          onClose={() => setActiveOverlay({ screen: 'booking' })}
+          onSuccess={handlePaymentSuccess}
+          // @ts-ignore
+          amount={pendingBooking?.price || 300}
+          // @ts-ignore
+          professionalName={pendingBooking?.professionalName || 'Dr. Ricardo Silva'}
+        />
+      )}
+
+      {activeOverlay.screen === 'success' && (
+        <SuccessScreen
+          isOpen={true}
+          bookingData={pendingBooking}
+          onGoToAnamnese={handleGoToAnamnese}
+          onGoToHome={handleSuccessComplete}
+        />
+      )}
+
+      {activeOverlay.screen === 'anamnese' && (
+        <AnamneseScreen
+          isOpen={true}
+          onClose={() => {
+            if (activeOverlay.screen === 'success' || pendingBooking) {
+              handleSuccessComplete();
+            } else {
+              setActiveOverlay({ screen: 'none' });
+            }
+          }}
+          onComplete={() => {
+            if (activeOverlay.screen === 'success' || pendingBooking) {
+              handleSuccessComplete();
+            } else {
+              setActiveOverlay({ screen: 'none' });
+            }
+          }}
         />
       )}
 
@@ -142,35 +206,8 @@ export default function App() {
           isOpen={true}
           appointment={activeOverlay.data}
           onClose={() => setActiveOverlay({ screen: 'none' })}
-          onReschedule={() => {
-            setActiveOverlay({ screen: 'booking', data: activeOverlay.data });
-          }}
+          onReschedule={() => setActiveOverlay({ screen: 'booking', data: activeOverlay.data })}
           onCancel={() => setActiveOverlay({ screen: 'none' })}
-        />
-      )}
-
-      {activeOverlay.screen === 'booking' && (
-        <BookingScreen
-          isOpen={true}
-          onClose={() => setActiveOverlay({ screen: 'none' })}
-          // @ts-ignore
-          onAdvance={handleOpenPayment}
-        />
-      )}
-
-      {activeOverlay.screen === 'payment' && (
-        <PaymentScreen
-          isOpen={true}
-          onClose={() => setActiveOverlay({ screen: 'none' })}
-          onSuccess={handlePaymentSuccess}
-        />
-      )}
-
-      {activeOverlay.screen === 'anamnese' && (
-        <AnamneseScreen
-          isOpen={true}
-          onClose={() => setActiveOverlay({ screen: 'none' })}
-          onComplete={() => setActiveOverlay({ screen: 'none' })}
         />
       )}
     </div>
