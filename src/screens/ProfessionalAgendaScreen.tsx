@@ -57,7 +57,7 @@ export function ProfessionalAgendaScreen({ isOpen, onClose }: { isOpen: boolean;
                 </div>
 
                 {/* Days Strip */}
-                <div className="flex justify-between gap-2 overflow-x-auto scrollbar-hide">
+                <div className="flex justify-between gap-2 overflow-x-auto pb-2 scrollbar-hide">
                     {[14, 15, 16, 17, 18, 19, 20].map((day, idx) => (
                         <motion.button
                             key={day}

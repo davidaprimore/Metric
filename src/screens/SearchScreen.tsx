@@ -1,5 +1,5 @@
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
 import {
     ArrowLeft,
     Search,
@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 const categories = [
-    { id: 'all', name: 'Todos', icon: '👨⚕️' },
+    { id: 'all', name: 'Todos', icon: '👨‍⚕️' },
     { id: 'nutrition', name: 'Nutrição', icon: '🥗' },
     { id: 'fitness', name: 'Fitness', icon: '💪' },
     { id: 'physio', name: 'Fisioterapia', icon: '🦴' },
@@ -111,8 +111,8 @@ export function SearchScreen({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                             key={cat.id}
                             onClick={() => setSelectedCategory(cat.id)}
                             className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${selectedCategory === cat.id
-                                    ? 'bg-gray-900 text-white'
-                                    : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                                ? 'bg-gray-900 text-white'
+                                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
                                 }`}
                         >
                             <span>{cat.icon}</span>

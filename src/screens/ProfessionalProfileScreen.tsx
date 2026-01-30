@@ -51,11 +51,13 @@ const professionalData: ProfessionalData = {
 export function ProfessionalProfileScreen({
     isOpen,
     onClose,
-    onBook
+    onBook,
+    professionalId
 }: {
     isOpen: boolean;
     onClose: () => void;
     onBook: () => void;
+    professionalId?: string;
 }) {
     const [activeTab, setActiveTab] = useState<'about' | 'services' | 'reviews'>('about');
     const [selectedService, setSelectedService] = useState<number | null>(1);

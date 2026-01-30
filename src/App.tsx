@@ -1,76 +1,120 @@
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import HomeScreen from './features/dashboard/pages/HomeScreen';
-import { ProfessionalProfileScreen } from './screens/ProfessionalProfileScreen';
+import { ProfessionalProfileScreen } from './screens/ProfessionalProfileScreen.tsx';
 import { BookingScreen } from './screens/BookingScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { ProfessionalAgendaScreen } from './screens/ProfessionalAgendaScreen';
 import { SearchScreen } from './screens/SearchScreen';
 import { MedicalRecordsScreen } from './screens/MedicalRecordsScreen';
+import { BottomNavigation } from './components/BottomNavigation';
 import { NotificationsModal } from './components/NotificationsModal';
 import { WaterModal } from './components/WaterModal';
 import './styles/animations.css';
 
 export default function App() {
-  // Estados de navegação
-  const [activeScreen, setActiveScreen] = useState<'home' | 'profile' | 'booking' | 'settings' | 'agenda' | 'search' | 'records'>('home');
+  // Estados principais de navegação do BottomNav
+  const [mainTab, setMainTab] = useState<'home' | 'agenda' | 'search' | 'records' | 'profile'>('home');
+
+  // Estados para overlays/modais (telas que abrem por cima)
+  const [overlay, setOverlay] = useState<{
+    type: 'none' | 'professional' | 'booking';
+    data?: any;
+  }>({ type: 'none' });
+
+  // Estados dos modais da Home (Herança)
   const [showNotifications, setShowNotifications] = useState(false);
   const [showWater, setShowWater] = useState(false);
 
-  // Pro profissional específico (mock)
-  const [selectedProfessionalId, setSelectedProfessionalId] = useState<string | null>(null);
+  // Handler de navegação principal
+  const handleMainNavigate = (tab: string) => {
+    setMainTab(tab as any);
+    // Fechar overlays ao trocar de abas principais
+    setOverlay({ type: 'none' });
+  };
 
   return (
-    <div className="relative">
-      {/* Tela Principal sempre montada (performance) */}
-      <div className={activeScreen !== 'home' ? 'hidden' : ''}>
-        <HomeScreen
-          onOpenNotifications={() => setShowNotifications(true)}
-          onOpenWater={() => setShowWater(true)}
-          onOpenProfile={(id) => {
-            setSelectedProfessionalId(id || '123');
-            setActiveScreen('profile');
-          }}
-          onOpenSettings={() => setActiveScreen('settings')}
-          onOpenAgenda={() => setActiveScreen('agenda')}
-          onOpenSearch={() => setActiveScreen('search')}
-          onOpenRecords={() => setActiveScreen('records')}
+    <div className="min-h-screen bg-gray-50 relative pb-20">
+      {/* CONTEÚDO PRINCIPAL (switch entre tabs) */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={mainTab}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2 }}
+          className="min-h-screen"
+        >
+          {mainTab === 'home' && (
+            <HomeScreen
+              onOpenProfile={(id) => setOverlay({ type: 'professional', data: id })}
+              onOpenAgenda={() => setMainTab('agenda')}
+              onOpenNotifications={() => setShowNotifications(true)}
+              onOpenWater={() => setShowWater(true)}
+              onOpenSettings={() => setMainTab('profile')}
+              onOpenSearch={() => setMainTab('search')}
+              onOpenRecords={() => setMainTab('records')}
+            />
+          )}
+
+          {mainTab === 'agenda' && (
+            <ProfessionalAgendaScreen
+              isOpen={true}
+              onClose={() => setMainTab('home')}
+            />
+          )}
+
+          {mainTab === 'search' && (
+            <SearchScreen
+              isOpen={true}
+              onClose={() => setMainTab('home')}
+            />
+          )}
+
+          {mainTab === 'records' && (
+            <MedicalRecordsScreen
+              isOpen={true}
+              onClose={() => setMainTab('home')}
+            />
+          )}
+
+          {mainTab === 'profile' && (
+            <SettingsScreen
+              isOpen={true}
+              onClose={() => setMainTab('home')}
+            />
+          )}
+        </motion.div>
+      </AnimatePresence>
+
+      {/* BOTTOM NAVIGATION - SEMPRE VISÍVEL */}
+      {overlay.type === 'none' && (
+        <BottomNavigation
+          currentScreen={mainTab}
+          onNavigate={handleMainNavigate}
         />
-      </div>
+      )}
 
-      {/* Telas Overlay */}
-      <ProfessionalProfileScreen
-        isOpen={activeScreen === 'profile'}
-        onClose={() => setActiveScreen('home')}
-        onBook={() => setActiveScreen('booking')}
-        professionalId={selectedProfessionalId}
-      />
+      {/* OVERLAYS (ficam por cima de tudo) */}
+      <AnimatePresence>
+        {overlay.type === 'professional' && (
+          <ProfessionalProfileScreen
+            isOpen={true}
+            onClose={() => setOverlay({ type: 'none' })}
+            onBook={() => setOverlay({ type: 'booking' })}
+            professionalId={overlay.data}
+          />
+        )}
 
-      <BookingScreen
-        isOpen={activeScreen === 'booking'}
-        onClose={() => setActiveScreen('home')}
-      />
+        {overlay.type === 'booking' && (
+          <BookingScreen
+            isOpen={true}
+            onClose={() => setOverlay({ type: 'none' })}
+          />
+        )}
+      </AnimatePresence>
 
-      <SettingsScreen
-        isOpen={activeScreen === 'settings'}
-        onClose={() => setActiveScreen('home')}
-      />
-
-      <ProfessionalAgendaScreen
-        isOpen={activeScreen === 'agenda'}
-        onClose={() => setActiveScreen('home')}
-      />
-
-      <SearchScreen
-        isOpen={activeScreen === 'search'}
-        onClose={() => setActiveScreen('home')}
-      />
-
-      <MedicalRecordsScreen
-        isOpen={activeScreen === 'records'}
-        onClose={() => setActiveScreen('home')}
-      />
-
-      {/* Modais Legados Integrados */}
+      {/* MODALS DA HOME */}
       <NotificationsModal
         isOpen={showNotifications}
         onClose={() => setShowNotifications(false)}
