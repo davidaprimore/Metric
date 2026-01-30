@@ -12,7 +12,11 @@ const actions = [
     { id: 'emergency', icon: '🚨', label: 'Emergência', bg: 'bg-[#FFE6E6]' },
 ];
 
-export function QuickActions() {
+interface QuickActionsProps {
+    onActionClick?: (actionId: string) => void;
+}
+
+export function QuickActions({ onActionClick }: QuickActionsProps) {
     const [showMore, setShowMore] = useState(false);
 
     return (
@@ -30,7 +34,7 @@ export function QuickActions() {
 
             <div className="grid grid-cols-4 gap-3 mb-2">
                 {actions.slice(0, 4).map((action, i) => (
-                    <ActionBtn key={action.id} action={action} delay={i * 0.05} />
+                    <ActionBtn key={action.id} action={action} delay={i * 0.05} onClick={() => onActionClick?.(action.id)} />
                 ))}
             </div>
 
@@ -44,7 +48,7 @@ export function QuickActions() {
                     >
                         <div className="grid grid-cols-4 gap-3 pt-3 border-t border-[#E8D5F0] mt-3">
                             {actions.slice(4).map((action, i) => (
-                                <ActionBtn key={action.id} action={action} delay={i * 0.05} />
+                                <ActionBtn key={action.id} action={action} delay={i * 0.05} onClick={() => onActionClick?.(action.id)} />
                             ))}
                         </div>
                     </motion.div>
@@ -54,12 +58,13 @@ export function QuickActions() {
     );
 }
 
-function ActionBtn({ action, delay }: { action: typeof actions[0], delay: number }) {
+function ActionBtn({ action, delay, onClick }: { action: typeof actions[0], delay: number, onClick: () => void }) {
     return (
         <motion.button
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay }}
+            onClick={onClick}
             whileHover={{ y: -3 }}
             whileTap={{ scale: 0.95 }}
             className="flex flex-col items-center gap-2"

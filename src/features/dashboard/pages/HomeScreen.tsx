@@ -1,5 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { MetricCard } from '../../../components/MetricCard';
+import { MatchCard } from '../../../components/MatchCard';
+import { QuickActions } from '../../../components/QuickActions';
+import { BottomNav } from '../../../components/BottomNav';
+import { SponsorCardPremium } from '../../../components/SponsorCardPremium';
 
 // Importação das Novas Telas
 import { BodyAssessmentScreen } from '../../../screens/BodyAssessmentScreen';
@@ -8,437 +13,252 @@ import { FeedScreen } from '../../../screens/FeedScreen';
 import { FoodDiaryScreen } from '../../../screens/FoodDiaryScreen';
 import { ProfessionalOnboarding } from '../../../screens/ProfessionalOnboardingScreen';
 
-// ÍCONES SVG INLINE
-const Icons = {
-    bell: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-        </svg>
-    ),
-    video: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M23 7l-7 5 7 5V7z" />
-            <rect x="1" y="5" width="15" height="14" rx="2" />
-        </svg>
-    ),
-    chart: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M3 3v18h18" />
-            <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
-        </svg>
-    ),
-    utensils: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
-            <path d="M7 2v20" />
-            <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
-        </svg>
-    ),
-    fire: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-3-2.5-3-5.5a5.5 5.5 0 0 1 11 0c0 3.5-2 4.5-3 7a2.5 2.5 0 0 0 2.5 2.5 5.48 5.48 0 0 0 1.5-3.5" />
-        </svg>
-    ),
-    droplet: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
-        </svg>
-    ),
-    plus: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="8" x2="12" y2="16" />
-            <line x1="8" y1="12" x2="16" y2="12" />
-        </svg>
-    ),
-    chevronRight: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="9 18 15 12 9 6" />
-        </svg>
-    ),
-    grid: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>,
-    heart: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>,
-    calendar: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>,
-    fileText: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></svg>,
-    activity: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>,
-    trendUp: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>,
-    pill: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.5 20.5l10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" /><path d="m8.5 8.5l7 7" /></svg>,
-};
-
 interface HomeScreenProps {
     onOpenNotifications?: () => void;
-    onOpenProfile?: () => void;
     onOpenWater?: () => void;
+    onOpenProfile?: () => void;
 }
 
-export default function HomeScreen({ onOpenNotifications, onOpenProfile, onOpenWater }: HomeScreenProps) {
-    const [greeting, setGreeting] = useState('');
-    const [activeTab, setActiveTab] = useState('upcoming');
-    const [showMoreActions, setShowMoreActions] = useState(false);
-    const [selectedMetric, setSelectedMetric] = useState(0);
+export default function HomeScreen({ onOpenNotifications, onOpenWater, onOpenProfile }: HomeScreenProps) {
+    const [hour, setHour] = useState(0);
     const [currentScreen, setCurrentScreen] = useState<'home' | 'body' | 'chat' | 'feed' | 'diary' | 'onboarding'>('home');
 
     useEffect(() => {
-        const hour = new Date().getHours();
-        if (hour < 12) setGreeting('Bom dia');
-        else if (hour < 18) setGreeting('Boa tarde');
-        else setGreeting('Boa noite');
+        setHour(new Date().getHours());
     }, []);
 
-    // Helper p/ trocar de tela com log
-    const handleSetScreen = (screen: typeof currentScreen) => {
-        console.log(`Abrindo tela: ${screen}`);
-        setCurrentScreen(screen);
+    const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
+
+    const handleActionClick = (id: string) => {
+        console.log(`Action clicked: ${id}`);
+        if (id === 'health' || id === 'evolution') setCurrentScreen('body');
+        if (id === 'schedule') setCurrentScreen('onboarding');
+        if (id === 'diet') setCurrentScreen('diary');
+        if (id === 'chat') setCurrentScreen('chat');
     };
 
-    const healthMetrics = [
-        {
-            id: 'fat',
-            value: '18.5%',
-            label: 'Gordura',
-            sublabel: 'Corporal',
-            icon: <span className="text-2xl">📊</span>,
-            color: 'from-orange-400 to-red-400',
-            bg: 'bg-orange-50',
-            progress: 65,
-            trend: '-2%',
-            alert: false
-        },
-        {
-            id: 'menu',
-            value: '1.450',
-            label: 'kcal',
-            sublabel: 'Cardápio hoje',
-            icon: <span className="text-2xl">🥗</span>,
-            color: 'from-green-400 to-emerald-500',
-            bg: 'bg-green-50',
-            progress: 80,
-            trend: 'na meta',
-            alert: false
-        },
-        {
-            id: 'hydration',
-            value: '1.2L',
-            label: 'Água',
-            sublabel: 'Meta: 2L',
-            icon: <span className="text-2xl">💧</span>,
-            color: 'from-blue-400 to-cyan-400',
-            bg: 'bg-blue-50',
-            progress: 60,
-            trend: '+500ml',
-            alert: true
-        },
-    ];
-
-    const quickActions = [
-        { id: 'health', icon: '❤️', label: 'Minha Saúde', color: 'from-red-400 to-pink-500' },
-        { id: 'schedule', icon: '📅', label: 'Agendar', color: 'from-lavender-400 to-lavender-600' },
-        { id: 'diet', icon: '🥗', label: 'Dieta', color: 'from-green-400 to-emerald-500' },
-        { id: 'meds', icon: '💊', label: 'Remédios', color: 'from-blue-400 to-blue-600' },
-        { id: 'exams', icon: '📋', label: 'Exames', color: 'from-teal-400 to-teal-600' },
-        { id: 'evolution', icon: '📈', label: 'Evolução', color: 'from-purple-400 to-purple-600' },
-        { id: 'chat', icon: '💬', label: 'Chat', color: 'from-yellow-400 to-orange-500' },
-        { id: 'emergency', icon: '🚨', label: 'Emergência', color: 'from-red-500 to-red-700' },
-    ];
-
-    const visibleActions = [
-        { ...quickActions[0], onClick: () => handleSetScreen('body') },
-        { ...quickActions[1], onClick: () => handleSetScreen('onboarding') },
-        { ...quickActions[2], onClick: () => handleSetScreen('diary') },
-        { ...quickActions[3], onClick: () => { } },
-    ];
-
-    const hiddenActionsFiltered = [
-        { ...quickActions[4], onClick: () => { } },
-        { ...quickActions[5], onClick: () => handleSetScreen('body') },
-        { ...quickActions[6], onClick: () => handleSetScreen('chat') },
-        { ...quickActions[7], onClick: () => { } },
-    ];
-
-    const appointments = [
-        { id: 1, doctor: 'Dra. Ana Paula', type: 'Nutricionista', time: '14:00', date: 'Hoje', status: 'confirmed', hasVideo: true },
-        { id: 2, doctor: 'Dr. Carlos', type: 'Fisioterapeuta', time: '10:00', date: 'Qua', status: 'pending', hasVideo: false },
-    ];
+    const handleNavClick = (id: string) => {
+        console.log(`Nav clicked: ${id}`);
+        if (id === 'home') setCurrentScreen('home');
+        if (id === 'search') setCurrentScreen('feed');
+        if (id === 'add') setCurrentScreen('diary');
+        if (id === 'calendar') setCurrentScreen('onboarding');
+        if (id === 'profile') onOpenProfile?.();
+    };
 
     return (
-        <div className="min-h-screen bg-background pb-24 w-full max-w-md mx-auto shadow-2xl relative overflow-x-hidden">
+        <div className="min-h-screen bg-[#FAF8FC] pb-28 max-w-[430px] mx-auto relative overflow-x-hidden">
             {/* Indicador de Versão Ativa */}
-            <div className="fixed top-2 left-1/2 -translate-x-1/2 z-[60] px-3 py-1 bg-lavender-600 text-white text-[10px] font-bold rounded-full shadow-lg pointer-events-none opacity-50">
+            <div className="fixed top-2 left-1/2 -translate-x-1/2 z-[60] px-3 py-1 bg-[#9B6AB0] text-white text-[10px] font-bold rounded-full shadow-lg pointer-events-none opacity-50">
                 METRIKA PRO ACTIVE
             </div>
 
-            <header className="px-4 pt-6 pb-2 flex justify-between items-center bg-background sticky top-0 z-30">
+            <header className="sticky top-0 z-50 bg-[#FAF8FC]/95 backdrop-blur-md border-b border-[#E8D5F0]/50 px-5 py-4 flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lavender-400 to-lavender-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                    <div className="w-10 h-10 bg-gradient-to-br from-[#C8A4D4] to-[#9B6AB0] rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
                         M
                     </div>
-                    <span className="font-display font-bold text-xl text-lavender-900">Metrika</span>
+                    <span className="font-[Outfit] font-bold text-xl text-[#3D2646]">Metrika</span>
                 </div>
 
                 <button
                     onClick={onOpenNotifications}
-                    className="w-10 h-10 rounded-full bg-white border border-lavender-200 flex items-center justify-center text-lavender-800 hover:bg-lavender-50 transition-colors relative"
+                    className="w-10 h-10 bg-white rounded-full border border-[#E8D5F0] flex items-center justify-center relative hover:bg-[#F3E8F7] transition-colors"
                 >
-                    {Icons.bell}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3D2646" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
                     <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
                 </button>
             </header>
 
-            <main className="px-4 pt-4 space-y-6">
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                    <p className="text-ink-muted text-sm mb-1">{greeting},</p>
-                    <h1 className="font-display text-3xl font-bold text-lavender-900 flex items-center gap-2">
-                        David <motion.span animate={{ rotate: [0, 20, -20, 0] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}>👋</motion.span>
-                    </h1>
-                </motion.div>
-
+            <main className="px-5 pt-6">
+                {/* SAUDAÇÃO */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="relative -mx-4"
+                    className="mb-6"
                 >
-                    <div className="flex gap-4 overflow-x-auto hide-scrollbar py-6 px-4 snap-x snap-mandatory">
-                        {healthMetrics.map((metric, index) => (
-                            <motion.div
-                                key={metric.id}
-                                onClick={() => {
-                                    setSelectedMetric(index);
-                                    if (metric.id === 'hydration') onOpenWater?.();
-                                }}
-                                className={`flex-shrink-0 w-40 snap-center rounded-3xl p-4 cursor-pointer transition-all border-2 ${selectedMetric === index ? 'border-lavender-500 shadow-xl scale-105' : 'border-transparent'
-                                    } bg-white shadow-soft`}
-                                whileTap={{ scale: 0.95 }}
-                            >
-                                <div className="flex justify-between items-start mb-3">
-                                    <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${metric.color} flex items-center justify-center text-white shadow-md`}>
-                                        {metric.icon}
-                                    </div>
-                                    {metric.alert && (
-                                        <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                                    )}
-                                </div>
-                                <div className="mb-2">
-                                    <span className="text-2xl font-bold text-lavender-900">{metric.value}</span>
-                                    <span className="text-xs text-ink-muted ml-1">{metric.label}</span>
-                                </div>
-                                <div className="w-full h-1.5 bg-lavender-100 rounded-full overflow-hidden mb-2">
-                                    <motion.div
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${metric.progress}%` }}
-                                        transition={{ duration: 1, delay: 0.5 }}
-                                        className={`h-full bg-gradient-to-r ${metric.color}`}
-                                    />
-                                </div>
-                                <p className={`text-xs font-medium ${metric.trend.includes('-') ? 'text-green-600' : 'text-lavender-600'}`}>
-                                    {metric.trend} {metric.sublabel}
-                                </p>
-                            </motion.div>
-                        ))}
-
-                        <motion.div
-                            onClick={() => handleSetScreen('body')}
-                            className="flex-shrink-0 w-24 snap-center rounded-3xl p-4 bg-lavender-50 border-2 border-dashed border-lavender-300 flex flex-col items-center justify-center cursor-pointer"
-                            whileHover={{ backgroundColor: '#E8D5F0' }}
-                            whileTap={{ scale: 0.95 }}
-                        >
-                            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-lavender-500 mb-2">
-                                {Icons.plus}
-                            </div>
-                            <span className="text-xs font-medium text-lavender-700 text-center">Ver<br />Mais</span>
-                        </motion.div>
+                    <p className="text-[#8B8591] text-[15px] mb-1">{greeting},</p>
+                    <div className="flex items-center gap-2">
+                        <h1 className="font-[Outfit] text-[36px] font-bold text-[#3D2646]">David</h1>
+                        <span className="text-3xl animate-wave">👋</span>
                     </div>
                 </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                {/* MÉTRICAS */}
+                <div className="mb-8">
                     <div className="flex justify-between items-center mb-4">
-                        <h3 className="font-display font-bold text-lg text-lavender-900">Ações Rápidas</h3>
-                        <motion.button
-                            onClick={() => setShowMoreActions(!showMoreActions)}
-                            className="text-xs font-semibold text-lavender-600 flex items-center gap-1 bg-lavender-50 px-3 py-1.5 rounded-full"
-                            whileTap={{ scale: 0.95 }}
-                        >
-                            {showMoreActions ? 'Ver menos' : 'Mostrar mais'}
-                            <motion.span animate={{ rotate: showMoreActions ? 180 : 0 }}>{Icons.chevronRight}</motion.span>
-                        </motion.button>
+                        <h2 className="font-[Outfit] text-[18px] font-bold text-[#3D2646]">Suas Métricas</h2>
+                        <span className="text-[13px] text-[#9B6AB0] font-medium">Hoje →</span>
                     </div>
 
-                    <div className="grid grid-cols-4 gap-2 sm:gap-4 mb-2">
-                        {visibleActions.map((action, i) => (
-                            <motion.button
-                                key={action.id}
-                                onClick={action.onClick}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: i * 0.05 }}
-                                whileHover={{ y: -5, scale: 1.05 }}
-                                whileTap={{ scale: 0.9 }}
-                                className="flex flex-col items-center gap-2 group"
-                            >
-                                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${action.color} flex items-center justify-center text-2xl shadow-lg`}>
-                                    {action.icon}
-                                </div>
-                                <span className="text-xs font-medium text-ink text-center leading-tight">{action.label}</span>
-                            </motion.button>
-                        ))}
+                    <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 -mx-5 px-5">
+                        <MetricCard icon="📊" value="18.5%" label="Gordura" progress={65} progressColor="bg-gradient-to-r from-orange-400 to-red-400" subtext="-2% este mês" subColor="text-green-600" delay={0.1} />
+                        <MetricCard icon="🥗" value="1.450" label="kcal" progress={80} progressColor="bg-gradient-to-r from-green-400 to-emerald-500" subtext="Na meta" subColor="text-green-600" delay={0.2} />
+                        <MetricCard icon="💧" value="1.2L" label="Água" progress={60} progressColor="bg-gradient-to-r from-blue-400 to-cyan-500" subtext="+500ml" subColor="text-blue-600" delay={0.3} onClick={onOpenWater} />
+                    </div>
+                </div>
+
+                {/* MATCH PERFEITO */}
+                <div className="mb-8">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="font-[Outfit] text-[18px] font-bold text-[#3D2646]">Seu Match Perfeito</h2>
+                        <span className="text-[13px] text-[#9B6AB0] font-medium">Ver todos →</span>
                     </div>
 
-                    <AnimatePresence>
-                        {showMoreActions && (
-                            <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="overflow-hidden"
-                            >
-                                <div className="grid grid-cols-4 gap-2 sm:gap-4 pt-4 border-t border-lavender-100 mt-4">
-                                    {hiddenActionsFiltered.map((action, i) => (
-                                        <motion.button
-                                            key={action.id}
-                                            onClick={action.onClick}
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: 10 }}
-                                            transition={{ delay: i * 0.05 }}
-                                            whileHover={{ y: -3 }}
-                                            className="flex flex-col items-center gap-2"
-                                        >
-                                            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${action.color} flex items-center justify-center text-2xl shadow-md`}>
-                                                {action.icon}
-                                            </div>
-                                            <span className="text-xs font-medium text-ink">{action.label}</span>
-                                        </motion.button>
-                                    ))}
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                    <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-4 -mx-5 px-5 snap-x">
+                        <div className="snap-center">
+                            <MatchCard
+                                image="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=600&h=400&fit=crop"
+                                name="Dra. Ana Paula"
+                                specialty="Nutricionista Funcional"
+                                crm="12345"
+                                rating={4.98}
+                                distance="2km"
+                                match={98}
+                                tags={['Emagrecimento', 'Performance']}
+                                price={280}
+                                delay={0.1}
+                                verified={true}
+                                onClick={onOpenProfile}
+                            />
+                        </div>
+                        <div className="snap-center">
+                            <MatchCard
+                                image="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop"
+                                name="Dr. Ricardo Silva"
+                                specialty="Nutricionista Esportivo"
+                                crm="12345"
+                                rating={4.9}
+                                distance="2.5 km"
+                                match={95}
+                                tags={['Nutrição Esportiva', 'Hipertrofia', 'Emagrecimento']}
+                                price={300}
+                                delay={0.6}
+                                onClick={onOpenProfile}
+                                verified={true}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Indicadores */}
+                    <div className="flex justify-center gap-2 mt-2">
+                        <div className="w-6 h-1.5 bg-[#9B6AB0] rounded-full"></div>
+                        <div className="w-1.5 h-1.5 bg-[#E8D5F0] rounded-full"></div>
+                    </div>
+                </div>
+
+                {/* AÇÕES RÁPIDAS */}
+                <QuickActions onActionClick={handleActionClick} />
+
+                {/* PATROCINADOR PREMIUM */}
+                <div className="mb-6">
+                    <SponsorCardPremium />
+                </div>
+
+                {/* PLANO */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="mb-6 bg-gradient-to-br from-[#2D2A32] to-[#3D2646] rounded-[24px] p-6 text-white relative overflow-hidden"
+                >
+                    <div className="absolute top-[-100px] right-[-50px] w-[200px] h-[200px] bg-[radial-gradient(circle,rgba(155,106,176,0.4),transparent)] rounded-full animate-[spin_20s_linear_infinite]"></div>
+                    <div className="relative z-10">
+                        <span className="inline-block px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold tracking-wider mb-3">⭐ RECOMENDADO</span>
+                        <h3 className="font-[Outfit] text-[22px] font-bold mb-2">Metrika Clube</h3>
+                        <p className="text-[14px] opacity-90 mb-4">Economize 40% em todas as consultas</p>
+                        <button className="w-full py-3 bg-white text-[#3D2646] rounded-2xl font-bold text-[15px] active:scale-[0.98] transition-transform">
+                            7 dias grátis
+                        </button>
+                    </div>
                 </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-                    <div className="flex items-center gap-6 border-b border-lavender-200 pb-1">
-                        <button
-                            onClick={() => setActiveTab('upcoming')}
-                            className={`pb-3 relative font-semibold text-sm transition-colors ${activeTab === 'upcoming' ? 'text-lavender-900' : 'text-ink-muted'}`}
-                        >
-                            <span>Próximos</span>
-                            <span className="ml-2 bg-lavender-200 text-lavender-800 text-xs w-5 h-5 rounded-full inline-flex items-center justify-center font-bold">2</span>
-                            {activeTab === 'upcoming' && (
-                                <motion.div layoutId="tab-indicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-lavender-600 rounded-full" />
-                            )}
+                {/* PRÓXIMA CONSULTA */}
+                <div className="mb-6">
+                    <div className="flex items-center gap-6 border-b border-[#E8D5F0] mb-4">
+                        <button className="pb-3 text-[#3D2646] font-bold text-[15px] relative">
+                            Próximos <span className="ml-2 bg-[#E8D5F0] text-[#3D2646] text-[11px] px-2 py-0.5 rounded-full font-bold">2</span>
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#9B6AB0] rounded-full"></div>
                         </button>
-                        <button
-                            onClick={() => setActiveTab('foryou')}
-                            className={`pb-3 relative font-semibold text-sm transition-colors ${activeTab === 'foryou' ? 'text-lavender-900' : 'text-ink-muted'}`}
-                        >
-                            Para Você
-                            {activeTab === 'foryou' && (
-                                <motion.div layoutId="tab-indicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-lavender-600 rounded-full" />
-                            )}
-                        </button>
+                        <button className="pb-3 text-[#8B8591] font-semibold text-[15px]">Para Você</button>
                     </div>
 
-                    <div className="mt-4 space-y-3">
-                        {activeTab === 'upcoming' ? (
-                            appointments.map((apt, i) => (
-                                <motion.div
-                                    key={apt.id}
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: i * 0.1 }}
-                                    className="bg-white rounded-3xl p-4 shadow-soft border border-lavender-100 flex items-center gap-4"
-                                >
-                                    <div className={`w-16 h-16 rounded-2xl flex flex-col items-center justify-center flex-shrink-0 ${apt.status === 'confirmed' ? 'bg-green-50 border-2 border-green-200' : 'bg-yellow-50 border-2 border-yellow-200'}`}>
-                                        <span className={`text-[10px] font-bold uppercase ${apt.status === 'confirmed' ? 'text-green-600' : 'text-yellow-600'}`}>{apt.date}</span>
-                                        <span className="text-lg font-bold text-lavender-900">{apt.time}</span>
-                                    </div>
-                                    <div className="flex-1">
-                                        <h4 className="font-bold text-lavender-900 text-lg">{apt.doctor}</h4>
-                                        <p className="text-ink-muted text-sm mb-1">{apt.type}</p>
-                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${apt.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                                            {apt.status === 'confirmed' ? '✓ Confirmado' : '⏳ Pendente'}
-                                        </span>
-                                    </div>
-                                    {apt.hasVideo && (
-                                        <button className="w-12 h-12 rounded-full bg-lavender-50 text-lavender-600 flex items-center justify-center">
-                                            {Icons.video}
-                                        </button>
-                                    )}
-                                </motion.div>
-                            ))
-                        ) : (
-                            <div className="text-center py-8 text-ink-muted">
-                                <div className="text-4xl mb-2">🎯</div>
-                                <p>Recomendações personalizadas em breve!</p>
-                            </div>
-                        )}
-                    </div>
-                </motion.div>
+                    <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.6 }}
+                        className="bg-white rounded-[24px] p-4 border border-[#E8D5F0] shadow-[0_4px_20px_rgba(93,61,107,0.06)] flex gap-4 mb-3"
+                    >
+                        <div className="w-16 h-16 bg-[#E6F7F0] border-2 border-[#A7F3D0] rounded-2xl flex flex-col items-center justify-center flex-shrink-0">
+                            <span className="text-[10px] font-bold text-[#059669] uppercase">HOJE</span>
+                            <span className="font-[Outfit] text-xl font-bold text-[#3D2646]">14:00</span>
+                        </div>
+                        <div className="flex-1">
+                            <h4 className="font-[Outfit] text-lg font-bold text-[#3D2646] mb-0.5 flex items-center">
+                                Dra. Ana Paula
+                                <span className="ml-1 inline-flex items-center justify-center w-4 h-4 bg-blue-500 rounded-full">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                </span>
+                            </h4>
+                            <p className="text-[13px] text-[#8B8591] mb-2">Nutricionista</p>
+                            <span className="inline-flex items-center gap-1 px-3 py-1 bg-[#E6F7F0] text-[#059669] rounded-full text-[11px] font-bold">
+                                ✓ Confirmado
+                            </span>
+                        </div>
+                        <button className="w-11 h-11 bg-[#F3E8F7] rounded-full flex items-center justify-center text-[#9B6AB0] flex-shrink-0">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M23 7l-7 5 7 5V7z" />
+                                <rect x="1" y="5" width="15" height="14" rx="2" />
+                            </svg>
+                        </button>
+                    </motion.div>
+                </div>
             </main>
 
             {/* NAV INFERIOR */}
-            <nav className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
-                <div className="max-w-md mx-auto bg-white/95 backdrop-blur-lg border-t border-lavender-100 pb-safe pointer-events-auto shadow-lg-up">
-                    <div className="flex justify-around items-center py-3 relative">
-                        <button
-                            onClick={() => handleSetScreen('home')}
-                            className={`flex flex-col items-center gap-1 w-16 transition-colors ${currentScreen === 'home' ? 'text-lavender-600' : 'text-ink-muted'}`}
-                        >
-                            <div className="text-xl">{Icons.grid}</div>
-                            <span className="text-[10px] font-medium">Início</span>
-                        </button>
-                        <button
-                            onClick={() => handleSetScreen('feed')}
-                            className={`flex flex-col items-center gap-1 w-16 transition-colors ${currentScreen === 'feed' ? 'text-lavender-600' : 'text-ink-muted'}`}
-                        >
-                            <div className="text-xl">🔍</div>
-                            <span className="text-[10px] font-medium">Descobrir</span>
-                        </button>
-                        <div className="relative -top-8">
-                            <motion.button
-                                onClick={() => handleSetScreen('diary')}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                className="w-14 h-14 rounded-full bg-gradient-to-br from-lavender-400 to-lavender-600 text-white shadow-lg flex items-center justify-center text-2xl"
-                            >
-                                {Icons.plus}
-                            </motion.button>
-                        </div>
-                        <button
-                            onClick={() => handleSetScreen('onboarding')}
-                            className="flex flex-col items-center gap-1 text-ink-muted hover:text-lavender-600 transition-colors w-16"
-                        >
-                            <div className="text-xl">{Icons.fileText}</div>
-                            <span className="text-[10px] font-medium">Agenda</span>
-                        </button>
-                        <button
-                            onClick={() => handleSetScreen('chat')}
-                            className="flex flex-col items-center gap-1 text-ink-muted hover:text-lavender-600 transition-colors w-16"
-                        >
-                            <div className="text-xl text-yellow-500">💬</div>
-                            <span className="text-[10px] font-medium">Chat</span>
-                        </button>
-                    </div>
-                </div>
-            </nav>
+            <BottomNav activeTab={currentScreen === 'home' ? 'home' : currentScreen === 'feed' ? 'search' : currentScreen === 'diary' ? 'add' : 'home'} onTabChange={handleNavClick} />
 
-            {/* TELAS OVERLAY - Mover para fora do nav p/ evitar problemas de pointer-events */}
-            <AnimatePresence>
+            {/* TELAS OVERLAY */}
+            <AnimatePresence mode="wait">
                 {currentScreen === 'body' && (
-                    <BodyAssessmentScreen isOpen={true} onClose={() => handleSetScreen('home')} />
+                    <BodyAssessmentScreen
+                        key="body-screen"
+                        isOpen={true}
+                        onClose={() => setCurrentScreen('home')}
+                    />
                 )}
                 {currentScreen === 'chat' && (
-                    <ChatScreen isOpen={true} onClose={() => handleSetScreen('home')} />
+                    <ChatScreen
+                        key="chat-screen"
+                        isOpen={true}
+                        onClose={() => setCurrentScreen('home')}
+                    />
                 )}
                 {currentScreen === 'feed' && (
-                    <FeedScreen isOpen={true} onClose={() => handleSetScreen('home')} />
+                    <FeedScreen
+                        key="feed-screen"
+                        isOpen={true}
+                        onClose={() => setCurrentScreen('home')}
+                    />
                 )}
                 {currentScreen === 'diary' && (
-                    <FoodDiaryScreen isOpen={true} onClose={() => handleSetScreen('home')} />
+                    <FoodDiaryScreen
+                        key="diary-screen"
+                        isOpen={true}
+                        onClose={() => setCurrentScreen('home')}
+                    />
                 )}
                 {currentScreen === 'onboarding' && (
-                    <ProfessionalOnboarding isOpen={true} onClose={() => handleSetScreen('home')} />
+                    <ProfessionalOnboarding
+                        key="onboarding-screen"
+                        isOpen={true}
+                        onClose={() => setCurrentScreen('home')}
+                    />
                 )}
             </AnimatePresence>
         </div>

@@ -9,8 +9,22 @@ const navItems = [
     { id: 'profile', icon: '👤', label: 'Perfil' },
 ];
 
-export function BottomNav() {
-    const [activeTab, setActiveTab] = useState('home');
+interface BottomNavProps {
+    activeTab?: string;
+    onTabChange?: (tabId: string) => void;
+}
+
+export function BottomNav({ activeTab: propActiveTab, onTabChange }: BottomNavProps) {
+    const [localActiveTab, setLocalActiveTab] = useState('home');
+    const activeTab = propActiveTab || localActiveTab;
+
+    const handleTabClick = (id: string) => {
+        if (onTabChange) {
+            onTabChange(id);
+        } else {
+            setLocalActiveTab(id);
+        }
+    };
 
     return (
         <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-[#E8D5F0] px-6 py-2 max-w-[430px] mx-auto z-50 pb-safe">
@@ -24,7 +38,7 @@ export function BottomNav() {
                                 <motion.button
                                     whileHover={{ scale: 1.1, rotate: 90 }}
                                     whileTap={{ scale: 0.9 }}
-                                    onClick={() => setActiveTab(item.id)}
+                                    onClick={() => handleTabClick(item.id)}
                                     className="w-16 h-16 bg-gradient-to-br from-[#C8A4D4] to-[#9B6AB0] rounded-full flex items-center justify-center text-white text-3xl shadow-lg shadow-[#9B6AB0]/40 border-4 border-[#FAF8FC] relative overflow-hidden"
                                 >
                                     {/* Ripple effect no botão */}
@@ -43,7 +57,7 @@ export function BottomNav() {
                     return (
                         <motion.button
                             key={item.id}
-                            onClick={() => setActiveTab(item.id)}
+                            onClick={() => handleTabClick(item.id)}
                             className="flex flex-col items-center gap-1 py-2 px-3 relative"
                             whileTap={{ scale: 0.9 }}
                         >
