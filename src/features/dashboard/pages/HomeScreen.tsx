@@ -66,7 +66,12 @@ const Icons = {
     pill: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.5 20.5l10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" /><path d="m8.5 8.5l7 7" /></svg>,
 };
 
-export default function HomeScreen() {
+interface HomeScreenProps {
+    onOpenNotifications?: () => void;
+    onOpenProfile?: () => void;
+}
+
+export default function HomeScreen({ onOpenNotifications, onOpenProfile }: HomeScreenProps) {
     const [greeting, setGreeting] = useState('');
     const [activeTab, setActiveTab] = useState('upcoming');
     const [showMoreActions, setShowMoreActions] = useState(false);
@@ -170,7 +175,10 @@ export default function HomeScreen() {
                     <span className="font-display font-bold text-xl text-lavender-900">Metrika</span>
                 </div>
 
-                <button className="w-10 h-10 rounded-full bg-white border border-lavender-200 flex items-center justify-center text-lavender-800 hover:bg-lavender-50 transition-colors relative">
+                <button
+                    onClick={onOpenNotifications}
+                    className="w-10 h-10 rounded-full bg-white border border-lavender-200 flex items-center justify-center text-lavender-800 hover:bg-lavender-50 transition-colors relative"
+                >
                     {Icons.bell}
                     <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
                 </button>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import HomeScreen from './screens/HomeScreen';
+import HomeScreen from './features/dashboard/pages/HomeScreen';
 import { NotificationsModal } from './components/NotificationsModal';
 import { WaterModal } from './components/WaterModal';
 import { ProfessionalProfileScreen } from './screens/ProfessionalProfileScreen.tsx';
@@ -17,7 +17,6 @@ function App() {
     <>
       <HomeScreen
         onOpenNotifications={() => setShowNotifications(true)}
-        onOpenWater={() => setShowWater(true)}
         onOpenProfile={() => setShowProfile(true)}
       />
       <NotificationsModal
