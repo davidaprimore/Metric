@@ -1,128 +1,145 @@
-import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import HomeScreen from './features/dashboard/pages/HomeScreen';
-import { ProfessionalProfileScreen } from './screens/ProfessionalProfileScreen.tsx';
-import { BookingScreen } from './screens/BookingScreen';
-import { SettingsScreen } from './screens/SettingsScreen';
-import { ProfessionalAgendaScreen } from './screens/ProfessionalAgendaScreen';
+import { ClientAgendaScreen } from './screens/ClientAgendaScreen';
+import { AppointmentDetailScreen } from './screens/AppointmentDetailScreen';
 import { SearchScreen } from './screens/SearchScreen';
 import { MedicalRecordsScreen } from './screens/MedicalRecordsScreen';
+import { SettingsScreen } from './screens/SettingsScreen';
+import { BookingScreen } from './screens/BookingScreen';
+import { PaymentScreen } from './screens/PaymentScreen';
+import { AnamneseScreen } from './screens/AnamneseScreen';
 import { BottomNavigation } from './components/BottomNavigation';
-import { NotificationsModal } from './components/NotificationsModal';
-import { WaterModal } from './components/WaterModal';
-import './styles/animations.css';
+import { LoadingTransition } from './components/LoadingTransition';
 
 export default function App() {
-  // Estados principais de navegação do BottomNav
   const [mainTab, setMainTab] = useState<'home' | 'agenda' | 'search' | 'records' | 'profile'>('home');
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Estados para overlays/modais (telas que abrem por cima)
-  const [overlay, setOverlay] = useState<{
-    type: 'none' | 'professional' | 'booking';
+  // Estados de telas modais/overlay
+  const [activeOverlay, setActiveOverlay] = useState<{
+    screen: 'none' | 'appointment-detail' | 'booking' | 'payment' | 'anamnese' | 'professional-profile';
     data?: any;
-  }>({ type: 'none' });
+  }>({ screen: 'none' });
 
-  // Estados dos modais da Home (Herança)
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [showWater, setShowWater] = useState(false);
+  // Handler de navegação com loading
+  const handleNavigate = (tab: typeof mainTab) => {
+    if (tab === mainTab) return;
 
-  // Handler de navegação principal
-  const handleMainNavigate = (tab: string) => {
-    setMainTab(tab as any);
-    // Fechar overlays ao trocar de abas principais
-    setOverlay({ type: 'none' });
+    setIsLoading(true);
+    setTimeout(() => {
+      setMainTab(tab);
+      setIsLoading(false);
+    }, 800); // Tempo da animação
+  };
+
+  const handleOpenAppointment = (appointment: any) => {
+    setActiveOverlay({ screen: 'appointment-detail', data: appointment });
+  };
+
+  const handleOpenPayment = () => {
+    setActiveOverlay({ screen: 'payment', data: null });
+  };
+
+  const handleOpenAnamnese = () => {
+    setActiveOverlay({ screen: 'anamnese', data: null });
+  };
+
+  const handlePaymentSuccess = () => {
+    setActiveOverlay({ screen: 'none' });
+    setMainTab('agenda');
   };
 
   return (
     <div className="min-h-screen bg-gray-50 relative pb-20">
-      {/* CONTEÚDO PRINCIPAL (switch entre tabs) */}
       <AnimatePresence mode="wait">
-        <motion.div
-          key={mainTab}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.2 }}
-          className="min-h-screen"
-        >
-          {mainTab === 'home' && (
-            <HomeScreen
-              onOpenProfile={(id) => setOverlay({ type: 'professional', data: id })}
-              onOpenAgenda={() => setMainTab('agenda')}
-              onOpenNotifications={() => setShowNotifications(true)}
-              onOpenWater={() => setShowWater(true)}
-              onOpenSettings={() => setMainTab('profile')}
-              onOpenSearch={() => setMainTab('search')}
-              onOpenRecords={() => setMainTab('records')}
-            />
-          )}
-
-          {mainTab === 'agenda' && (
-            <ProfessionalAgendaScreen
-              isOpen={true}
-              onClose={() => setMainTab('home')}
-            />
-          )}
-
-          {mainTab === 'search' && (
-            <SearchScreen
-              isOpen={true}
-              onClose={() => setMainTab('home')}
-            />
-          )}
-
-          {mainTab === 'records' && (
-            <MedicalRecordsScreen
-              isOpen={true}
-              onClose={() => setMainTab('home')}
-            />
-          )}
-
-          {mainTab === 'profile' && (
-            <SettingsScreen
-              isOpen={true}
-              onClose={() => setMainTab('home')}
-            />
-          )}
-        </motion.div>
+        {isLoading && <LoadingTransition isVisible={true} />}
       </AnimatePresence>
 
-      {/* BOTTOM NAVIGATION - SEMPRE VISÍVEL */}
-      {overlay.type === 'none' && (
+      {/* Conteúdo Principal */}
+      <div className={isLoading ? 'opacity-0' : 'opacity-100 transition-opacity duration-300'}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={mainTab}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            {mainTab === 'home' && <HomeScreen />}
+
+            {mainTab === 'agenda' && (
+              <ClientAgendaScreen
+                isOpen={true}
+                onClose={() => handleNavigate('home')}
+                onSelectAppointment={handleOpenAppointment}
+              />
+            )}
+
+            {mainTab === 'search' && <SearchScreen isOpen={true} onClose={() => { }} />}
+            {mainTab === 'records' && <MedicalRecordsScreen isOpen={true} onClose={() => { }} />}
+            {mainTab === 'profile' && (
+              <SettingsScreen
+                isOpen={true}
+                onClose={() => handleNavigate('home')}
+                onOpenAnamnese={handleOpenAnamnese}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Bottom Navigation - SEMPRE visível na base */}
         <BottomNavigation
           currentScreen={mainTab}
-          onNavigate={handleMainNavigate}
+          onNavigate={handleNavigate}
+        />
+      </div>
+
+      {/* Overlays/Modais */}
+      {activeOverlay.screen === 'appointment-detail' && (
+        <AppointmentDetailScreen
+          isOpen={true}
+          appointment={activeOverlay.data}
+          onClose={() => setActiveOverlay({ screen: 'none' })}
+          onReschedule={() => {
+            setActiveOverlay({ screen: 'booking', data: activeOverlay.data });
+          }}
+          onCancel={() => setActiveOverlay({ screen: 'none' })}
         />
       )}
 
-      {/* OVERLAYS (ficam por cima de tudo) */}
-      <AnimatePresence>
-        {overlay.type === 'professional' && (
-          <ProfessionalProfileScreen
-            isOpen={true}
-            onClose={() => setOverlay({ type: 'none' })}
-            onBook={() => setOverlay({ type: 'booking' })}
-            professionalId={overlay.data}
-          />
-        )}
+      {activeOverlay.screen === 'booking' && (
+        <BookingScreen
+          isOpen={true}
+          onClose={() => setActiveOverlay({ screen: 'none' })}
+          // @ts-ignore - Adaptado para o fluxo experimental
+          onAdvance={handleOpenPayment}
+        />
+      )}
 
-        {overlay.type === 'booking' && (
-          <BookingScreen
-            isOpen={true}
-            onClose={() => setOverlay({ type: 'none' })}
-          />
-        )}
-      </AnimatePresence>
+      {activeOverlay.screen === 'payment' && (
+        <PaymentScreen
+          isOpen={true}
+          onClose={() => setActiveOverlay({ screen: 'none' })}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
 
-      {/* MODALS DA HOME */}
-      <NotificationsModal
-        isOpen={showNotifications}
-        onClose={() => setShowNotifications(false)}
-      />
-      <WaterModal
-        isOpen={showWater}
-        onClose={() => setShowWater(false)}
-      />
+      {activeOverlay.screen === 'payment' && (
+        <PaymentScreen
+          isOpen={true}
+          onClose={() => setActiveOverlay({ screen: 'none' })}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
+
+      {activeOverlay.screen === 'anamnese' && (
+        <AnamneseScreen
+          isOpen={true}
+          onClose={() => setActiveOverlay({ screen: 'none' })}
+          onComplete={() => setActiveOverlay({ screen: 'none' })}
+        />
+      )}
     </div>
   );
 }

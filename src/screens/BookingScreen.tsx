@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useMemo } from 'react';
+import { addDays, isBefore, startOfDay } from 'date-fns';
 import {
     ArrowLeft,
     ChevronLeft,
@@ -38,6 +39,8 @@ export function BookingScreen({
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [currentMonth, setCurrentMonth] = useState(new Date(2026, 0, 1));
     const [showConfirmation, setShowConfirmation] = useState(false);
+
+    const today = startOfDay(new Date());
 
     const daysInMonth = useMemo(() => {
         const year = currentMonth.getFullYear();
@@ -173,24 +176,25 @@ export function BookingScreen({
                             const isAvailable = hasAvailability(date);
                             const isSelected = selectedDate?.toDateString() === date.toDateString();
                             const isToday = new Date().toDateString() === date.toDateString();
+                            const isPast = isBefore(date, today);
 
                             return (
                                 <motion.button
                                     key={idx}
-                                    whileHover={isAvailable ? { scale: 1.1 } : {}}
-                                    whileTap={isAvailable ? { scale: 0.95 } : {}}
-                                    onClick={() => isAvailable && setSelectedDate(date)}
-                                    disabled={!isAvailable}
+                                    whileHover={isAvailable && !isPast ? { scale: 1.1 } : {}}
+                                    whileTap={isAvailable && !isPast ? { scale: 0.95 } : {}}
+                                    onClick={() => isAvailable && !isPast && setSelectedDate(date)}
+                                    disabled={!isAvailable || isPast}
                                     className={`
                     aspect-square flex flex-col items-center justify-center rounded-2xl text-sm relative
                     ${isSelected ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30' : ''}
-                    ${isAvailable && !isSelected ? 'bg-white text-gray-800 hover:bg-purple-50 border border-gray-200' : ''}
-                    ${!isAvailable ? 'text-gray-300 cursor-not-allowed' : ''}
+                    ${isAvailable && !isSelected && !isPast ? 'bg-white text-gray-800 hover:bg-purple-50 border border-gray-200' : ''}
+                    ${(!isAvailable || isPast) ? 'text-gray-200 cursor-not-allowed bg-gray-50' : ''}
                     ${isToday && !isSelected ? 'border-2 border-purple-600 text-purple-600 font-bold' : ''}
                   `}
                                 >
                                     <span className="font-semibold">{date.getDate()}</span>
-                                    {isAvailable && !isSelected && (
+                                    {isAvailable && !isSelected && !isPast && (
                                         <span className="w-1 h-1 bg-green-500 rounded-full mt-1" />
                                     )}
                                 </motion.button>
@@ -311,7 +315,15 @@ export function BookingScreen({
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     disabled={!selectedDate || !selectedTime}
-                    onClick={() => setShowConfirmation(true)}
+                    onClick={() => {
+                        // Agora este botão redireciona para o fluxo de pagamento no App.tsx
+                        // mas para fins de demonstração, podemos manter o setShowConfirmation ou emitir uma nova prop handleAdvance
+                        if (typeof (onClose as any).onAdvance === 'function') {
+                            (onClose as any).onAdvance();
+                        } else {
+                            setShowConfirmation(true);
+                        }
+                    }}
                     className={`
             w-full py-4 rounded-2xl font-bold text-white transition-all
             ${selectedDate && selectedTime
@@ -320,7 +332,7 @@ export function BookingScreen({
                         }
           `}
                 >
-                    {selectedDate && selectedTime ? 'Confirmar Agendamento' : 'Selecione data e horário'}
+                    {selectedDate && selectedTime ? 'Avançar' : 'Selecione data e horário'}
                 </motion.button>
             </div>
         </motion.div>

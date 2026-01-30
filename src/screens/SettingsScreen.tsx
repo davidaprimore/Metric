@@ -9,16 +9,32 @@ import {
     LogOut,
     ChevronRight,
     Moon,
-    Mail
+    Mail,
+    Heart
 } from 'lucide-react';
 
-export function SettingsScreen({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+export function SettingsScreen({
+    isOpen,
+    onClose,
+    onOpenAnamnese
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+    onOpenAnamnese?: () => void;
+}) {
     if (!isOpen) return null;
 
     const menuItems = [
         { icon: User, label: 'Editar Perfil', color: 'text-purple-600', bg: 'bg-purple-100' },
         { icon: CreditCard, label: 'Formas de Pagamento', color: 'text-blue-600', bg: 'bg-blue-100' },
         { icon: Bell, label: 'Notificações', color: 'text-orange-600', bg: 'bg-orange-100', badge: '2' },
+        {
+            icon: Heart,
+            label: 'Minha Anamnese',
+            color: 'text-pink-600',
+            bg: 'bg-pink-100',
+            onClick: () => onOpenAnamnese?.()
+        },
         { icon: Moon, label: 'Tema Escuro', color: 'text-indigo-600', bg: 'bg-indigo-100', toggle: true },
         { icon: Shield, label: 'Privacidade e Segurança', color: 'text-green-600', bg: 'bg-green-100' },
         { icon: HelpCircle, label: 'Ajuda e Suporte', color: 'text-pink-600', bg: 'bg-pink-100' },
@@ -77,6 +93,7 @@ export function SettingsScreen({ isOpen, onClose }: { isOpen: boolean; onClose: 
                             key={item.label}
                             whileHover={{ x: 4 }}
                             whileTap={{ scale: 0.98 }}
+                            onClick={item.onClick}
                             className={`w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors ${idx !== menuItems.length - 1 ? 'border-b border-gray-100' : ''
                                 }`}
                         >
@@ -102,6 +119,30 @@ export function SettingsScreen({ isOpen, onClose }: { isOpen: boolean; onClose: 
                             </div>
                         </motion.button>
                     ))}
+                </motion.div>
+
+                {/* Anamnese Quick Preview */}
+                <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.15 }}
+                    className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6"
+                >
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-pink-100 rounded-2xl flex items-center justify-center text-pink-600">
+                            <Heart className="w-6 h-6" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="font-bold text-gray-800">Anamnese Completa</h3>
+                            <p className="text-sm text-gray-500">Atualizada em 15/01/2026</p>
+                        </div>
+                        <button
+                            onClick={onOpenAnamnese}
+                            className="text-purple-600 text-sm font-bold"
+                        >
+                            Ver/Editar
+                        </button>
+                    </div>
                 </motion.div>
 
                 {/* Logout Button */}
