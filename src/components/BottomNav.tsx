@@ -22,7 +22,7 @@ export function BottomNav() {
                         return (
                             <div key={item.id} className="relative -top-6">
                                 <motion.button
-                                    whileHover={{ scale: 1.1, rotate: 180 }}
+                                    whileHover={{ scale: 1.1, rotate: 90 }}
                                     whileTap={{ scale: 0.9 }}
                                     onClick={() => setActiveTab(item.id)}
                                     className="w-16 h-16 bg-gradient-to-br from-[#C8A4D4] to-[#9B6AB0] rounded-full flex items-center justify-center text-white text-3xl shadow-lg shadow-[#9B6AB0]/40 border-4 border-[#FAF8FC] relative overflow-hidden"
@@ -34,7 +34,7 @@ export function BottomNav() {
                                         animate={activeTab === item.id ? { scale: [0, 2], opacity: [0.5, 0] } : {}}
                                         transition={{ duration: 0.6 }}
                                     />
-                                    <span className="relative z-10 font-light">{item.icon}</span>
+                                    <span className="relative z-10 font-light pb-2">{item.icon}</span>
                                 </motion.button>
                             </div>
                         );

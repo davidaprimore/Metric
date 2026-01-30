@@ -23,7 +23,7 @@ export default function HomeScreen({ onOpenNotifications, onOpenWater, onOpenPro
 
     return (
         <div className="min-h-screen bg-[#FAF8FC] pb-28 max-w-[430px] mx-auto relative overflow-x-hidden">
-            {/* HEADER FIXO */}
+            {/* ... header and other content remains same until MatchCard ... */}
             <header className="sticky top-0 z-50 bg-[#FAF8FC]/95 backdrop-blur-md border-b border-[#E8D5F0]/50 px-5 py-4 flex justify-between items-center">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-[#C8A4D4] to-[#9B6AB0] rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
@@ -94,6 +94,7 @@ export default function HomeScreen({ onOpenNotifications, onOpenWater, onOpenPro
                                 price={280}
                                 delay={0.1}
                                 verified={true}
+                                onClick={onOpenProfile}
                             />
                         </div>
                         <div className="snap-center">
