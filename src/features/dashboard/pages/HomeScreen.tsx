@@ -3,10 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MetricCard } from '../../../components/MetricCard';
 import { MatchCard } from '../../../components/MatchCard';
 import { QuickActions } from '../../../components/QuickActions';
-import { BottomNav } from '../../../components/BottomNav';
 import { SponsorCardPremium } from '../../../components/SponsorCardPremium';
 
-// Importação das Novas Telas
+// Importação das Novas Telas Overlays Internas (Mantidas da versão anterior se necessário)
 import { BodyAssessmentScreen } from '../../../screens/BodyAssessmentScreen';
 import { ChatScreen } from '../../../screens/ChatScreen';
 import { FeedScreen } from '../../../screens/FeedScreen';
@@ -16,10 +15,22 @@ import { ProfessionalOnboarding } from '../../../screens/ProfessionalOnboardingS
 interface HomeScreenProps {
     onOpenNotifications?: () => void;
     onOpenWater?: () => void;
-    onOpenProfile?: () => void;
+    onOpenProfile: (id?: string) => void;
+    onOpenSettings: () => void;
+    onOpenAgenda: () => void;
+    onOpenSearch: () => void;
+    onOpenRecords: () => void;
 }
 
-export default function HomeScreen({ onOpenNotifications, onOpenWater, onOpenProfile }: HomeScreenProps) {
+export default function HomeScreen({
+    onOpenNotifications,
+    onOpenWater,
+    onOpenProfile,
+    onOpenSettings,
+    onOpenAgenda,
+    onOpenSearch,
+    onOpenRecords
+}: HomeScreenProps) {
     const [hour, setHour] = useState(0);
     const [currentScreen, setCurrentScreen] = useState<'home' | 'body' | 'chat' | 'feed' | 'diary' | 'onboarding'>('home');
 
@@ -30,20 +41,10 @@ export default function HomeScreen({ onOpenNotifications, onOpenWater, onOpenPro
     const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
 
     const handleActionClick = (id: string) => {
-        console.log(`Action clicked: ${id}`);
         if (id === 'health' || id === 'evolution') setCurrentScreen('body');
-        if (id === 'schedule') setCurrentScreen('onboarding');
+        if (id === 'schedule') onOpenAgenda();
         if (id === 'diet') setCurrentScreen('diary');
         if (id === 'chat') setCurrentScreen('chat');
-    };
-
-    const handleNavClick = (id: string) => {
-        console.log(`Nav clicked: ${id}`);
-        if (id === 'home') setCurrentScreen('home');
-        if (id === 'search') setCurrentScreen('feed');
-        if (id === 'add') setCurrentScreen('diary');
-        if (id === 'calendar') setCurrentScreen('onboarding');
-        if (id === 'profile') onOpenProfile?.();
     };
 
     return (
@@ -135,7 +136,7 @@ export default function HomeScreen({ onOpenNotifications, onOpenWater, onOpenPro
                 <div className="mb-8">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="font-[Outfit] text-[18px] font-bold text-[#3D2646]">Seu Match Perfeito</h2>
-                        <span className="text-[13px] text-[#9B6AB0] font-medium">Ver todos →</span>
+                        <span onClick={onOpenSearch} className="text-[13px] text-[#9B6AB0] font-medium cursor-pointer">Ver todos →</span>
                     </div>
 
                     <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-4 -mx-5 px-5 snap-x">
@@ -152,7 +153,7 @@ export default function HomeScreen({ onOpenNotifications, onOpenWater, onOpenPro
                                 price={280}
                                 delay={0.1}
                                 verified={true}
-                                onClick={onOpenProfile}
+                                onClick={() => onOpenProfile('ana-paula')}
                             />
                         </div>
                         <div className="snap-center">
@@ -167,16 +168,10 @@ export default function HomeScreen({ onOpenNotifications, onOpenWater, onOpenPro
                                 tags={['Nutrição Esportiva', 'Hipertrofia', 'Emagrecimento']}
                                 price={300}
                                 delay={0.6}
-                                onClick={onOpenProfile}
+                                onClick={() => onOpenProfile('ricardo-silva')}
                                 verified={true}
                             />
                         </div>
-                    </div>
-
-                    {/* Indicadores */}
-                    <div className="flex justify-center gap-2 mt-2">
-                        <div className="w-6 h-1.5 bg-[#9B6AB0] rounded-full"></div>
-                        <div className="w-1.5 h-1.5 bg-[#E8D5F0] rounded-full"></div>
                     </div>
                 </div>
 
@@ -208,56 +203,40 @@ export default function HomeScreen({ onOpenNotifications, onOpenWater, onOpenPro
                         </button>
                     </div>
                 </motion.div>
-
-                {/* PRÓXIMA CONSULTA */}
-                <div className="mb-6">
-                    <div className="flex items-center gap-6 border-b border-[#E8D5F0] mb-4">
-                        <button className="pb-3 text-[#3D2646] font-bold text-[15px] relative">
-                            Próximos <span className="ml-2 bg-[#E8D5F0] text-[#3D2646] text-[11px] px-2 py-0.5 rounded-full font-bold">2</span>
-                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#9B6AB0] rounded-full"></div>
-                        </button>
-                        <button className="pb-3 text-[#8B8591] font-semibold text-[15px]">Para Você</button>
-                    </div>
-
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.6 }}
-                        onClick={onOpenProfile}
-                        className="bg-white rounded-[24px] p-4 border border-[#E8D5F0] shadow-[0_4px_20px_rgba(93,61,107,0.06)] flex gap-4 mb-3 cursor-pointer"
-                    >
-                        <div className="w-16 h-16 bg-[#E6F7F0] border-2 border-[#A7F3D0] rounded-2xl flex flex-col items-center justify-center flex-shrink-0">
-                            <span className="text-[10px] font-bold text-[#059669] uppercase">HOJE</span>
-                            <span className="font-[Outfit] text-xl font-bold text-[#3D2646]">14:00</span>
-                        </div>
-                        <div className="flex-1">
-                            <h4 className="font-[Outfit] text-lg font-bold text-[#3D2646] mb-0.5 flex items-center">
-                                Dra. Ana Paula
-                                <span className="ml-1 inline-flex items-center justify-center w-4 h-4 bg-blue-500 rounded-full">
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                        <polyline points="20 6 9 17 4 12"></polyline>
-                                    </svg>
-                                </span>
-                            </h4>
-                            <p className="text-[13px] text-[#8B8591] mb-2">Nutricionista</p>
-                            <span className="inline-flex items-center gap-1 px-3 py-1 bg-[#E6F7F0] text-[#059669] rounded-full text-[11px] font-bold">
-                                ✓ Confirmado
-                            </span>
-                        </div>
-                        <button className="w-11 h-11 bg-[#F3E8F7] rounded-full flex items-center justify-center text-[#9B6AB0] flex-shrink-0">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M23 7l-7 5 7 5V7z" />
-                                <rect x="1" y="5" width="15" height="14" rx="2" />
-                            </svg>
-                        </button>
-                    </motion.div>
-                </div>
             </main>
 
             {/* NAV INFERIOR */}
-            <BottomNav activeTab={currentScreen === 'home' ? 'home' : currentScreen === 'feed' ? 'search' : currentScreen === 'diary' ? 'add' : 'home'} onTabChange={handleNavClick} />
+            <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 py-3 flex items-center justify-between z-50 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.03)] rounded-t-[32px]">
+                <button onClick={() => setCurrentScreen('home')} className={`flex flex-col items-center gap-1 ${currentScreen === 'home' ? 'text-purple-600' : 'text-gray-400'}`}>
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
+                    <span className="text-[10px] font-medium">Início</span>
+                </button>
 
-            {/* TELAS OVERLAY */}
+                <button onClick={onOpenSearch} className="flex flex-col items-center gap-1 text-gray-400 hover:text-purple-600 transition-colors">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    <span className="text-[10px] font-medium">Buscar</span>
+                </button>
+
+                {/* Floating Action Button */}
+                <button
+                    onClick={onOpenAgenda}
+                    className="w-14 h-14 bg-purple-600 rounded-full flex items-center justify-center text-white shadow-lg shadow-purple-500/40 -mt-8 border-4 border-gray-50 hover:scale-110 transition-transform"
+                >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                </button>
+
+                <button onClick={onOpenRecords} className="flex flex-col items-center gap-1 text-gray-400 hover:text-purple-600 transition-colors">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    <span className="text-[10px] font-medium">Prontuário</span>
+                </button>
+
+                <button onClick={onOpenSettings} className="flex flex-col items-center gap-1 text-gray-400 hover:text-purple-600 transition-colors">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                    <span className="text-[10px] font-medium">Perfil</span>
+                </button>
+            </nav>
+
+            {/* TELAS OVERLAY INTERNAS */}
             <AnimatePresence mode="wait">
                 {currentScreen === 'body' && (
                     <BodyAssessmentScreen
