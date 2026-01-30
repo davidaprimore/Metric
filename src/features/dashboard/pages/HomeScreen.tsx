@@ -5,7 +5,7 @@ import { MatchCard } from '../../../components/MatchCard';
 import { QuickActions } from '../../../components/QuickActions';
 import { SponsorCardPremium } from '../../../components/SponsorCardPremium';
 
-// Importação das Novas Telas Overlays Internas (Mantidas da versão anterior se necessário)
+// Importação das Novas Telas Overlays Internas
 import { BodyAssessmentScreen } from '../../../screens/BodyAssessmentScreen';
 import { ChatScreen } from '../../../screens/ChatScreen';
 import { FeedScreen } from '../../../screens/FeedScreen';
@@ -20,6 +20,7 @@ interface HomeScreenProps {
     onOpenAgenda: () => void;
     onOpenSearch: () => void;
     onOpenRecords: () => void;
+    onSwitchMode?: () => void; // Prop para alternar modo
 }
 
 export default function HomeScreen({
@@ -29,7 +30,7 @@ export default function HomeScreen({
     onOpenSettings,
     onOpenAgenda,
     onOpenSearch,
-    onOpenRecords
+    onSwitchMode
 }: HomeScreenProps) {
     const [hour, setHour] = useState(0);
     const [currentScreen, setCurrentScreen] = useState<'home' | 'body' | 'chat' | 'feed' | 'diary' | 'onboarding'>('home');
@@ -49,29 +50,36 @@ export default function HomeScreen({
 
     return (
         <div className="min-h-screen bg-[#FAF8FC] pb-28 max-w-[430px] mx-auto relative overflow-x-hidden">
-            {/* Indicador de Versão Ativa */}
-            <div className="fixed top-2 left-1/2 -translate-x-1/2 z-[60] px-3 py-1 bg-[#9B6AB0] text-white text-[10px] font-bold rounded-full shadow-lg pointer-events-none opacity-50">
-                METRIKA PRO ACTIVE
-            </div>
-
             <header className="sticky top-0 z-50 bg-[#FAF8FC]/95 backdrop-blur-md border-b border-[#E8D5F0]/50 px-5 py-4 flex justify-between items-center">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-[#C8A4D4] to-[#9B6AB0] rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
                         M
                     </div>
-                    <span className="font-[Outfit] font-bold text-xl text-[#3D2646]">Metrika</span>
+                    <div>
+                        <span className="font-[Outfit] font-bold text-xl text-[#3D2646]">Metrika</span>
+                    </div>
                 </div>
 
-                <button
-                    onClick={onOpenNotifications}
-                    className="w-10 h-10 bg-white rounded-full border border-[#E8D5F0] flex items-center justify-center relative hover:bg-[#F3E8F7] transition-colors"
-                >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3D2646" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                    </svg>
-                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                </button>
+                <div className="flex items-center gap-2">
+                    {/* Botão Temporário de Alternância para Modo Profissional */}
+                    <button
+                        onClick={onSwitchMode}
+                        className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg text-[10px] font-bold hover:bg-purple-200 transition-colors"
+                    >
+                        MODO PRO
+                    </button>
+
+                    <button
+                        onClick={onOpenNotifications}
+                        className="w-10 h-10 bg-white rounded-full border border-[#E8D5F0] flex items-center justify-center relative hover:bg-[#F3E8F7] transition-colors"
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3D2646" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                        <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                    </button>
+                </div>
             </header>
 
             <main className="px-5 pt-6">
