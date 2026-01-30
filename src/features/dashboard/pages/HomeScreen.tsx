@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Importação das Novas Telas
+import { BodyAssessmentScreen } from '../../../screens/BodyAssessmentScreen';
+import { ChatScreen } from '../../../screens/ChatScreen';
+import { FeedScreen } from '../../../screens/FeedScreen';
+import { FoodDiaryScreen } from '../../../screens/FoodDiaryScreen';
+import { ProfessionalOnboarding } from '../../../screens/ProfessionalOnboardingScreen';
+
 // ÍCONES SVG INLINE (funciona 100% garantido)
 const Icons = {
     bell: (
@@ -64,7 +71,7 @@ export default function HomeScreen() {
     const [activeTab, setActiveTab] = useState('upcoming');
     const [showMoreActions, setShowMoreActions] = useState(false);
     const [selectedMetric, setSelectedMetric] = useState(0);
-    const [fabRotation, setFabRotation] = useState(0);
+    const [currentScreen, setCurrentScreen] = useState<'home' | 'body' | 'chat' | 'feed' | 'diary' | 'onboarding'>('home');
 
     useEffect(() => {
         const hour = new Date().getHours();
@@ -73,7 +80,7 @@ export default function HomeScreen() {
         else setGreeting('Boa noite');
     }, []);
 
-    // Métricas de saúde REAIS (substitua por dados do Supabase)
+    // Métricas de saúde REAIS
     const healthMetrics = [
         {
             id: 'fat',
@@ -83,7 +90,7 @@ export default function HomeScreen() {
             icon: <span className="text-2xl">📊</span>,
             color: 'from-orange-400 to-red-400',
             bg: 'bg-orange-50',
-            progress: 65, // 65% da meta
+            progress: 65,
             trend: '-2%',
             alert: false
         },
@@ -113,23 +120,31 @@ export default function HomeScreen() {
         },
     ];
 
-    // Ações rápidas EXPANSÍVEIS (estilo C6 Bank)
     const quickActions = [
-        { id: 'health', icon: '❤️', label: 'Minha Saúde', color: 'from-red-400 to-pink-500', fullLabel: 'Relatório Completo de Saúde' },
-        { id: 'schedule', icon: '📅', label: 'Agendar', color: 'from-lavender-400 to-lavender-600', fullLabel: 'Agendar Nova Consulta' },
-        { id: 'diet', icon: '🥗', label: 'Dieta', color: 'from-green-400 to-emerald-500', fullLabel: 'Plano Alimentar' },
-        { id: 'meds', icon: '💊', label: 'Remédios', color: 'from-blue-400 to-blue-600', fullLabel: 'Gestão de Medicamentos' },
-        // Ocultas inicialmente (aparecem ao expandir)
-        { id: 'exams', icon: '📋', label: 'Exames', color: 'from-teal-400 to-teal-600', fullLabel: 'Resultados de Exames' },
-        { id: 'evolution', icon: '📈', label: 'Evolução', color: 'from-purple-400 to-purple-600', fullLabel: 'Gráficos de Evolução' },
-        { id: 'chat', icon: '💬', label: 'Chat', color: 'from-yellow-400 to-orange-500', fullLabel: 'Conversar com Especialista' },
-        { id: 'emergency', icon: '🚨', label: 'Emergência', color: 'from-red-500 to-red-700', fullLabel: 'Contatos de Emergência' },
+        { id: 'health', icon: '❤️', label: 'Minha Saúde', color: 'from-red-400 to-pink-500' },
+        { id: 'schedule', icon: '📅', label: 'Agendar', color: 'from-lavender-400 to-lavender-600' },
+        { id: 'diet', icon: '🥗', label: 'Dieta', color: 'from-green-400 to-emerald-500' },
+        { id: 'meds', icon: '💊', label: 'Remédios', color: 'from-blue-400 to-blue-600' },
+        { id: 'exams', icon: '📋', label: 'Exames', color: 'from-teal-400 to-teal-600' },
+        { id: 'evolution', icon: '📈', label: 'Evolução', color: 'from-purple-400 to-purple-600' },
+        { id: 'chat', icon: '💬', label: 'Chat', color: 'from-yellow-400 to-orange-500' },
+        { id: 'emergency', icon: '🚨', label: 'Emergência', color: 'from-red-500 to-red-700' },
     ];
 
-    const visibleActions = quickActions.slice(0, 4);
-    const hiddenActions = quickActions.slice(4);
+    const visibleActions = [
+        { ...quickActions[0], onClick: () => setCurrentScreen('body') },
+        { ...quickActions[1], onClick: () => setCurrentScreen('onboarding') },
+        { ...quickActions[2], onClick: () => setCurrentScreen('diary') },
+        { ...quickActions[3], onClick: () => { } },
+    ];
 
-    // Consultas (mock)
+    const hiddenActionsFiltered = [
+        { ...quickActions[4], onClick: () => { } },
+        { ...quickActions[5], onClick: () => setCurrentScreen('body') },
+        { ...quickActions[6], onClick: () => setCurrentScreen('chat') },
+        { ...quickActions[7], onClick: () => { } },
+    ];
+
     const appointments = [
         { id: 1, doctor: 'Dra. Ana Paula', type: 'Nutricionista', time: '14:00', date: 'Hoje', status: 'confirmed', hasVideo: true },
         { id: 2, doctor: 'Dr. Carlos', type: 'Fisioterapeuta', time: '10:00', date: 'Qua', status: 'pending', hasVideo: false },
@@ -137,7 +152,6 @@ export default function HomeScreen() {
 
     return (
         <div className="min-h-screen bg-background pb-24 w-full max-w-md mx-auto shadow-2xl relative overflow-x-hidden">
-            {/* Header com Notificação Funcional */}
             <header className="px-4 pt-6 pb-2 flex justify-between items-center bg-background sticky top-0 z-30">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lavender-400 to-lavender-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
@@ -153,7 +167,6 @@ export default function HomeScreen() {
             </header>
 
             <main className="px-4 pt-4 space-y-6">
-                {/* Saudação */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                     <p className="text-ink-muted text-sm mb-1">{greeting},</p>
                     <h1 className="font-display text-3xl font-bold text-lavender-900 flex items-center gap-2">
@@ -161,13 +174,11 @@ export default function HomeScreen() {
                     </h1>
                 </motion.div>
 
-                {/* CAROUSEL DE MÉTRICAS CLÍNICAS (C6 Bank style) */}
-                {/* CAROUSEL DE MÉTRICAS CLÍNICAS (C6 Bank style) */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="relative -mx-4" // Pull full width (matched to px-4)
+                    className="relative -mx-4"
                 >
                     <div className="flex gap-4 overflow-x-auto hide-scrollbar py-6 px-4 snap-x snap-mandatory">
                         {healthMetrics.map((metric, index) => (
@@ -178,7 +189,6 @@ export default function HomeScreen() {
                                     } bg-white shadow-soft`}
                                 whileTap={{ scale: 0.95 }}
                             >
-                                {/* Header do card */}
                                 <div className="flex justify-between items-start mb-3">
                                     <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${metric.color} flex items-center justify-center text-white shadow-md`}>
                                         {metric.icon}
@@ -187,14 +197,10 @@ export default function HomeScreen() {
                                         <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                                     )}
                                 </div>
-
-                                {/* Valor principal */}
                                 <div className="mb-2">
                                     <span className="text-2xl font-bold text-lavender-900">{metric.value}</span>
                                     <span className="text-xs text-ink-muted ml-1">{metric.label}</span>
                                 </div>
-
-                                {/* Barra de progresso */}
                                 <div className="w-full h-1.5 bg-lavender-100 rounded-full overflow-hidden mb-2">
                                     <motion.div
                                         initial={{ width: 0 }}
@@ -203,16 +209,14 @@ export default function HomeScreen() {
                                         className={`h-full bg-gradient-to-r ${metric.color}`}
                                     />
                                 </div>
-
-                                {/* Trend */}
                                 <p className={`text-xs font-medium ${metric.trend.includes('-') ? 'text-green-600' : 'text-lavender-600'}`}>
                                     {metric.trend} {metric.sublabel}
                                 </p>
                             </motion.div>
                         ))}
 
-                        {/* Card "Ver Mais" */}
                         <motion.div
+                            onClick={() => setCurrentScreen('body')}
                             className="flex-shrink-0 w-24 snap-center rounded-3xl p-4 bg-lavender-50 border-2 border-dashed border-lavender-300 flex flex-col items-center justify-center cursor-pointer"
                             whileHover={{ backgroundColor: '#E8D5F0' }}
                             whileTap={{ scale: 0.95 }}
@@ -223,19 +227,8 @@ export default function HomeScreen() {
                             <span className="text-xs font-medium text-lavender-700 text-center">Ver<br />Mais</span>
                         </motion.div>
                     </div>
-
-                    {/* Indicador de página */}
-                    <div className="flex justify-center gap-1.5 -mt-2 mb-4">
-                        {healthMetrics.map((_, i) => (
-                            <div
-                                key={i}
-                                className={`h-1.5 rounded-full transition-all ${selectedMetric === i ? 'w-6 bg-lavender-600' : 'w-1.5 bg-lavender-200'}`}
-                            />
-                        ))}
-                    </div>
                 </motion.div>
 
-                {/* AÇÕES RÁPIDAS - EXPANSÍVEIS (Estilo C6 Bank) */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="font-display font-bold text-lg text-lavender-900">Ações Rápidas</h3>
@@ -253,6 +246,7 @@ export default function HomeScreen() {
                         {visibleActions.map((action, i) => (
                             <motion.button
                                 key={action.id}
+                                onClick={action.onClick}
                                 initial={{ opacity: 0, scale: 0.8 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: i * 0.05 }}
@@ -260,7 +254,7 @@ export default function HomeScreen() {
                                 whileTap={{ scale: 0.9 }}
                                 className="flex flex-col items-center gap-2 group"
                             >
-                                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${action.color} flex items-center justify-center text-2xl shadow-lg group-hover:shadow-xl transition-shadow`}>
+                                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${action.color} flex items-center justify-center text-2xl shadow-lg`}>
                                     {action.icon}
                                 </div>
                                 <span className="text-xs font-medium text-ink text-center leading-tight">{action.label}</span>
@@ -268,7 +262,6 @@ export default function HomeScreen() {
                         ))}
                     </div>
 
-                    {/* Linha expansível (estilo C6 Bank) */}
                     <AnimatePresence>
                         {showMoreActions && (
                             <motion.div
@@ -278,15 +271,16 @@ export default function HomeScreen() {
                                 className="overflow-hidden"
                             >
                                 <div className="grid grid-cols-4 gap-2 sm:gap-4 pt-4 border-t border-lavender-100 mt-4">
-                                    {hiddenActions.map((action, i) => (
+                                    {hiddenActionsFiltered.map((action, i) => (
                                         <motion.button
                                             key={action.id}
+                                            onClick={action.onClick}
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, y: 10 }}
                                             transition={{ delay: i * 0.05 }}
                                             whileHover={{ y: -3 }}
-                                            className="flex flex-col items-center gap-2 group"
+                                            className="flex flex-col items-center gap-2"
                                         >
                                             <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${action.color} flex items-center justify-center text-2xl shadow-md`}>
                                                 {action.icon}
@@ -300,7 +294,6 @@ export default function HomeScreen() {
                     </AnimatePresence>
                 </motion.div>
 
-                {/* TABS FUNCIONANDO */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
                     <div className="flex items-center gap-6 border-b border-lavender-200 pb-1">
                         <button
@@ -313,7 +306,6 @@ export default function HomeScreen() {
                                 <motion.div layoutId="tab-indicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-lavender-600 rounded-full" />
                             )}
                         </button>
-
                         <button
                             onClick={() => setActiveTab('foryou')}
                             className={`pb-3 relative font-semibold text-sm transition-colors ${activeTab === 'foryou' ? 'text-lavender-900' : 'text-ink-muted'}`}
@@ -325,7 +317,6 @@ export default function HomeScreen() {
                         </button>
                     </div>
 
-                    {/* CONTEÚDO DAS TABS */}
                     <div className="mt-4 space-y-3">
                         {activeTab === 'upcoming' ? (
                             appointments.map((apt, i) => (
@@ -334,95 +325,92 @@ export default function HomeScreen() {
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: i * 0.1 }}
-                                    whileHover={{ x: 8 }}
-                                    className="bg-white rounded-3xl p-4 shadow-soft border border-lavender-100 flex items-center gap-4 cursor-pointer group"
+                                    className="bg-white rounded-3xl p-4 shadow-soft border border-lavender-100 flex items-center gap-4"
                                 >
-                                    <div className={`w-16 h-16 rounded-2xl flex flex-col items-center justify-center flex-shrink-0 ${apt.status === 'confirmed' ? 'bg-green-50 border-2 border-green-200' : 'bg-yellow-50 border-2 border-yellow-200'
-                                        }`}>
+                                    <div className={`w-16 h-16 rounded-2xl flex flex-col items-center justify-center flex-shrink-0 ${apt.status === 'confirmed' ? 'bg-green-50 border-2 border-green-200' : 'bg-yellow-50 border-2 border-yellow-200'}`}>
                                         <span className={`text-[10px] font-bold uppercase ${apt.status === 'confirmed' ? 'text-green-600' : 'text-yellow-600'}`}>{apt.date}</span>
                                         <span className="text-lg font-bold text-lavender-900">{apt.time}</span>
                                     </div>
-
                                     <div className="flex-1">
                                         <h4 className="font-bold text-lavender-900 text-lg">{apt.doctor}</h4>
                                         <p className="text-ink-muted text-sm mb-1">{apt.type}</p>
-                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${apt.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                                            }`}>
+                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${apt.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                                             {apt.status === 'confirmed' ? '✓ Confirmado' : '⏳ Pendente'}
                                         </span>
                                     </div>
-
-                                    {
-                                        apt.hasVideo && (
-                                            <motion.button
-                                                whileHover={{ scale: 1.1 }}
-                                                whileTap={{ scale: 0.9 }}
-                                                className="w-12 h-12 rounded-full bg-lavender-50 text-lavender-600 flex items-center justify-center hover:bg-lavender-100 transition-colors"
-                                            >
-                                                {Icons.video}
-                                            </motion.button>
-                                        )
-                                    }
+                                    {apt.hasVideo && (
+                                        <button className="w-12 h-12 rounded-full bg-lavender-50 text-lavender-600 flex items-center justify-center">
+                                            {Icons.video}
+                                        </button>
+                                    )}
                                 </motion.div>
                             ))
                         ) : (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="text-center py-8 text-ink-muted"
-                            >
+                            <div className="text-center py-8 text-ink-muted">
                                 <div className="text-4xl mb-2">🎯</div>
                                 <p>Recomendações personalizadas em breve!</p>
-                            </motion.div>
+                            </div>
                         )}
                     </div>
-                </motion.div >
-            </main >
+                </motion.div>
+            </main>
 
-            {/* Bottom Nav - ÚNICA E FUNCIONAL */}
             <nav className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
                 <div className="max-w-md mx-auto bg-white/95 backdrop-blur-lg border-t border-lavender-100 pb-safe pointer-events-auto shadow-lg-up">
                     <div className="flex justify-around items-center py-3 relative">
-                        {/* Item 1 */}
-                        <button className="flex flex-col items-center gap-1 text-lavender-600 w-16">
+                        <button
+                            onClick={() => setCurrentScreen('home')}
+                            className={`flex flex-col items-center gap-1 w-16 transition-colors ${currentScreen === 'home' ? 'text-lavender-600' : 'text-ink-muted'}`}
+                        >
                             <div className="text-xl">{Icons.grid}</div>
                             <span className="text-[10px] font-medium">Início</span>
                         </button>
-
-                        {/* Item 2 */}
-                        <button className="flex flex-col items-center gap-1 text-ink-muted hover:text-lavender-600 transition-colors w-16">
-                            <div className="text-xl">{Icons.calendar}</div>
-                            <span className="text-[10px] font-medium">Buscar</span>
+                        <button
+                            onClick={() => setCurrentScreen('feed')}
+                            className={`flex flex-col items-center gap-1 w-16 transition-colors ${currentScreen === 'feed' ? 'text-lavender-600' : 'text-ink-muted'}`}
+                        >
+                            <div className="text-xl">🔍</div>
+                            <span className="text-[10px] font-medium">Descobrir</span>
                         </button>
-
-                        {/* FAB Central */}
                         <div className="relative -top-8">
                             <motion.button
-                                onClick={() => setFabRotation(fabRotation === 0 ? 45 : 0)}
-                                animate={{ rotate: fabRotation }}
+                                onClick={() => setCurrentScreen('diary')}
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
-                                transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                                className="w-14 h-14 rounded-full bg-gradient-to-br from-lavender-400 to-lavender-600 text-white shadow-lg shadow-lavender-500/30 flex items-center justify-center text-2xl"
+                                className="w-14 h-14 rounded-full bg-gradient-to-br from-lavender-400 to-lavender-600 text-white shadow-lg flex items-center justify-center text-2xl"
                             >
                                 {Icons.plus}
                             </motion.button>
                         </div>
-
-                        {/* Item 4 */}
                         <button className="flex flex-col items-center gap-1 text-ink-muted hover:text-lavender-600 transition-colors w-16">
                             <div className="text-xl">{Icons.fileText}</div>
                             <span className="text-[10px] font-medium">Agenda</span>
                         </button>
-
-                        {/* Item 5 */}
                         <button className="flex flex-col items-center gap-1 text-ink-muted hover:text-lavender-600 transition-colors w-16">
                             <div className="text-xl">{Icons.heart}</div>
                             <span className="text-[10px] font-medium">Perfil</span>
                         </button>
                     </div>
+
+                    <AnimatePresence>
+                        {currentScreen === 'body' && (
+                            <BodyAssessmentScreen isOpen={true} onClose={() => setCurrentScreen('home')} />
+                        )}
+                        {currentScreen === 'chat' && (
+                            <ChatScreen isOpen={true} onClose={() => setCurrentScreen('home')} />
+                        )}
+                        {currentScreen === 'feed' && (
+                            <FeedScreen isOpen={true} onClose={() => setCurrentScreen('home')} />
+                        )}
+                        {currentScreen === 'diary' && (
+                            <FoodDiaryScreen isOpen={true} onClose={() => setCurrentScreen('home')} />
+                        )}
+                        {currentScreen === 'onboarding' && (
+                            <ProfessionalOnboarding isOpen={true} onClose={() => setCurrentScreen('home')} />
+                        )}
+                    </AnimatePresence>
                 </div>
             </nav>
-        </div >
+        </div>
     );
 }
