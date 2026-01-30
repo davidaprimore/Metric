@@ -4,13 +4,15 @@ import { MetricCard } from '../components/MetricCard';
 import { MatchCard } from '../components/MatchCard';
 import { QuickActions } from '../components/QuickActions';
 import { BottomNav } from '../components/BottomNav';
+import { SponsorCardPremium } from '../components/SponsorCardPremium';
 
 interface HomeScreenProps {
     onOpenNotifications: () => void;
     onOpenWater: () => void;
+    onOpenProfile: () => void;
 }
 
-export default function HomeScreen({ onOpenNotifications, onOpenWater }: HomeScreenProps) {
+export default function HomeScreen({ onOpenNotifications, onOpenWater, onOpenProfile }: HomeScreenProps) {
     const [hour, setHour] = useState(0);
 
     useEffect(() => {
@@ -96,16 +98,17 @@ export default function HomeScreen({ onOpenNotifications, onOpenWater }: HomeScr
                         </div>
                         <div className="snap-center">
                             <MatchCard
-                                image="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=600&h=400&fit=crop"
+                                image="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop"
                                 name="Dr. Ricardo Silva"
-                                specialty="Fisioterapeuta"
-                                crm="54321"
-                                rating={4.92}
-                                distance="3.5km"
+                                specialty="Nutricionista Esportivo"
+                                crm="12345"
+                                rating={4.9}
+                                distance="2.5 km"
                                 match={95}
-                                tags={['Reabilitação', 'Dor']}
-                                price={220}
-                                delay={0.2}
+                                tags={['Nutrição Esportiva', 'Hipertrofia', 'Emagrecimento']}
+                                price={300}
+                                delay={0.6}
+                                onClick={onOpenProfile}
                                 verified={true}
                             />
                         </div>
@@ -121,50 +124,10 @@ export default function HomeScreen({ onOpenNotifications, onOpenWater }: HomeScr
                 {/* AÇÕES RÁPIDAS */}
                 <QuickActions />
 
-                {/* PATROCINADOR GROWTH */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
-                    whileHover={{ scale: 1.02 }}
-                    className="bg-white rounded-[24px] p-5 border border-[#E8D5F0] shadow-[0_4px_20px_rgba(93,61,107,0.06)] flex gap-4 items-center relative overflow-hidden mb-6 cursor-pointer group"
-                >
-                    {/* Badge sutil */}
-                    <div className="absolute top-3 right-3 text-[9px] text-[#8B8591] font-semibold tracking-wider uppercase opacity-60">
-                        Patrocinado
-                    </div>
-
-                    {/* Imagem/Ícone */}
-                    <motion.div
-                        className="w-20 h-20 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl flex items-center justify-center text-4xl flex-shrink-0 border border-green-100"
-                        whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
-                        transition={{ duration: 0.5 }}
-                    >
-                        💪
-                    </motion.div>
-
-                    <div className="flex-1 pt-2">
-                        <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-[Outfit] text-[16px] font-bold text-[#3D2646]">Growth Suplementos</h4>
-                            <span className="px-1.5 py-0.5 bg-green-100 text-green-600 text-[9px] font-bold rounded">PARCEIRO</span>
-                        </div>
-                        <p className="text-[13px] text-[#8B8591] leading-snug mb-3">
-                            Whey Protein Isolado com <span className="text-green-600 font-bold">30% OFF</span> exclusivo para membros Metrika
-                        </p>
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="px-4 py-2 bg-[#FAF8FC] border border-[#E8D5F0] rounded-full text-[12px] font-bold text-[#3D2646] hover:bg-[#F3E8F7] hover:border-[#9B6AB0] transition-colors group-hover:shadow-md"
-                        >
-                            Ver oferta →
-                        </motion.button>
-                    </div>
-
-                    {/* Efeito de brilho sutil no hover */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                    </div>
-                </motion.div>
+                {/* PATROCINADOR PREMIUM */}
+                <div className="mb-6">
+                    <SponsorCardPremium />
+                </div>
 
                 {/* PLANO */}
                 <motion.div

@@ -13,15 +13,18 @@ interface Props {
     price: number;
     delay: number;
     verified?: boolean;
+    onClick?: () => void;
 }
 
-export function MatchCard({ image, name, specialty, crm, rating, distance, match, tags, price, delay, verified = true }: Props) {
+export function MatchCard({ image, name, specialty, crm, rating, distance, match, tags, price, delay, verified = true, onClick }: Props) {
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay, duration: 0.5, ease: "easeOut" }}
-            className="min-w-[280px] max-w-[280px] bg-white rounded-[28px] overflow-hidden shadow-[0_10px_40px_rgba(93,61,107,0.12)] border border-[#E8D5F0]"
+            onClick={onClick}
+            whileTap={onClick ? { scale: 0.98 } : undefined}
+            className={`min-w-[280px] max-w-[280px] bg-white rounded-[28px] overflow-hidden shadow-[0_10px_40px_rgba(93,61,107,0.12)] border border-[#E8D5F0] ${onClick ? 'cursor-pointer' : ''}`}
         >
             {/* Imagem com Overlay */}
             <div className="relative h-[180px] bg-gradient-to-br from-[#e9d5f0] to-[#d4b8e0]">
@@ -59,7 +62,13 @@ export function MatchCard({ image, name, specialty, crm, rating, distance, match
                     ))}
                 </div>
 
-                <button className="w-full py-3.5 bg-gradient-to-r from-[#9B6AB0] to-[#7D5490] text-white rounded-2xl font-bold text-[15px] active:scale-[0.98] transition-transform">
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (onClick) onClick();
+                    }}
+                    className="w-full py-3.5 bg-gradient-to-r from-[#9B6AB0] to-[#7D5490] text-white rounded-2xl font-bold text-[15px] active:scale-[0.98] transition-transform"
+                >
                     Agendar R$ {price}
                 </button>
             </div>
