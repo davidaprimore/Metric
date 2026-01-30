@@ -8,7 +8,7 @@ import { FeedScreen } from '../../../screens/FeedScreen';
 import { FoodDiaryScreen } from '../../../screens/FoodDiaryScreen';
 import { ProfessionalOnboarding } from '../../../screens/ProfessionalOnboardingScreen';
 
-// ÍCONES SVG INLINE (funciona 100% garantido)
+// ÍCONES SVG INLINE
 const Icons = {
     bell: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -80,7 +80,12 @@ export default function HomeScreen() {
         else setGreeting('Boa noite');
     }, []);
 
-    // Métricas de saúde REAIS
+    // Helper p/ trocar de tela com log
+    const handleSetScreen = (screen: typeof currentScreen) => {
+        console.log(`Abrindo tela: ${screen}`);
+        setCurrentScreen(screen);
+    };
+
     const healthMetrics = [
         {
             id: 'fat',
@@ -132,16 +137,16 @@ export default function HomeScreen() {
     ];
 
     const visibleActions = [
-        { ...quickActions[0], onClick: () => setCurrentScreen('body') },
-        { ...quickActions[1], onClick: () => setCurrentScreen('onboarding') },
-        { ...quickActions[2], onClick: () => setCurrentScreen('diary') },
+        { ...quickActions[0], onClick: () => handleSetScreen('body') },
+        { ...quickActions[1], onClick: () => handleSetScreen('onboarding') },
+        { ...quickActions[2], onClick: () => handleSetScreen('diary') },
         { ...quickActions[3], onClick: () => { } },
     ];
 
     const hiddenActionsFiltered = [
         { ...quickActions[4], onClick: () => { } },
-        { ...quickActions[5], onClick: () => setCurrentScreen('body') },
-        { ...quickActions[6], onClick: () => setCurrentScreen('chat') },
+        { ...quickActions[5], onClick: () => handleSetScreen('body') },
+        { ...quickActions[6], onClick: () => handleSetScreen('chat') },
         { ...quickActions[7], onClick: () => { } },
     ];
 
@@ -152,6 +157,11 @@ export default function HomeScreen() {
 
     return (
         <div className="min-h-screen bg-background pb-24 w-full max-w-md mx-auto shadow-2xl relative overflow-x-hidden">
+            {/* Indicador de Versão Ativa */}
+            <div className="fixed top-2 left-1/2 -translate-x-1/2 z-[60] px-3 py-1 bg-lavender-600 text-white text-[10px] font-bold rounded-full shadow-lg pointer-events-none opacity-50">
+                METRIKA PRO ACTIVE
+            </div>
+
             <header className="px-4 pt-6 pb-2 flex justify-between items-center bg-background sticky top-0 z-30">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lavender-400 to-lavender-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
@@ -216,7 +226,7 @@ export default function HomeScreen() {
                         ))}
 
                         <motion.div
-                            onClick={() => setCurrentScreen('body')}
+                            onClick={() => handleSetScreen('body')}
                             className="flex-shrink-0 w-24 snap-center rounded-3xl p-4 bg-lavender-50 border-2 border-dashed border-lavender-300 flex flex-col items-center justify-center cursor-pointer"
                             whileHover={{ backgroundColor: '#E8D5F0' }}
                             whileTap={{ scale: 0.95 }}
@@ -355,18 +365,19 @@ export default function HomeScreen() {
                 </motion.div>
             </main>
 
+            {/* NAV INFERIOR */}
             <nav className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
                 <div className="max-w-md mx-auto bg-white/95 backdrop-blur-lg border-t border-lavender-100 pb-safe pointer-events-auto shadow-lg-up">
                     <div className="flex justify-around items-center py-3 relative">
                         <button
-                            onClick={() => setCurrentScreen('home')}
+                            onClick={() => handleSetScreen('home')}
                             className={`flex flex-col items-center gap-1 w-16 transition-colors ${currentScreen === 'home' ? 'text-lavender-600' : 'text-ink-muted'}`}
                         >
                             <div className="text-xl">{Icons.grid}</div>
                             <span className="text-[10px] font-medium">Início</span>
                         </button>
                         <button
-                            onClick={() => setCurrentScreen('feed')}
+                            onClick={() => handleSetScreen('feed')}
                             className={`flex flex-col items-center gap-1 w-16 transition-colors ${currentScreen === 'feed' ? 'text-lavender-600' : 'text-ink-muted'}`}
                         >
                             <div className="text-xl">🔍</div>
@@ -374,7 +385,7 @@ export default function HomeScreen() {
                         </button>
                         <div className="relative -top-8">
                             <motion.button
-                                onClick={() => setCurrentScreen('diary')}
+                                onClick={() => handleSetScreen('diary')}
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
                                 className="w-14 h-14 rounded-full bg-gradient-to-br from-lavender-400 to-lavender-600 text-white shadow-lg flex items-center justify-center text-2xl"
@@ -382,35 +393,42 @@ export default function HomeScreen() {
                                 {Icons.plus}
                             </motion.button>
                         </div>
-                        <button className="flex flex-col items-center gap-1 text-ink-muted hover:text-lavender-600 transition-colors w-16">
+                        <button
+                            onClick={() => handleSetScreen('onboarding')}
+                            className="flex flex-col items-center gap-1 text-ink-muted hover:text-lavender-600 transition-colors w-16"
+                        >
                             <div className="text-xl">{Icons.fileText}</div>
                             <span className="text-[10px] font-medium">Agenda</span>
                         </button>
-                        <button className="flex flex-col items-center gap-1 text-ink-muted hover:text-lavender-600 transition-colors w-16">
-                            <div className="text-xl">{Icons.heart}</div>
-                            <span className="text-[10px] font-medium">Perfil</span>
+                        <button
+                            onClick={() => handleSetScreen('chat')}
+                            className="flex flex-col items-center gap-1 text-ink-muted hover:text-lavender-600 transition-colors w-16"
+                        >
+                            <div className="text-xl text-yellow-500">💬</div>
+                            <span className="text-[10px] font-medium">Chat</span>
                         </button>
                     </div>
-
-                    <AnimatePresence>
-                        {currentScreen === 'body' && (
-                            <BodyAssessmentScreen isOpen={true} onClose={() => setCurrentScreen('home')} />
-                        )}
-                        {currentScreen === 'chat' && (
-                            <ChatScreen isOpen={true} onClose={() => setCurrentScreen('home')} />
-                        )}
-                        {currentScreen === 'feed' && (
-                            <FeedScreen isOpen={true} onClose={() => setCurrentScreen('home')} />
-                        )}
-                        {currentScreen === 'diary' && (
-                            <FoodDiaryScreen isOpen={true} onClose={() => setCurrentScreen('home')} />
-                        )}
-                        {currentScreen === 'onboarding' && (
-                            <ProfessionalOnboarding isOpen={true} onClose={() => setCurrentScreen('home')} />
-                        )}
-                    </AnimatePresence>
                 </div>
             </nav>
+
+            {/* TELAS OVERLAY - Mover para fora do nav p/ evitar problemas de pointer-events */}
+            <AnimatePresence>
+                {currentScreen === 'body' && (
+                    <BodyAssessmentScreen isOpen={true} onClose={() => handleSetScreen('home')} />
+                )}
+                {currentScreen === 'chat' && (
+                    <ChatScreen isOpen={true} onClose={() => handleSetScreen('home')} />
+                )}
+                {currentScreen === 'feed' && (
+                    <FeedScreen isOpen={true} onClose={() => handleSetScreen('home')} />
+                )}
+                {currentScreen === 'diary' && (
+                    <FoodDiaryScreen isOpen={true} onClose={() => handleSetScreen('home')} />
+                )}
+                {currentScreen === 'onboarding' && (
+                    <ProfessionalOnboarding isOpen={true} onClose={() => handleSetScreen('home')} />
+                )}
+            </AnimatePresence>
         </div>
     );
 }

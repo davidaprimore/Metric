@@ -73,7 +73,7 @@ const feedItems = [
 
 const topics = ['Todos', 'Nutrição', 'Treino', 'Mental', 'Receitas', 'Bem-estar'];
 
-export function FeedScreen({ isOpen }: { isOpen: boolean; onClose: () => void }) {
+export function FeedScreen({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
     const [activeTopic, setActiveTopic] = useState('Todos');
     const [savedPosts, setSavedPosts] = useState<number[]>([2]);
 
@@ -95,7 +95,14 @@ export function FeedScreen({ isOpen }: { isOpen: boolean; onClose: () => void })
             {/* Header Sticky */}
             <div className="bg-white px-4 py-3 border-b border-gray-100 sticky top-0 z-10">
                 <div className="flex items-center justify-between mb-3">
-                    <h1 className="text-2xl font-bold text-gray-800">Descubra</h1>
+                    <div className="flex items-center gap-3">
+                        <button onClick={onClose} className="p-2 -ml-2 hover:bg-gray-100 rounded-full">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M19 12H5M12 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <h1 className="text-2xl font-bold text-gray-800">Descubra</h1>
+                    </div>
                     <button className="p-2 hover:bg-gray-100 rounded-full">
                         <Search className="w-6 h-6 text-gray-600" />
                     </button>
@@ -108,8 +115,8 @@ export function FeedScreen({ isOpen }: { isOpen: boolean; onClose: () => void })
                             key={topic}
                             onClick={() => setActiveTopic(topic)}
                             className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${activeTopic === topic
-                                    ? 'bg-gray-900 text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                ? 'bg-gray-900 text-white'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                 }`}
                         >
                             {topic}
