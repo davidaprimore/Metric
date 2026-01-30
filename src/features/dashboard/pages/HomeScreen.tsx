@@ -69,9 +69,10 @@ const Icons = {
 interface HomeScreenProps {
     onOpenNotifications?: () => void;
     onOpenProfile?: () => void;
+    onOpenWater?: () => void;
 }
 
-export default function HomeScreen({ onOpenNotifications, onOpenProfile }: HomeScreenProps) {
+export default function HomeScreen({ onOpenNotifications, onOpenProfile, onOpenWater }: HomeScreenProps) {
     const [greeting, setGreeting] = useState('');
     const [activeTab, setActiveTab] = useState('upcoming');
     const [showMoreActions, setShowMoreActions] = useState(false);
@@ -202,7 +203,10 @@ export default function HomeScreen({ onOpenNotifications, onOpenProfile }: HomeS
                         {healthMetrics.map((metric, index) => (
                             <motion.div
                                 key={metric.id}
-                                onClick={() => setSelectedMetric(index)}
+                                onClick={() => {
+                                    setSelectedMetric(index);
+                                    if (metric.id === 'hydration') onOpenWater?.();
+                                }}
                                 className={`flex-shrink-0 w-40 snap-center rounded-3xl p-4 cursor-pointer transition-all border-2 ${selectedMetric === index ? 'border-lavender-500 shadow-xl scale-105' : 'border-transparent'
                                     } bg-white shadow-soft`}
                                 whileTap={{ scale: 0.95 }}

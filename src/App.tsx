@@ -17,6 +17,7 @@ function App() {
     <>
       <HomeScreen
         onOpenNotifications={() => setShowNotifications(true)}
+        onOpenWater={() => setShowWater(true)}
         onOpenProfile={() => setShowProfile(true)}
       />
       <NotificationsModal
