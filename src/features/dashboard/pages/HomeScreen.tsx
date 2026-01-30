@@ -95,9 +95,39 @@ export default function HomeScreen({ onOpenNotifications, onOpenWater, onOpenPro
                     </div>
 
                     <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 -mx-5 px-5">
-                        <MetricCard icon="📊" value="18.5%" label="Gordura" progress={65} progressColor="bg-gradient-to-r from-orange-400 to-red-400" subtext="-2% este mês" subColor="text-green-600" delay={0.1} />
-                        <MetricCard icon="🥗" value="1.450" label="kcal" progress={80} progressColor="bg-gradient-to-r from-green-400 to-emerald-500" subtext="Na meta" subColor="text-green-600" delay={0.2} />
-                        <MetricCard icon="💧" value="1.2L" label="Água" progress={60} progressColor="bg-gradient-to-r from-blue-400 to-cyan-500" subtext="+500ml" subColor="text-blue-600" delay={0.3} onClick={onOpenWater} />
+                        <MetricCard
+                            icon="📊"
+                            value="18.5%"
+                            label="Gordura"
+                            progress={65}
+                            progressColor="bg-gradient-to-r from-orange-400 to-red-400"
+                            subtext="-2% este mês"
+                            subColor="text-green-600"
+                            delay={0.1}
+                            onClick={() => setCurrentScreen('body')}
+                        />
+                        <MetricCard
+                            icon="🥗"
+                            value="1.450"
+                            label="kcal"
+                            progress={80}
+                            progressColor="bg-gradient-to-r from-green-400 to-emerald-500"
+                            subtext="Na meta"
+                            subColor="text-green-600"
+                            delay={0.2}
+                            onClick={() => setCurrentScreen('diary')}
+                        />
+                        <MetricCard
+                            icon="💧"
+                            value="1.2L"
+                            label="Água"
+                            progress={60}
+                            progressColor="bg-gradient-to-r from-blue-400 to-cyan-500"
+                            subtext="+500ml"
+                            subColor="text-blue-600"
+                            delay={0.3}
+                            onClick={onOpenWater}
+                        />
                     </div>
                 </div>
 
@@ -170,7 +200,10 @@ export default function HomeScreen({ onOpenNotifications, onOpenWater, onOpenPro
                         <span className="inline-block px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold tracking-wider mb-3">⭐ RECOMENDADO</span>
                         <h3 className="font-[Outfit] text-[22px] font-bold mb-2">Metrika Clube</h3>
                         <p className="text-[14px] opacity-90 mb-4">Economize 40% em todas as consultas</p>
-                        <button className="w-full py-3 bg-white text-[#3D2646] rounded-2xl font-bold text-[15px] active:scale-[0.98] transition-transform">
+                        <button
+                            onClick={() => setCurrentScreen('diary')}
+                            className="w-full py-3 bg-white text-[#3D2646] rounded-2xl font-bold text-[15px] active:scale-[0.98] transition-transform"
+                        >
                             7 dias grátis
                         </button>
                     </div>
@@ -190,7 +223,8 @@ export default function HomeScreen({ onOpenNotifications, onOpenWater, onOpenPro
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.6 }}
-                        className="bg-white rounded-[24px] p-4 border border-[#E8D5F0] shadow-[0_4px_20px_rgba(93,61,107,0.06)] flex gap-4 mb-3"
+                        onClick={onOpenProfile}
+                        className="bg-white rounded-[24px] p-4 border border-[#E8D5F0] shadow-[0_4px_20px_rgba(93,61,107,0.06)] flex gap-4 mb-3 cursor-pointer"
                     >
                         <div className="w-16 h-16 bg-[#E6F7F0] border-2 border-[#A7F3D0] rounded-2xl flex flex-col items-center justify-center flex-shrink-0">
                             <span className="text-[10px] font-bold text-[#059669] uppercase">HOJE</span>
