@@ -18,6 +18,10 @@ import { LoadingTransition } from './components/LoadingTransition';
 import { DashboardProScreen } from './screens/professional/DashboardProScreen';
 import { BottomNavigationPro } from './components/BottomNavigationPro';
 import { AvailabilityManagerScreen } from './screens/professional/AvailabilityManagerScreen';
+import { PatientsListScreen } from './screens/professional/PatientsListScreen';
+import { PatientDetailScreen } from './screens/professional/PatientDetailScreen';
+import { FinanceScreen } from './screens/professional/FinanceScreen';
+import { ProfessionalSettingsScreen } from './screens/professional/ProfessionalSettingsScreen';
 
 export default function App() {
   const [userMode, setUserMode] = useState<'client' | 'professional'>('client');
@@ -26,10 +30,11 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
 
   const [selectedProfessionalId, setSelectedProfessionalId] = useState<string | null>(null);
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [pendingBooking, setPendingBooking] = useState<any>(null);
 
   const [activeOverlay, setActiveOverlay] = useState<{
-    screen: 'none' | 'professional-profile' | 'booking' | 'payment' | 'success' | 'anamnese' | 'appointment-detail';
+    screen: 'none' | 'professional-profile' | 'booking' | 'payment' | 'success' | 'anamnese' | 'appointment-detail' | 'patient-detail';
     data?: any;
   }>({ screen: 'none' });
 
@@ -40,6 +45,15 @@ export default function App() {
       setMainTab(tab);
       setIsLoading(false);
     }, 600);
+  };
+
+  const handleProNavigate = (tab: string) => {
+    if (tab === proTab) return;
+    setIsLoading(true);
+    setTimeout(() => {
+      setProTab(tab);
+      setIsLoading(false);
+    }, 500);
   };
 
   const switchUserMode = () => {
@@ -53,6 +67,11 @@ export default function App() {
   const handleOpenProfessionalProfile = (id: string) => {
     setSelectedProfessionalId(id);
     setActiveOverlay({ screen: 'professional-profile', data: id });
+  };
+
+  const handleOpenPatientDetail = (id: string) => {
+    setSelectedPatientId(id);
+    setActiveOverlay({ screen: 'patient-detail', data: id });
   };
 
   const handleStartBooking = () => setActiveOverlay({ screen: 'booking', data: null });
@@ -153,23 +172,36 @@ export default function App() {
                 transition={{ duration: 0.2 }}
               >
                 {proTab === 'dashboard' && <DashboardProScreen onSwitchMode={switchUserMode} />}
-                {proTab === 'agenda' && <AvailabilityManagerScreen isOpen={true} onClose={() => setProTab('dashboard')} />}
-                {/* Outras abas Pro serão adicionadas futuramente */}
-                {['patients', 'finance', 'profile'].includes(proTab) && (
-                  <div className="flex items-center justify-center min-h-screen text-gray-400">
-                    Tela de {proTab} em desenvolvimento
-                  </div>
-                )}
+                {proTab === 'agenda' && <AvailabilityManagerScreen isOpen={true} onClose={() => handleProNavigate('dashboard')} />}
+                {proTab === 'patients' && <PatientsListScreen onSelectPatient={handleOpenPatientDetail} />}
+                {proTab === 'finance' && <FinanceScreen onClose={() => handleProNavigate('dashboard')} />}
+                {proTab === 'profile' && <ProfessionalSettingsScreen onSwitchToClient={switchUserMode} />}
               </motion.div>
             </AnimatePresence>
 
-            <BottomNavigationPro
-              currentScreen={proTab}
-              onNavigate={setProTab}
-            />
+            {activeOverlay.screen !== 'patient-detail' && (
+              <BottomNavigationPro
+                currentScreen={proTab}
+                onNavigate={handleProNavigate}
+              />
+            )}
+
+            {/* Overlays Profissional */}
+            <AnimatePresence>
+              {activeOverlay.screen === 'patient-detail' && (
+                <PatientDetailScreen
+                  patientId={selectedPatientId || ''}
+                  onClose={() => setActiveOverlay({ screen: 'none' })}
+                />
+              )}
+            </AnimatePresence>
           </div>
         )}
       </div>
     </div>
+  );
+}
+      </div >
+    </div >
   );
 }
